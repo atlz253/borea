@@ -16,7 +16,7 @@ Nirvana is an open-source software development workspace (analogue of JetBrains 
 - **UI:** React 19 + Tailwind CSS v4
 - **Build:** Vite 8
 - **Lint/format:** Biome 2
-- **Tests:** Vitest 4 + Testing Library + jsdom
+- **Tests:** Vitest 4 + Testing Library + jsdom; E2E via Playwright 1 (`tests/e2e/`, `playwright.config.ts`)
 - **Language:** TypeScript, strict mode, `verbatimModuleSyntax`
 
 ## Commands
@@ -28,6 +28,8 @@ npm run check       # Biome lint + format (must pass clean)
 npx tsc --noEmit    # Typecheck (strict; must pass with no errors)
 npm run test        # Vitest unit tests (must pass)
 npm run generate-routes  # Regenerate route tree after adding/removing routes
+npm run test:e2e    # Playwright E2E tests (must pass)
+npm run test:e2e:ui # Playwright E2E in UI mode
 ```
 
 Other useful:
@@ -55,6 +57,8 @@ npm run build       # Production build → dist/
 | `src/routes/` | File-based route definitions |
 | `src/router.tsx` | Router factory + router type registration (`declare module`) |
 | `src/routeTree.gen.ts` | ⚠ Generated route tree — do not edit |
+| `tests/e2e/` | Playwright E2E test files |
+| `playwright.config.ts` | Playwright configuration |
 | `src/components/` | Shared presentational components |
 | `src/styles.css` | Global styles + CSS custom-property theme tokens (light/dark) |
 | `vite.config.ts` | Vite plugins: devtools, nitro, tailwindcss, tanstackStart, react |
@@ -76,9 +80,10 @@ Respect these when adding features — do not violate them without an ADR:
 Before marking a change complete:
 1. `npm run check` passes with no errors.
 2. `npx tsc --noEmit` passes with no errors.
-3. `npm run test` passes (add or update tests for business logic per the spec's TDD requirement, §10).
-4. If routes were added/removed, `src/routeTree.gen.ts` is regenerated.
-5. No secrets, keys, or credentials committed.
+3. `npm run test` passes (add or update unit tests per the spec's TDD requirement, §10).
+4. `npm run test:e2e` passes (add or update E2E tests per §10.3).
+5. If routes were added/removed, `src/routeTree.gen.ts` is regenerated.
+6. No secrets, keys, or credentials committed.
 
 <!-- context7 -->
 Use Context7 MCP to fetch current documentation whenever the user asks about a library, framework, SDK, API, CLI tool, or cloud service -- even well-known ones like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. This includes API syntax, configuration, version migration, library-specific debugging, setup instructions, and CLI tool usage. Use even when you think you know the answer -- your training data may not reflect recent changes. Prefer this over web search for library docs.

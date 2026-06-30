@@ -16,7 +16,7 @@ Nirvana is a platform project, built as a modular monolith with provider-based a
 | Build tool           | Vite 8                                                                 |
 | Styling              | Tailwind CSS v4 + `@tailwindcss/typography`                            |
 | Lint & format        | Biome 2 (tabs, double quotes)                                          |
-| Testing              | Vitest 4 + Testing Library + jsdom                                     |
+| Testing              | Vitest 4 + Testing Library + jsdom; Playwright 1 (E2E)                 |
 | Package manager      | npm                                                                    |
 | Language             | TypeScript (strict)                                                    |
 
@@ -40,7 +40,10 @@ npm run dev      # http://localhost:3000
 | `npm run build`           | Build for production (outputs to `dist/`)      |
 | `npm run preview`         | Preview the production build                   |
 | `npm run generate-routes` | Regenerate the TanStack Router route tree      |
-| `npm run test`            | Run unit tests once (Vitest)                   |
+| `npm run test`            | Run unit tests (Vitest)                        |
+| `npm run test:e2e`        | Run E2E tests (Playwright)                     |
+| `npm run test:e2e:ui`     | Run E2E tests in UI mode (Playwright)          |
+| `npm run test:e2e:install`| Install Playwright browsers                    |
 | `npm run lint`            | Lint with Biome                                |
 | `npm run format`          | Format with Biome                              |
 | `npm run check`           | Combined Biome check (lint + format)           |
@@ -75,7 +78,10 @@ nirvana/
 │   ├── router.tsx                   # Router factory + type registration
 │   ├── routeTree.gen.ts             # ⚠ Generated — do not edit
 │   └── styles.css                   # Global styles + Tailwind theme tokens
+├── tests/
+│   └── e2e/                        # Playwright E2E test files
 ├── biome.json                       # Linter/formatter config
+├── playwright.config.ts             # Playwright configuration
 ├── tsconfig.json                    # TypeScript config (strict, bundler mode)
 ├── tsr.config.json                  # TanStack Router CLI config
 └── vite.config.ts                   # Vite + TanStack Start + Nitro + Tailwind

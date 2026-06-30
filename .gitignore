@@ -12,3 +12,7 @@ dist-ssr
 __unconfig*
 todos.json
 coverage
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
