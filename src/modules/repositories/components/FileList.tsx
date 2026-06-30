@@ -40,6 +40,39 @@ function sortEntries(entries: TreeEntry[]): TreeEntry[] {
 	});
 }
 
+function parentDirLink(repoName: string, currentPath: string) {
+	if (currentPath.length === 0) return null;
+
+	const slashIndex = currentPath.lastIndexOf("/");
+	if (slashIndex === -1) {
+		return (
+			<Link
+				to="/repositories/$name"
+				params={{ name: repoName }}
+				style={LINK_STYLE}
+			>
+				<Group gap="xs">
+					<Folder size={16} />
+					..
+				</Group>
+			</Link>
+		);
+	}
+
+	return (
+		<Link
+			to="/repositories/$name/tree/$"
+			params={{ name: repoName, _splat: currentPath.slice(0, slashIndex) }}
+			style={LINK_STYLE}
+		>
+			<Group gap="xs">
+				<Folder size={16} />
+				..
+			</Group>
+		</Link>
+	);
+}
+
 export default function FileList({
 	entries,
 	repoName,
@@ -47,7 +80,21 @@ export default function FileList({
 }: FileListProps) {
 	const sorted = sortEntries(entries);
 
-	const rows = sorted.map((entry) => {
+	const rows = [];
+
+	const parentLink = parentDirLink(repoName, currentPath);
+	if (parentLink) {
+		rows.push(
+			<Table.Tr key="..">
+				<Table.Td>{parentLink}</Table.Td>
+				<Table.Td style={{ textAlign: "right" }}>
+					<Box />
+				</Table.Td>
+			</Table.Tr>,
+		);
+	}
+
+	for (const entry of sorted) {
 		const isTree = entry.type === "tree";
 		const icon = isTree ? <Folder size={16} /> : <File size={16} />;
 
@@ -69,7 +116,7 @@ export default function FileList({
 			</Group>
 		);
 
-		return (
+		rows.push(
 			<Table.Tr key={`${entry.type}/${entry.name}`}>
 				<Table.Td>{nameCell}</Table.Td>
 				<Table.Td style={{ textAlign: "right" }}>
@@ -81,9 +128,9 @@ export default function FileList({
 						<Box />
 					)}
 				</Table.Td>
-			</Table.Tr>
+			</Table.Tr>,
 		);
-	});
+	}
 
 	return (
 		<Table highlightOnHover withRowBorders>
