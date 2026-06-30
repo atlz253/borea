@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.5/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -17,7 +17,8 @@
 			"**/playwright.config.ts",
 			"!**/src/routeTree.gen.ts",
 			"!**/src/styles.css",
-			"!**/coverage"
+			"!**/coverage",
+			"!**/playwright-report"
 		]
 	},
 	"formatter": {
@@ -28,12 +29,47 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"style": {
+				"noRestrictedImports": {
+					"level": "error",
+					"options": {
+						"patterns": [
+							{
+								"group": [
+									"#/modules/*/**",
+									"@/modules/*/**",
+									"**/modules/*/**"
+								],
+								"message": "Deep imports into domain modules are forbidden. Import only from the module barrel: #/modules/<name>. See ADR 0003."
+							}
+						]
+					}
+				}
+			}
 		}
 	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": [
+				"**/*.test.ts",
+				"**/*.test.tsx",
+				"**/*.spec.ts",
+				"**/*.spec.tsx",
+				"**/tests/e2e/**"
+			],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": "off"
+					}
+				}
+			}
+		}
+	]
 }

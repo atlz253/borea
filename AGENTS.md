@@ -43,8 +43,10 @@ npm run build       # Production build → dist/
 - **Formatting:** tabs for indentation, double quotes for strings (enforced by Biome). Do not reformat files outside the Biome `files.includes` set.
 - **Files Biome ignores:** `src/routeTree.gen.ts` (generated) and `src/styles.css`.
 - **Imports:** use the path aliases `#/*` or `@/*` (both map to `./src/*`). Run "organize imports" on save.
+- **Module boundaries:** cross-module imports must go through the barrel (`index.ts`). Deep imports into internal module subpaths are forbidden by Biome `style/noRestrictedImports`. See ADR 0003.
 - **No comments** unless explicitly requested by the user.
 - **Routing:** file-based — add a new route by creating a file in `src/routes/`; the route tree is auto-generated into `src/routeTree.gen.ts` (never edit by hand).
+- **Routes are thin:** route files in `src/routes/` should only contain `createFileRoute`, a loader, and rendering of a page component imported from `src/modules/<domain>/pages/`. Domain logic belongs in modules, not routes.
 - **React:** function components, hooks-based; follow the patterns in `src/routes/` and `src/components/`.
 
 ## Key Files & Locations
@@ -59,6 +61,9 @@ npm run build       # Production build → dist/
 | `src/routeTree.gen.ts` | ⚠ Generated route tree — do not edit |
 | `tests/e2e/` | Playwright E2E test files |
 | `playwright.config.ts` | Playwright configuration |
+| `src/modules/` | Domain modules (git, auth, repositories, pull-requests) |
+| `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
+| `src/routes/api/` | Server routes for REST API and Git HTTP — delegates to module services |
 | `src/components/` | Shared presentational components |
 | `src/styles.css` | Global styles + CSS custom-property theme tokens (light/dark) |
 | `vite.config.ts` | Vite plugins: devtools, nitro, tailwindcss, tanstackStart, react |
