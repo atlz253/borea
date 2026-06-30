@@ -1,10 +1,12 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { Readable } from "node:stream";
 import { type ExecaError, execa } from "execa";
 import { getConfig } from "#/platform/config";
 import type {
 	GitProvider,
+	GitService,
 	ListFilesOptions,
 	RepositoryInfo,
 	TreeEntry,
@@ -124,6 +126,66 @@ export class CliGitProvider implements GitProvider {
 		}
 
 		return this.parseLsTree(output);
+	}
+
+	async advertiseRefs(
+		name: string,
+		service: GitService,
+	): Promise<ReadableStream<Uint8Array>> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		const cmdName = this.gitCommandName(service);
+		const subprocess = execa(this.gitBin, [
+			"--git-dir",
+			repoPath,
+			cmdName,
+			"--stateless-rpc",
+			"--advertise-refs",
+			repoPath,
+		]);
+
+		return Readable.toWeb(subprocess.stdout) as ReadableStream<Uint8Array>;
+	}
+
+	async invokeService(
+		name: string,
+		service: GitService,
+		input: ReadableStream<Uint8Array>,
+	): Promise<ReadableStream<Uint8Array>> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		const cmdName = this.gitCommandName(service);
+		const subprocess = execa(this.gitBin, [
+			"--git-dir",
+			repoPath,
+			cmdName,
+			"--stateless-rpc",
+			repoPath,
+		]);
+
+		const inputNode = Readable.fromWeb(input as never);
+		inputNode.pipe(subprocess.stdin);
+
+		subprocess.catch(() => {});
+
+		return Readable.toWeb(subprocess.stdout) as ReadableStream<Uint8Array>;
+	}
+
+	private gitCommandName(service: GitService): string {
+		switch (service) {
+			case "git-upload-pack":
+				return "upload-pack";
+			case "git-receive-pack":
+				return "receive-pack";
+		}
 	}
 
 	private async refExists(repoPath: string, ref: string): Promise<boolean> {

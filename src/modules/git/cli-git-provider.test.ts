@@ -192,4 +192,110 @@ describe("CliGitProvider", () => {
 			).rejects.toThrow(/parent-directory/);
 		});
 	});
+
+	describe("advertiseRefs", () => {
+		it("returns ref advertisement for a repo with commits", async () => {
+			await provider.init("pull-repo");
+			await seedCommits(provider, "pull-repo", {
+				"test.txt": "hello\n",
+			});
+
+			const stream = await provider.advertiseRefs(
+				"pull-repo",
+				"git-upload-pack",
+			);
+			const reader = stream.getReader();
+			const chunks: Uint8Array[] = [];
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				chunks.push(value);
+			}
+			const output = chunks.map((c) => new TextDecoder().decode(c)).join("");
+
+			expect(output).toContain("HEAD");
+			expect(output).toContain("refs/heads/");
+		});
+
+		it("returns capability advertisement without branch refs for empty repo", async () => {
+			await provider.init("empty-pull");
+			const stream = await provider.advertiseRefs(
+				"empty-pull",
+				"git-upload-pack",
+			);
+			const reader = stream.getReader();
+			const chunks: Uint8Array[] = [];
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				if (value) chunks.push(value);
+			}
+			const output = chunks.map((c) => new TextDecoder().decode(c)).join("");
+
+			expect(output).toContain("capabilities");
+			expect(output).toContain("agent=");
+			expect(output).not.toContain("refs/heads/");
+		});
+
+		it("throws for non-existent repository", async () => {
+			await expect(
+				provider.advertiseRefs("no-such-repo", "git-upload-pack"),
+			).rejects.toThrow(/not found/);
+		});
+
+		it("throws for invalid name", async () => {
+			await provider.init("valid");
+			await expect(
+				provider.advertiseRefs("../etc", "git-upload-pack"),
+			).rejects.toThrow();
+		});
+	});
+
+	describe("invokeService", () => {
+		it("returns a stream for a valid fetch request", async () => {
+			await provider.init("fetch-repo");
+			await seedCommits(provider, "fetch-repo", {
+				"file.txt": "content\n",
+			});
+
+			const inputStream = new ReadableStream({
+				start(controller) {
+					controller.close();
+				},
+			});
+
+			const stream = await provider.invokeService(
+				"fetch-repo",
+				"git-upload-pack",
+				inputStream,
+			);
+
+			expect(stream).toBeInstanceOf(ReadableStream);
+		});
+
+		it("throws for non-existent repository", async () => {
+			const inputStream = new ReadableStream({
+				start(controller) {
+					controller.close();
+				},
+			});
+
+			await expect(
+				provider.invokeService("no-such", "git-upload-pack", inputStream),
+			).rejects.toThrow(/not found/);
+		});
+
+		it("throws for invalid name", async () => {
+			await provider.init("fetch-valid");
+			const inputStream = new ReadableStream({
+				start(controller) {
+					controller.close();
+				},
+			});
+
+			await expect(
+				provider.invokeService("../../etc", "git-upload-pack", inputStream),
+			).rejects.toThrow();
+		});
+	});
 });

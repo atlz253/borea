@@ -1,7 +1,16 @@
-import { Box, Breadcrumbs, Container, Group, Text, Title } from "@mantine/core";
+import {
+	Box,
+	Breadcrumbs,
+	Container,
+	Group,
+	Stack,
+	Text,
+	Title,
+} from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import FileList from "../components/FileList";
+import GitCloneInfo from "../components/GitCloneInfo";
 import type { TreeEntry } from "../schemas";
 
 interface RepositoryPageProps {
@@ -57,6 +66,10 @@ export default function RepositoryPage({
 			<Title order={1} mb="sm">
 				{name}
 			</Title>
+
+			<Stack mb="lg">
+				<GitCloneInfo name={name} />
+			</Stack>
 
 			{segments.length > 0 && (
 				<Breadcrumbs separator={<ChevronRight size={14} />} mb="md">
