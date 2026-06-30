@@ -6,19 +6,10 @@ vi.mock("../server/repository.functions", () => ({
 	createRepositoryFn: vi.fn(),
 }));
 
-vi.mock("@tanstack/react-router", () => {
-	const mockUseLoaderData = vi.fn(() => []);
-	return {
-		getRouteApi: () => ({
-			useLoaderData: mockUseLoaderData,
-		}),
-	};
-});
-
 it("renders the repositories heading", () => {
 	render(
 		<MantineProvider>
-			<RepositoriesPage />
+			<RepositoriesPage repositories={[]} />
 		</MantineProvider>,
 	);
 
@@ -30,7 +21,7 @@ it("renders the repositories heading", () => {
 it("shows the new repository button", () => {
 	render(
 		<MantineProvider>
-			<RepositoriesPage />
+			<RepositoriesPage repositories={[]} />
 		</MantineProvider>,
 	);
 

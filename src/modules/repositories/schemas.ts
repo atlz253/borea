@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESC_LENGTH = 500;
+const MAX_PATH_LENGTH = 1024;
 
 export const repoNameSchema = z
 	.string()
@@ -34,5 +35,34 @@ export const repositorySchema = z.object({
 	createdAt: z.date(),
 });
 
+export const treeEntryTypeSchema = z.enum(["blob", "tree"]);
+
+export const treeEntrySchema = z.object({
+	name: z.string().min(1),
+	type: treeEntryTypeSchema,
+	mode: z.string(),
+	size: z.number().int().nonnegative().optional(),
+});
+
+export const repoPathSchema = z
+	.string()
+	.max(MAX_PATH_LENGTH, "Path is too long")
+	.refine((p) => !p.includes("\0"), "Path cannot contain null bytes")
+	.refine(
+		(p) => p.split("/").every((seg) => seg !== ".."),
+		"Path cannot contain parent-directory segments",
+	)
+	.refine(
+		(p) => !p.startsWith("/") && !p.endsWith("/"),
+		"Path must be relative without leading or trailing slashes",
+	);
+
+export const listFilesSchema = z.object({
+	name: repoNameSchema,
+	path: repoPathSchema.optional(),
+});
+
 export type CreateRepositoryInput = z.infer<typeof createRepositorySchema>;
 export type Repository = z.infer<typeof repositorySchema>;
+export type TreeEntryType = z.infer<typeof treeEntryTypeSchema>;
+export type TreeEntry = z.infer<typeof treeEntrySchema>;

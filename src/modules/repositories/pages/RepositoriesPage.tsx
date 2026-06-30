@@ -8,17 +8,19 @@ import {
 	TextInput,
 	Title,
 } from "@mantine/core";
-import { getRouteApi } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import RepositoryList from "../components/RepositoryList";
 import type { Repository } from "../schemas";
 import { createRepositoryFn } from "../server/repository.functions";
 
-const routeApi = getRouteApi("/repositories");
+interface RepositoriesPageProps {
+	repositories: Repository[];
+}
 
-export default function RepositoriesPage() {
-	const repositories = routeApi.useLoaderData() as Repository[];
+export default function RepositoriesPage({
+	repositories,
+}: RepositoriesPageProps) {
 	const [showForm, setShowForm] = useState(false);
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");

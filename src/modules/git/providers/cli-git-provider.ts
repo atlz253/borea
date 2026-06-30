@@ -3,13 +3,24 @@ import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { type ExecaError, execa } from "execa";
 import { getConfig } from "#/platform/config";
-import type { GitProvider, RepositoryInfo } from "../git-provider";
+import type {
+	GitProvider,
+	ListFilesOptions,
+	RepositoryInfo,
+	TreeEntry,
+	TreeEntryType,
+} from "../git-provider";
 
 const REPO_NAME_RE = /^[a-zA-Z0-9._-]+$/;
 
 const DEFAULT_DESC =
 	"Unnamed repository; edit this file to 'name' the repository.";
 const MAX_NAME_LENGTH = 100;
+const MAX_PATH_LENGTH = 1024;
+const DEFAULT_REF = "HEAD";
+const LS_TREE_SEPARATOR = "\t";
+const SIZE_PLACEHOLDER = "-";
+const LS_TREE_MIN_PARTS = 4;
 
 export class CliGitProvider implements GitProvider {
 	private readonly storagePath: string;
@@ -76,6 +87,129 @@ export class CliGitProvider implements GitProvider {
 	async exists(name: string): Promise<boolean> {
 		const repoPath = this.resolvePath(name);
 		return existsSync(repoPath) && existsSync(path.join(repoPath, "HEAD"));
+	}
+
+	async listFiles(
+		name: string,
+		options?: ListFilesOptions,
+	): Promise<TreeEntry[]> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		const ref = options?.ref ?? DEFAULT_REF;
+		const subPath = this.normalizePath(options?.path);
+
+		if (!(await this.refExists(repoPath, ref))) {
+			return [];
+		}
+
+		const treeish = subPath ? `${ref}:${subPath}` : ref;
+
+		let output: string;
+		try {
+			const result = await execa(this.gitBin, [
+				"--git-dir",
+				repoPath,
+				"ls-tree",
+				"--long",
+				treeish,
+			]);
+			output = result.stdout;
+		} catch {
+			throw new Error(`Path "${subPath}" not found in repository "${name}"`);
+		}
+
+		return this.parseLsTree(output);
+	}
+
+	private async refExists(repoPath: string, ref: string): Promise<boolean> {
+		try {
+			await execa(this.gitBin, [
+				"--git-dir",
+				repoPath,
+				"rev-parse",
+				"--verify",
+				"--quiet",
+				`${ref}^{commit}`,
+			]);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	private parseLsTree(stdout: string): TreeEntry[] {
+		const entries: TreeEntry[] = [];
+		const lines = stdout.split("\n");
+
+		for (const line of lines) {
+			if (!line) {
+				continue;
+			}
+
+			const tabIdx = line.indexOf(LS_TREE_SEPARATOR);
+			if (tabIdx === -1) {
+				continue;
+			}
+
+			const meta = line.slice(0, tabIdx);
+			const name = line.slice(tabIdx + 1);
+			const parts = meta.trim().split(/\s+/);
+			if (parts.length < LS_TREE_MIN_PARTS) {
+				continue;
+			}
+
+			const mode = parts[0];
+			const type = parts[1];
+			const sizeStr = parts[3];
+
+			if (type !== "blob" && type !== "tree") {
+				continue;
+			}
+
+			const entry: TreeEntry = {
+				name,
+				type: type as TreeEntryType,
+				mode,
+			};
+
+			if (type === "blob" && sizeStr !== SIZE_PLACEHOLDER) {
+				const size = Number.parseInt(sizeStr, 10);
+				if (!Number.isNaN(size)) {
+					entry.size = size;
+				}
+			}
+
+			entries.push(entry);
+		}
+
+		return entries;
+	}
+
+	private normalizePath(p: string | undefined): string | undefined {
+		if (!p || p.length === 0) {
+			return undefined;
+		}
+		this.validatePath(p);
+		return p;
+	}
+
+	private validatePath(p: string): void {
+		if (p.includes("\0")) {
+			throw new Error("Path cannot contain null bytes");
+		}
+		if (p.length > MAX_PATH_LENGTH) {
+			throw new Error("Path is too long");
+		}
+		for (const seg of p.split("/")) {
+			if (seg === "..") {
+				throw new Error("Path cannot contain parent-directory segments");
+			}
+		}
 	}
 
 	private async getInfo(

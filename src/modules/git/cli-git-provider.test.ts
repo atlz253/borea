@@ -1,8 +1,61 @@
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { execa } from "execa";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { CliGitProvider } from "./providers/cli-git-provider";
+
+async function seedCommits(
+	provider: CliGitProvider,
+	repoName: string,
+	files: Record<string, string>,
+): Promise<void> {
+	const storagePath = (provider as unknown as { storagePath: string })
+		.storagePath;
+	const barePath = join(storagePath, repoName);
+	const workDir = mkdtempSync(join(tmpdir(), "nirvana-work-"));
+	try {
+		const { stdout: branchRaw } = await execa("git", [
+			"--git-dir",
+			barePath,
+			"symbolic-ref",
+			"--short",
+			"HEAD",
+		]);
+		const branch = branchRaw.trim();
+
+		await execa("git", ["clone", barePath, workDir], {
+			env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+		});
+		await execa("git", ["symbolic-ref", "HEAD", `refs/heads/${branch}`], {
+			cwd: workDir,
+		});
+
+		for (const [relPath, content] of Object.entries(files)) {
+			const fullPath = join(workDir, relPath);
+			await mkdir(join(fullPath, ".."), { recursive: true });
+			await writeFile(fullPath, content, "utf-8");
+		}
+		await execa("git", ["add", "--all"], { cwd: workDir });
+		await execa("git", ["commit", "--message=seed"], {
+			cwd: workDir,
+			env: {
+				...process.env,
+				GIT_AUTHOR_NAME: "test",
+				GIT_AUTHOR_EMAIL: "test@example.com",
+				GIT_COMMITTER_NAME: "test",
+				GIT_COMMITTER_EMAIL: "test@example.com",
+			},
+		});
+		await execa("git", ["push", "origin", `HEAD:${branch}`], {
+			cwd: workDir,
+			env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+		});
+	} finally {
+		rmSync(workDir, { recursive: true, force: true });
+	}
+}
 
 describe("CliGitProvider", () => {
 	let tmpDir: string;
@@ -64,5 +117,79 @@ describe("CliGitProvider", () => {
 	it("returns empty list when no repositories exist", async () => {
 		const repos = await provider.list();
 		expect(repos).toEqual([]);
+	});
+
+	describe("listFiles", () => {
+		it("returns empty array for a repository without commits", async () => {
+			await provider.init("empty-repo");
+			const entries = await provider.listFiles("empty-repo");
+
+			expect(entries).toEqual([]);
+		});
+
+		it("throws when repository does not exist", async () => {
+			await expect(provider.listFiles("missing")).rejects.toThrow(/not found/);
+		});
+
+		it("lists root files and directories", async () => {
+			await provider.init("populated");
+			await seedCommits(provider, "populated", {
+				"README.md": "# populated\n",
+				"src/index.ts": "export {}\n",
+				"src/utils/helper.ts": "export const x = 1;\n",
+			});
+
+			const entries = await provider.listFiles("populated");
+			const names = entries.map((e) => e.name).sort();
+			expect(names).toEqual(["README.md", "src"]);
+
+			const readme = entries.find((e) => e.name === "README.md");
+			expect(readme?.type).toBe("blob");
+			expect(readme?.mode).toBe("100644");
+			expect(readme?.size).toBeGreaterThan(0);
+
+			const src = entries.find((e) => e.name === "src");
+			expect(src?.type).toBe("tree");
+			expect(src?.mode).toBe("040000");
+			expect(src?.size).toBeUndefined();
+		});
+
+		it("lists contents of a subdirectory", async () => {
+			await provider.init("subdir-repo");
+			await seedCommits(provider, "subdir-repo", {
+				"src/index.ts": "export {}\n",
+				"src/utils/helper.ts": "export const x = 1;\n",
+				"src/utils/extra.ts": "export const y = 2;\n",
+			});
+
+			const entries = await provider.listFiles("subdir-repo", {
+				path: "src/utils",
+			});
+			const names = entries.map((e) => e.name).sort();
+			expect(names).toEqual(["extra.ts", "helper.ts"]);
+			expect(entries.every((e) => e.type === "blob")).toBe(true);
+		});
+
+		it("throws for a non-existent path", async () => {
+			await provider.init("path-repo");
+			await seedCommits(provider, "path-repo", {
+				"README.md": "hello\n",
+			});
+
+			await expect(
+				provider.listFiles("path-repo", { path: "no-such-dir" }),
+			).rejects.toThrow(/not found/);
+		});
+
+		it("rejects parent-directory segments in path", async () => {
+			await provider.init("traversal-repo");
+			await seedCommits(provider, "traversal-repo", {
+				"README.md": "hi\n",
+			});
+
+			await expect(
+				provider.listFiles("traversal-repo", { path: "../etc" }),
+			).rejects.toThrow(/parent-directory/);
+		});
 	});
 });

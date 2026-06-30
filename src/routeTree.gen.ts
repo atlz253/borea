@@ -11,6 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RepositoriesRouteImport } from './routes/repositories'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RepositoriesIndexRouteImport } from './routes/repositories.index'
+import { Route as RepositoriesNameRouteImport } from './routes/repositories.$name'
+import { Route as RepositoriesNameTreeSplatRouteImport } from './routes/repositories.$name.tree.$'
 
 const RepositoriesRoute = RepositoriesRouteImport.update({
   id: '/repositories',
@@ -22,31 +25,67 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RepositoriesIndexRoute = RepositoriesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RepositoriesRoute,
+} as any)
+const RepositoriesNameRoute = RepositoriesNameRouteImport.update({
+  id: '/$name',
+  path: '/$name',
+  getParentRoute: () => RepositoriesRoute,
+} as any)
+const RepositoriesNameTreeSplatRoute =
+  RepositoriesNameTreeSplatRouteImport.update({
+    id: '/tree/$',
+    path: '/tree/$',
+    getParentRoute: () => RepositoriesNameRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/repositories': typeof RepositoriesRoute
+  '/repositories': typeof RepositoriesRouteWithChildren
+  '/repositories/$name': typeof RepositoriesNameRouteWithChildren
+  '/repositories/': typeof RepositoriesIndexRoute
+  '/repositories/$name/tree/$': typeof RepositoriesNameTreeSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/repositories': typeof RepositoriesRoute
+  '/repositories/$name': typeof RepositoriesNameRouteWithChildren
+  '/repositories': typeof RepositoriesIndexRoute
+  '/repositories/$name/tree/$': typeof RepositoriesNameTreeSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/repositories': typeof RepositoriesRoute
+  '/repositories': typeof RepositoriesRouteWithChildren
+  '/repositories/$name': typeof RepositoriesNameRouteWithChildren
+  '/repositories/': typeof RepositoriesIndexRoute
+  '/repositories/$name/tree/$': typeof RepositoriesNameTreeSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/repositories'
+  fullPaths:
+    | '/'
+    | '/repositories'
+    | '/repositories/$name'
+    | '/repositories/'
+    | '/repositories/$name/tree/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/repositories'
-  id: '__root__' | '/' | '/repositories'
+  to:
+    '/' | '/repositories/$name' | '/repositories' | '/repositories/$name/tree/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/repositories'
+    | '/repositories/$name'
+    | '/repositories/'
+    | '/repositories/$name/tree/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  RepositoriesRoute: typeof RepositoriesRoute
+  RepositoriesRoute: typeof RepositoriesRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +104,58 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/repositories/': {
+      id: '/repositories/'
+      path: '/'
+      fullPath: '/repositories/'
+      preLoaderRoute: typeof RepositoriesIndexRouteImport
+      parentRoute: typeof RepositoriesRoute
+    }
+    '/repositories/$name': {
+      id: '/repositories/$name'
+      path: '/$name'
+      fullPath: '/repositories/$name'
+      preLoaderRoute: typeof RepositoriesNameRouteImport
+      parentRoute: typeof RepositoriesRoute
+    }
+    '/repositories/$name/tree/$': {
+      id: '/repositories/$name/tree/$'
+      path: '/tree/$'
+      fullPath: '/repositories/$name/tree/$'
+      preLoaderRoute: typeof RepositoriesNameTreeSplatRouteImport
+      parentRoute: typeof RepositoriesNameRoute
+    }
   }
 }
 
+interface RepositoriesNameRouteChildren {
+  RepositoriesNameTreeSplatRoute: typeof RepositoriesNameTreeSplatRoute
+}
+
+const RepositoriesNameRouteChildren: RepositoriesNameRouteChildren = {
+  RepositoriesNameTreeSplatRoute: RepositoriesNameTreeSplatRoute,
+}
+
+const RepositoriesNameRouteWithChildren =
+  RepositoriesNameRoute._addFileChildren(RepositoriesNameRouteChildren)
+
+interface RepositoriesRouteChildren {
+  RepositoriesNameRoute: typeof RepositoriesNameRouteWithChildren
+  RepositoriesIndexRoute: typeof RepositoriesIndexRoute
+}
+
+const RepositoriesRouteChildren: RepositoriesRouteChildren = {
+  RepositoriesNameRoute: RepositoriesNameRouteWithChildren,
+  RepositoriesIndexRoute: RepositoriesIndexRoute,
+}
+
+const RepositoriesRouteWithChildren = RepositoriesRoute._addFileChildren(
+  RepositoriesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  RepositoriesRoute: RepositoriesRoute,
+  RepositoriesRoute: RepositoriesRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
