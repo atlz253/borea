@@ -16,21 +16,27 @@ import type {
 	MergeStatus,
 	RepositoryInfo,
 	TreeEntry,
-	TreeEntryType,
 } from "../git-provider";
-
-const REPO_NAME_RE = /^[a-zA-Z0-9._-]+$/;
-
-const DEFAULT_DESC =
-	"Unnamed repository; edit this file to 'name' the repository.";
-const MAX_NAME_LENGTH = 100;
-const MAX_PATH_LENGTH = 1024;
-const DEFAULT_REF = "HEAD";
-const LS_TREE_SEPARATOR = "\t";
-const SIZE_PLACEHOLDER = "-";
-const LS_TREE_MIN_PARTS = 4;
-const DEFAULT_LOG_LIMIT = 100;
-const LOG_FORMAT = "%H%x00%h%x00%an%x00%ae%x00%aI%x00%cI%x00%s";
+import {
+	computeMergeTree,
+	gitCommandName,
+	isAncestor,
+	refExists,
+	revParse,
+} from "./cli-git-helpers";
+import {
+	DEFAULT_LOG_LIMIT,
+	DEFAULT_REF,
+	LOG_FORMAT,
+	parseLogOutput,
+	parseLsTree,
+} from "./cli-git-parsers";
+import {
+	DEFAULT_DESC,
+	normalizePath,
+	resolvePath,
+	validateName,
+} from "./cli-git-validators";
 
 export class CliGitProvider implements GitProvider {
 	private readonly storagePath: string;
@@ -43,8 +49,8 @@ export class CliGitProvider implements GitProvider {
 	}
 
 	async init(name: string, description?: string): Promise<RepositoryInfo> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 
 		if (existsSync(repoPath)) {
 			throw new Error(`Repository "${name}" already exists`);
@@ -95,7 +101,7 @@ export class CliGitProvider implements GitProvider {
 	}
 
 	async exists(name: string): Promise<boolean> {
-		const repoPath = this.resolvePath(name);
+		const repoPath = resolvePath(this.storagePath, name);
 		return existsSync(repoPath) && existsSync(path.join(repoPath, "HEAD"));
 	}
 
@@ -103,17 +109,17 @@ export class CliGitProvider implements GitProvider {
 		name: string,
 		options?: ListFilesOptions,
 	): Promise<TreeEntry[]> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
 		}
 
 		const ref = options?.ref ?? DEFAULT_REF;
-		const subPath = this.normalizePath(options?.path);
+		const subPath = normalizePath(options?.path);
 
-		if (!(await this.refExists(repoPath, ref))) {
+		if (!(await refExists(this.gitBin, repoPath, ref))) {
 			return [];
 		}
 
@@ -133,7 +139,7 @@ export class CliGitProvider implements GitProvider {
 			throw new Error(`Path "${subPath}" not found in repository "${name}"`);
 		}
 
-		return this.parseLsTree(output);
+		return parseLsTree(output);
 	}
 
 	async createBranch(
@@ -141,8 +147,8 @@ export class CliGitProvider implements GitProvider {
 		branch: string,
 		fromRef?: string,
 	): Promise<BranchInfo> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -171,8 +177,8 @@ export class CliGitProvider implements GitProvider {
 	}
 
 	async listBranches(name: string): Promise<BranchInfo[]> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -205,8 +211,8 @@ export class CliGitProvider implements GitProvider {
 		name: string,
 		options?: ListCommitsOptions,
 	): Promise<CommitInfo[]> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -215,7 +221,7 @@ export class CliGitProvider implements GitProvider {
 		const ref = options?.ref ?? DEFAULT_REF;
 		const limit = options?.limit ?? DEFAULT_LOG_LIMIT;
 
-		if (!(await this.refExists(repoPath, ref))) {
+		if (!(await refExists(this.gitBin, repoPath, ref))) {
 			return [];
 		}
 
@@ -230,15 +236,15 @@ export class CliGitProvider implements GitProvider {
 				ref,
 			]);
 
-			return this.parseLogOutput(stdout);
+			return parseLogOutput(stdout);
 		} catch {
 			return [];
 		}
 	}
 
 	async countCommits(name: string, ref?: string): Promise<number> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -246,7 +252,7 @@ export class CliGitProvider implements GitProvider {
 
 		const resolvedRef = ref ?? DEFAULT_REF;
 
-		if (!(await this.refExists(repoPath, resolvedRef))) {
+		if (!(await refExists(this.gitBin, repoPath, resolvedRef))) {
 			return 0;
 		}
 
@@ -269,21 +275,21 @@ export class CliGitProvider implements GitProvider {
 		head: string,
 		base: string,
 	): Promise<MergeStatus> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
 		}
 
-		if (!(await this.refExists(repoPath, head))) {
+		if (!(await refExists(this.gitBin, repoPath, head))) {
 			throw new Error(`Ref "${head}" not found in repository "${name}"`);
 		}
-		if (!(await this.refExists(repoPath, base))) {
+		if (!(await refExists(this.gitBin, repoPath, base))) {
 			throw new Error(`Ref "${base}" not found in repository "${name}"`);
 		}
 
-		const fastForward = await this.isAncestor(repoPath, base, head);
+		const fastForward = await isAncestor(this.gitBin, repoPath, base, head);
 
 		const result = await execa(
 			this.gitBin,
@@ -328,28 +334,28 @@ export class CliGitProvider implements GitProvider {
 		base: string,
 		options?: MergeOptions,
 	): Promise<MergeResult> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
 		}
 
-		if (!(await this.refExists(repoPath, head))) {
+		if (!(await refExists(this.gitBin, repoPath, head))) {
 			throw new Error(`Ref "${head}" not found in repository "${name}"`);
 		}
-		if (!(await this.refExists(repoPath, base))) {
+		if (!(await refExists(this.gitBin, repoPath, base))) {
 			throw new Error(`Ref "${base}" not found in repository "${name}"`);
 		}
 
-		const headSha = await this.revParse(repoPath, head);
-		const baseSha = await this.revParse(repoPath, base);
+		const headSha = await revParse(this.gitBin, repoPath, head);
+		const baseSha = await revParse(this.gitBin, repoPath, base);
 
-		const isFF = await this.isAncestor(repoPath, base, head);
+		const isFf = await isAncestor(this.gitBin, repoPath, base, head);
 
-		const wantFF = options?.fastForward ?? false;
+		const wantFf = options?.fastForward ?? false;
 
-		if (isFF && wantFF) {
+		if (isFf && wantFf) {
 			await execa(this.gitBin, [
 				"--git-dir",
 				repoPath,
@@ -360,7 +366,7 @@ export class CliGitProvider implements GitProvider {
 			return { mergedSha: headSha, fastForward: true };
 		}
 
-		const treeSha = await this.computeMergeTree(repoPath, base, head);
+		const treeSha = await computeMergeTree(this.gitBin, repoPath, base, head);
 		if (treeSha === null) {
 			throw new Error(
 				`Merge of "${head}" into "${base}" has conflicts and cannot be performed`,
@@ -395,83 +401,17 @@ export class CliGitProvider implements GitProvider {
 		return { mergedSha, fastForward: false };
 	}
 
-	private async computeMergeTree(
-		repoPath: string,
-		base: string,
-		head: string,
-	): Promise<string | null> {
-		const result = await execa(
-			this.gitBin,
-			[
-				"--git-dir",
-				repoPath,
-				"merge-tree",
-				"--write-tree",
-				"--name-only",
-				"--no-messages",
-				base,
-				head,
-			],
-			{ reject: false },
-		);
-
-		if (result.exitCode !== 0) {
-			return null;
-		}
-
-		const lines = (result.stdout ?? "")
-			.split("\n")
-			.map((l) => l.trim())
-			.filter((l) => l.length > 0);
-		if (lines.length === 0) {
-			return null;
-		}
-
-		return lines[0];
-	}
-
-	private async isAncestor(
-		repoPath: string,
-		ancestor: string,
-		descendant: string,
-	): Promise<boolean> {
-		try {
-			await execa(this.gitBin, [
-				"--git-dir",
-				repoPath,
-				"merge-base",
-				"--is-ancestor",
-				ancestor,
-				descendant,
-			]);
-			return true;
-		} catch {
-			return false;
-		}
-	}
-
-	private async revParse(repoPath: string, ref: string): Promise<string> {
-		const { stdout } = await execa(this.gitBin, [
-			"--git-dir",
-			repoPath,
-			"rev-parse",
-			"--verify",
-			ref,
-		]);
-		return stdout.trim();
-	}
-
 	async advertiseRefs(
 		name: string,
 		service: GitService,
 	): Promise<ReadableStream<Uint8Array>> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
 		}
 
-		const cmdName = this.gitCommandName(service);
+		const cmdName = gitCommandName(service);
 		const subprocess = execa(this.gitBin, [
 			"--git-dir",
 			repoPath,
@@ -489,13 +429,13 @@ export class CliGitProvider implements GitProvider {
 		service: GitService,
 		input: ReadableStream<Uint8Array>,
 	): Promise<ReadableStream<Uint8Array>> {
-		this.validateName(name);
-		const repoPath = this.resolvePath(name);
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
 		}
 
-		const cmdName = this.gitCommandName(service);
+		const cmdName = gitCommandName(service);
 		const subprocess = execa(this.gitBin, [
 			"--git-dir",
 			repoPath,
@@ -510,129 +450,6 @@ export class CliGitProvider implements GitProvider {
 		subprocess.catch(() => {});
 
 		return Readable.toWeb(subprocess.stdout) as ReadableStream<Uint8Array>;
-	}
-
-	private gitCommandName(service: GitService): string {
-		switch (service) {
-			case "git-upload-pack":
-				return "upload-pack";
-			case "git-receive-pack":
-				return "receive-pack";
-		}
-	}
-
-	private async refExists(repoPath: string, ref: string): Promise<boolean> {
-		try {
-			await execa(this.gitBin, [
-				"--git-dir",
-				repoPath,
-				"rev-parse",
-				"--verify",
-				"--quiet",
-				`${ref}^{commit}`,
-			]);
-			return true;
-		} catch {
-			return false;
-		}
-	}
-
-	private parseLsTree(stdout: string): TreeEntry[] {
-		const entries: TreeEntry[] = [];
-		const lines = stdout.split("\n");
-
-		for (const line of lines) {
-			if (!line) {
-				continue;
-			}
-
-			const tabIdx = line.indexOf(LS_TREE_SEPARATOR);
-			if (tabIdx === -1) {
-				continue;
-			}
-
-			const meta = line.slice(0, tabIdx);
-			const name = line.slice(tabIdx + 1);
-			const parts = meta.trim().split(/\s+/);
-			if (parts.length < LS_TREE_MIN_PARTS) {
-				continue;
-			}
-
-			const mode = parts[0];
-			const type = parts[1];
-			const sizeStr = parts[3];
-
-			if (type !== "blob" && type !== "tree") {
-				continue;
-			}
-
-			const entry: TreeEntry = {
-				name,
-				type: type as TreeEntryType,
-				mode,
-			};
-
-			if (type === "blob" && sizeStr !== SIZE_PLACEHOLDER) {
-				const size = Number.parseInt(sizeStr, 10);
-				if (!Number.isNaN(size)) {
-					entry.size = size;
-				}
-			}
-
-			entries.push(entry);
-		}
-
-		return entries;
-	}
-
-	private normalizePath(p: string | undefined): string | undefined {
-		if (!p || p.length === 0) {
-			return undefined;
-		}
-		this.validatePath(p);
-		return p;
-	}
-
-	private validatePath(p: string): void {
-		if (p.includes("\0")) {
-			throw new Error("Path cannot contain null bytes");
-		}
-		if (p.length > MAX_PATH_LENGTH) {
-			throw new Error("Path is too long");
-		}
-		for (const seg of p.split("/")) {
-			if (seg === "..") {
-				throw new Error("Path cannot contain parent-directory segments");
-			}
-		}
-	}
-
-	private parseLogOutput(stdout: string): CommitInfo[] {
-		if (!stdout) return [];
-
-		return stdout
-			.split("\n")
-			.filter((line) => line.length > 0)
-			.map((line) => {
-				const [
-					sha,
-					shortSha,
-					authorName,
-					authorEmail,
-					authoredAt,
-					committedAt,
-					subject,
-				] = line.split("\0");
-				return {
-					sha,
-					shortSha,
-					authorName,
-					authorEmail,
-					authoredAt: new Date(authoredAt),
-					committedAt: new Date(committedAt),
-					subject,
-				};
-			});
 	}
 
 	private async getInfo(
@@ -660,35 +477,6 @@ export class CliGitProvider implements GitProvider {
 			description,
 			createdAt: stats.birthtime ?? stats.mtime,
 		};
-	}
-
-	private resolvePath(name: string): string {
-		const resolved = path.resolve(this.storagePath, name);
-		const root = path.resolve(this.storagePath);
-		if (!resolved.startsWith(root)) {
-			throw new Error("Invalid repository name");
-		}
-		return resolved;
-	}
-
-	private validateName(name: string): void {
-		if (!name) {
-			throw new Error("Repository name is required");
-		}
-		if (!REPO_NAME_RE.test(name)) {
-			throw new Error(
-				"Repository name must contain only letters, numbers, dots, hyphens, and underscores",
-			);
-		}
-		if (name === "." || name === ".." || name.startsWith(".")) {
-			throw new Error("Repository name cannot start with a dot");
-		}
-		if (name.length > MAX_NAME_LENGTH) {
-			throw new Error("Repository name is too long (max 100 characters)");
-		}
-		if (name.toLowerCase().endsWith(".git")) {
-			throw new Error("Repository name cannot end with .git");
-		}
 	}
 }
 

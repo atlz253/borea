@@ -51,6 +51,14 @@ npm run format      # Biome format
 - **Files Biome ignores:** `src/routeTree.gen.ts` (generated).
 - **Imports:** use the path aliases `#/*` or `@/*` (both map to `./src/*`). Run "organize imports" on save.
 - **Module boundaries:** cross-module imports must go through the barrel (`index.ts`). Deep imports into internal module subpaths are forbidden by Biome `style/noRestrictedImports`. See ADR 0003.
+- **Biome linter rules:** additional non-recommended rules enforced:
+  - `noExcessiveLinesPerFile` — prod ≤600 lines, tests ≤850 lines
+  - `noExcessiveCognitiveComplexity` — functions complexity ≤15
+  - `noFloatingPromises` — all promises must be awaited, void-ed, or caught
+  - `noConsole` — use `#/platform/logger` instead (warn in tests)
+  - `useExhaustiveDependencies` — React hook deps must be complete
+  - `noConfusingVoidType` — `void` only in return/type param positions
+  - `noEmptyInterface` — empty interfaces are forbidden
 - **Mantine imports:** import Mantine components from `@mantine/core`, hooks from `@mantine/hooks`, code highlighting from `@mantine/code-highlight`. Import Mantine CSS via side-effect: `import '@mantine/core/styles.css'` in root layout.
 - **No comments** unless explicitly requested by the user.
 - **Routing:** file-based — add a new route by creating a file in `src/routes/`; the route tree is auto-generated into `src/routeTree.gen.ts` (never edit by hand).

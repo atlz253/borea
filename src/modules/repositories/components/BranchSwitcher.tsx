@@ -33,12 +33,12 @@ export default function BranchSwitcher({
 	const handleSelect = (branch: string) => {
 		const encodedBranch = encodeURIComponent(branch);
 		if (toCommits) {
-			navigate({
+			void navigate({
 				to: "/repositories/$name/tree/$branch/commits" as const,
 				params: { name: repoName, branch: encodedBranch },
 			});
 		} else if (currentTreePath) {
-			navigate({
+			void navigate({
 				to: "/repositories/$name/tree/$branch/$" as const,
 				params: {
 					name: repoName,
@@ -47,7 +47,7 @@ export default function BranchSwitcher({
 				},
 			});
 		} else {
-			navigate({
+			void navigate({
 				to: "/repositories/$name/tree/$branch" as const,
 				params: { name: repoName, branch: encodedBranch },
 			});
@@ -68,7 +68,7 @@ export default function BranchSwitcher({
 			setOpened(false);
 			setNewBranchName("");
 			const encoded = encodeURIComponent(newBranchName);
-			navigate({
+			void navigate({
 				to: "/repositories/$name/tree/$branch" as const,
 				params: { name: repoName, branch: encoded },
 			});

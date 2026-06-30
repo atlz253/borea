@@ -30,6 +30,24 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"nursery": {
+				"noExcessiveLinesPerFile": {
+					"level": "error",
+					"options": { "maxLines": 600 }
+				},
+				"noFloatingPromises": "error"
+			},
+			"complexity": {
+				"noExcessiveCognitiveComplexity": "error"
+			},
+			"correctness": {
+				"useExhaustiveDependencies": "error"
+			},
+			"suspicious": {
+				"noConsole": "error",
+				"noConfusingVoidType": "error",
+				"noEmptyInterface": "error"
+			},
 			"style": {
 				"noMagicNumbers": "error",
 				"noRestrictedImports": {
@@ -66,6 +84,19 @@
 			],
 			"linter": {
 				"rules": {
+					"nursery": {
+						"noExcessiveLinesPerFile": {
+							"level": "error",
+							"options": { "maxLines": 850 }
+						},
+						"noFloatingPromises": "warn"
+					},
+					"complexity": {
+						"noExcessiveCognitiveComplexity": "warn"
+					},
+					"suspicious": {
+						"noConsole": "warn"
+					},
 					"style": {
 						"noMagicNumbers": "off",
 						"noRestrictedImports": "off"
