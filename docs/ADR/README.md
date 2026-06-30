@@ -1,0 +1,23 @@
+# Architecture Decision Records
+
+This directory contains Architecture Decision Records (ADRs) for Nirvana. Each ADR documents a significant architectural choice, including context, alternatives, decision, and consequences.
+
+| # | Title | Description |
+|---|-------|-------------|
+| 0001 | [Full-Stack TypeScript Framework](0001-fullstack-framework.md) | Choosing TanStack Start (RC) on Nitro over Next.js and Remix |
+| 0002 | [E2E Testing Tool](0002-e2e-testing-tool.md) | Choosing Playwright over Cypress and Vitest Browser Mode |
+| 0003 | [Project Directory Structure](0003-project-structure.md) | Modular monolith layout, thin routes, platform/ infra, Biome boundary enforcement |
+| 0004 | [UI Design System](0004-ui-design-system.md) | Choosing Mantine v9 over shadcn/ui, Chakra, and MUI |
+| 0005 | [Application Layout](0005-application-layout.md) | Mantine AppShell with header, sidebar, and end-of-content footer |
+| 0006 | [GitProvider Implementation](0006-git-provider-implementation.md) | System Git CLI via execa, filesystem metadata, no database |
+| 0007 | [Git Smart-HTTP Pull](0007-git-smart-http-pull.md) | Manual `git-upload-pack --stateless-rpc` for clone/fetch |
+| 0008 | [Git Smart-HTTP Push](0008-git-smart-http-push.md) | Manual `git-receive-pack --stateless-rpc` for push |
+| 0009 | [Commit History](0009-commit-history.md) | GitProvider extension for listing branches, commits, and counting commits |
+
+## Adding a New ADR
+
+1. Choose the next number (e.g., `0010`).
+2. Create a file named `00NN-title-in-kebab-case.md`.
+3. Follow the existing format: Context / Alternatives / Decision / Consequences.
+4. Update this index (`README.md`) with the new entry.
+5. Update `docs/README.md` and the project `README.md` if needed.

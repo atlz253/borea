@@ -7,17 +7,20 @@ Guidance for AI coding agents (and human contributors) working in this repositor
 Nirvana is an open-source software development workspace (analogue of JetBrains Space / Yandex SourceCraft). The MVP is a Git hosting service with repositories, pull/merge requests, code review, and a REST API — a modular monolith deployable as a single Docker container. Currently at the pre-MVP scaffolding stage.
 
 - **Spec:** `docs/MVP.md` — read this before making architectural changes.
-- **Decisions:** `docs/ADR/` — record any new architectural decision as a numbered ADR before implementing it.
+- **Decisions:** `docs/ADR/README.md` — index of all ADRs (0001–0009). Record any new architectural decision as a numbered ADR before implementing it.
 
 ## Tech Stack
 
 - **Full-stack framework:** TanStack Start (RC) on Nitro
 - **Routing:** TanStack Router, file-based (`src/routes/`)
 - **UI:** React 19 + Mantine v9
+- **Icons:** lucide-react
 - **Build:** Vite 8
 - **Styling:** Mantine (CSS layers, style props, CSS variables) — no Tailwind
 - **Lint/format:** Biome 2
 - **Tests:** Vitest 4 + Testing Library + jsdom; E2E via Playwright 1 (`tests/e2e/`, `playwright.config.ts`)
+- **Git operations:** system Git CLI via execa
+- **Validation:** Zod v4
 - **Language:** TypeScript, strict mode, `verbatimModuleSyntax`
 
 ## Commands
@@ -37,6 +40,9 @@ Other useful:
 ```bash
 npm run dev         # Dev server on :3000
 npm run build       # Production build → dist/
+npm run test:coverage  # Unit tests with coverage report
+npm run lint        # Biome lint
+npm run format      # Biome format
 ```
 
 ## Code Conventions
@@ -57,6 +63,13 @@ npm run build       # Production build → dist/
 | --- | --- |
 | `docs/MVP.md` | Technical specification — source of truth for requirements |
 | `docs/ADR/` | Architecture Decision Records |
+| `docs/ADR/README.md` | ADR index (0001–0009) |
+| `docs/architecture.md` | Architecture overview for developers |
+| `docs/git-http.md` | User guide for clone/push over HTTP |
+| `docs/repository-page.md` | User guide for repository UI pages |
+| `docs/security/noauth-mode.md` | NoAuth mode documentation |
+| `CONTRIBUTING.md` | Contributor guide |
+| `API.md` | API reference (Git smart-HTTP) |
 | `src/routes/__root.tsx` | Root document shell (HTML, head, header/footer, devtools) |
 | `src/routes/` | File-based route definitions |
 | `src/router.tsx` | Router factory + router type registration (`declare module`) |
@@ -80,7 +93,17 @@ Respect these when adding features — do not violate them without an ADR:
 - **NoAuth mode (MVP):** all actions on behalf of a fixed user. Must be blocked in production (`NODE_ENV=production`) unless `ALLOW_NOAUTH_IN_PRODUCTION=true`. See §5.3 and the final recommendations in `docs/MVP.md`.
 - **Modular monolith:** clear boundaries between domain modules (git, auth, repositories, pull-requests). See §7.
 - **Single-container deploy:** the whole app runs in one Nitro process; do not introduce a separate server framework. See ADR 0001.
-- **Git smart-HTTP protocol:** to be served via a dedicated server route delegating to `GitProvider` (not yet implemented — pending a de-risking spike; see ADR 0001 risks).
+- **Git smart-HTTP protocol:** served via `/api/git/<name>.git/` endpoints delegating to `GitProvider`. See ADR 0007 and ADR 0008.
+
+## Documentation
+
+Every new feature or architectural change must be documented. Follow these rules:
+
+- **Architectural changes** — create a new ADR in `docs/ADR/` before implementing. Update `docs/ADR/README.md` with the new entry.
+- **New features** — if the change affects architecture, create an ADR. If it is a user-facing feature, add or update a document in `docs/` (e.g., `docs/git-http.md`, `docs/repository-page.md`).
+- **Stack/structure changes** — update `README.md` and `AGENTS.md`.
+- **API changes** — update `API.md` when endpoints are added or modified.
+- **Check links** — verify all cross-document references before committing.
 
 ## Definition of Done for Code Changes
 
@@ -90,7 +113,8 @@ Before marking a change complete:
 3. `npm run test` passes (add or update unit tests per the spec's TDD requirement, §10).
 4. `npm run test:e2e` passes (add or update E2E tests per §10.3).
 5. If routes were added/removed, `src/routeTree.gen.ts` is regenerated.
-6. No secrets, keys, or credentials committed.
+6. **Documentation is updated** — ADR for architectural changes; section in `docs/` for new features; `README.md`/`AGENTS.md` for stack/structure changes; `API.md` for new endpoints.
+7. No secrets, keys, or credentials committed.
 
 <!-- mantine -->
 Use Mantine MCP (`list_items`, `get_item_doc`, `get_item_props`, `search_docs`) for Mantine-specific questions: component props, theming API, available components, usage examples. Prefer this over Context7 for Mantine queries — it draws from the authoritative `mantine.dev` source.
