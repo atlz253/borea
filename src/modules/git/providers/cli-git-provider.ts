@@ -133,6 +133,40 @@ export class CliGitProvider implements GitProvider {
 		return this.parseLsTree(output);
 	}
 
+	async createBranch(
+		name: string,
+		branch: string,
+		fromRef?: string,
+	): Promise<BranchInfo> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		const args = ["--git-dir", repoPath, "branch", branch];
+		if (fromRef) {
+			args.push(fromRef);
+		}
+
+		try {
+			await execa(this.gitBin, args);
+		} catch (error) {
+			if (error instanceof Error && "exitCode" in error) {
+				const e = error as ExecaError;
+				const msg = String(e.stderr ?? "").trim() || e.shortMessage;
+				if (msg.includes("already exists")) {
+					throw new Error(`Branch "${branch}" already exists`);
+				}
+				throw new Error(`Failed to create branch: ${msg}`);
+			}
+			throw error;
+		}
+
+		return { name: branch, isHead: false };
+	}
+
 	async listBranches(name: string): Promise<BranchInfo[]> {
 		this.validateName(name);
 		const repoPath = this.resolvePath(name);

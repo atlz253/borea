@@ -30,6 +30,19 @@ At the top of the page, next to the clone URL, you'll find the **branch switcher
 
 Branch names containing `/` (e.g., `feature/logout`) are URL-encoded as `%2F` in the address bar.
 
+### Creating a Branch
+
+At the bottom of the branch switcher dropdown, below a divider, you'll see **"New branch"**. Click it to open a modal where you can enter the new branch name. The new branch is created from the currently selected branch.
+
+Branch name rules:
+- Must be 1–200 characters.
+- Cannot contain spaces, `~`, `^`, `:`, `?`, `*`, `[`, `\`, or `@{`.
+- Cannot contain `..` (consecutive dots).
+- Cannot start with a hyphen (`-`).
+- Cannot end with `.lock`.
+
+After creation, the page navigates to the new branch's tree view. If creation fails (e.g., the branch already exists), an error message is shown in the modal.
+
 ### Clone URL
 
 You'll find the **"Git pull URL"** field with the address for cloning the repository over HTTP. Click the copy button to copy it, then use it in your terminal:

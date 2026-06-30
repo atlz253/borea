@@ -432,4 +432,58 @@ describe("CliGitProvider", () => {
 			).rejects.toThrow();
 		});
 	});
+
+	describe("createBranch", () => {
+		it("creates a new branch from HEAD", async () => {
+			await provider.init("create-branch-1");
+			await seedCommits(provider, "create-branch-1", { "a.txt": "a\n" });
+
+			const branch = await provider.createBranch(
+				"create-branch-1",
+				"new-branch",
+			);
+
+			expect(branch).toEqual({ name: "new-branch", isHead: false });
+
+			const branches = await provider.listBranches("create-branch-1");
+			expect(branches.map((b) => b.name)).toContain("new-branch");
+		});
+
+		it("creates a branch from a specific ref", async () => {
+			await provider.init("create-branch-2");
+			await seedCommits(provider, "create-branch-2", { "a.txt": "a\n" });
+
+			const existingBranches = await provider.listBranches("create-branch-2");
+			const defaultBranch = existingBranches.find((b) => b.isHead)?.name;
+			if (!defaultBranch) throw new Error("No HEAD branch found");
+
+			const branch = await provider.createBranch(
+				"create-branch-2",
+				"from-default",
+				defaultBranch,
+			);
+
+			expect(branch).toEqual({ name: "from-default", isHead: false });
+
+			const branches = await provider.listBranches("create-branch-2");
+			expect(branches.map((b) => b.name)).toContain("from-default");
+		});
+
+		it("throws when branch already exists", async () => {
+			await provider.init("create-branch-3");
+			await seedCommits(provider, "create-branch-3", { "a.txt": "a\n" });
+
+			await provider.createBranch("create-branch-3", "feature-x");
+
+			await expect(
+				provider.createBranch("create-branch-3", "feature-x"),
+			).rejects.toThrow(/already exists/);
+		});
+
+		it("throws for non-existent repository", async () => {
+			await expect(
+				provider.createBranch("no-such-repo", "new"),
+			).rejects.toThrow(/not found/);
+		});
+	});
 });

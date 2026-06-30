@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+	branchNameSchema,
+	createBranchSchema,
 	createRepositorySchema,
 	listFilesSchema,
 	repoNameSchema,
@@ -113,6 +115,109 @@ describe("treeEntrySchema", () => {
 	it("rejects empty name", () => {
 		expect(() =>
 			treeEntrySchema.parse({ name: "", type: "blob", mode: "100644" }),
+		).toThrow();
+	});
+});
+
+describe("branchNameSchema", () => {
+	it("accepts simple names", () => {
+		expect(branchNameSchema.parse("main")).toBe("main");
+		expect(branchNameSchema.parse("develop")).toBe("develop");
+		expect(branchNameSchema.parse("v1.0")).toBe("v1.0");
+	});
+
+	it("accepts names with slashes", () => {
+		expect(branchNameSchema.parse("feature/login")).toBe("feature/login");
+		expect(branchNameSchema.parse("feature/feat-1")).toBe("feature/feat-1");
+	});
+
+	it("accepts names with special allowed chars", () => {
+		expect(branchNameSchema.parse("fix_123")).toBe("fix_123");
+		expect(branchNameSchema.parse("release/1.0")).toBe("release/1.0");
+	});
+
+	it("rejects empty name", () => {
+		expect(() => branchNameSchema.parse("")).toThrow();
+	});
+
+	it("rejects name starting with hyphen", () => {
+		expect(() => branchNameSchema.parse("-branch")).toThrow();
+	});
+
+	it("rejects name with consecutive dots", () => {
+		expect(() => branchNameSchema.parse("a..b")).toThrow();
+	});
+
+	it("rejects name ending with .lock", () => {
+		expect(() => branchNameSchema.parse("main.lock")).toThrow();
+	});
+
+	it("rejects name with @{", () => {
+		expect(() => branchNameSchema.parse("branch@{1}")).toThrow();
+	});
+
+	it("rejects name with spaces", () => {
+		expect(() => branchNameSchema.parse("my branch")).toThrow();
+	});
+
+	it("rejects name with tilde", () => {
+		expect(() => branchNameSchema.parse("branch~1")).toThrow();
+	});
+
+	it("rejects name with caret", () => {
+		expect(() => branchNameSchema.parse("branch^1")).toThrow();
+	});
+
+	it("rejects name with colon", () => {
+		expect(() => branchNameSchema.parse("branch:fix")).toThrow();
+	});
+
+	it("rejects name with question mark", () => {
+		expect(() => branchNameSchema.parse("branch?")).toThrow();
+	});
+
+	it("rejects name with asterisk", () => {
+		expect(() => branchNameSchema.parse("branch*")).toThrow();
+	});
+
+	it("rejects name with backslash", () => {
+		expect(() => branchNameSchema.parse("branch\\name")).toThrow();
+	});
+
+	it("rejects too long name", () => {
+		expect(() => branchNameSchema.parse("b".repeat(201))).toThrow();
+	});
+});
+
+describe("createBranchSchema", () => {
+	it("accepts name and branch", () => {
+		const result = createBranchSchema.parse({
+			name: "my-repo",
+			branch: "new-feature",
+		});
+		expect(result.name).toBe("my-repo");
+		expect(result.branch).toBe("new-feature");
+		expect(result.from).toBeUndefined();
+	});
+
+	it("accepts optional from", () => {
+		const result = createBranchSchema.parse({
+			name: "my-repo",
+			branch: "fix",
+			from: "main",
+		});
+		expect(result.from).toBe("main");
+	});
+
+	it("rejects invalid repo name", () => {
+		expect(() =>
+			createBranchSchema.parse({ name: "bad repo", branch: "fix" }),
+		).toThrow();
+	});
+
+	it("rejects invalid branch name", () => {
+		expect(() =>
+			createBranchSchema.parse({ name: "my-repo", branch: "bad branch" }),
 		).toThrow();
 	});
 });

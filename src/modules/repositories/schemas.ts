@@ -3,6 +3,7 @@ import { z } from "zod";
 const MAX_NAME_LENGTH = 100;
 const MAX_DESC_LENGTH = 500;
 const MAX_PATH_LENGTH = 1024;
+const MAX_BRANCH_NAME_LENGTH = 200;
 
 export const repoNameSchema = z
 	.string()
@@ -90,7 +91,30 @@ export const listBranchesSchema = z.object({
 	name: repoNameSchema,
 });
 
+export const branchNameSchema = z
+	.string()
+	.min(1, "Branch name is required")
+	.max(MAX_BRANCH_NAME_LENGTH, "Branch name is too long")
+	.regex(/^[^\s~^:?*[\\]+$/, "Branch name contains invalid characters")
+	.refine((name) => !name.includes(".."), "Branch name cannot contain '..'")
+	.refine(
+		(name) => !name.startsWith("-"),
+		"Branch name cannot start with a hyphen",
+	)
+	.refine(
+		(name) => !name.endsWith(".lock"),
+		"Branch name cannot end with .lock",
+	)
+	.refine((name) => !name.includes("@{"), "Branch name cannot contain '@{'");
+
+export const createBranchSchema = z.object({
+	name: repoNameSchema,
+	branch: branchNameSchema,
+	from: refSchema.optional(),
+});
+
 export type CreateRepositoryInput = z.infer<typeof createRepositorySchema>;
 export type Repository = z.infer<typeof repositorySchema>;
 export type TreeEntryType = z.infer<typeof treeEntryTypeSchema>;
 export type TreeEntry = z.infer<typeof treeEntrySchema>;
+export type CreateBranchInput = z.infer<typeof createBranchSchema>;

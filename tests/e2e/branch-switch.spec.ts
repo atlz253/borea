@@ -20,6 +20,80 @@ async function waitForHydration(page: import("@playwright/test").Page) {
 	);
 }
 
+test("create branch from branch switcher", async ({ page }) => {
+	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+	const repoName = `e2e-create-branch-${uid}`;
+	const barePath = join(STORAGE_PATH, repoName);
+	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-work-${uid}-`));
+
+	try {
+		// Seed bare repo with a single commit on default branch
+		await execa("git", ["init", "--bare", barePath]);
+
+		const { stdout: branchRaw } = await execa("git", [
+			"--git-dir",
+			barePath,
+			"symbolic-ref",
+			"--short",
+			"HEAD",
+		]);
+		const defaultBranch = branchRaw.trim();
+
+		await execa("git", ["init", workDir]);
+		await writeFile(join(workDir, "readme.md"), "hello", "utf-8");
+		await execa("git", ["add", "--all"], { cwd: workDir });
+		await execa("git", ["commit", "--message=init"], {
+			cwd: workDir,
+			env: {
+				GIT_AUTHOR_NAME: "e2e",
+				GIT_AUTHOR_EMAIL: "e2e@test.com",
+				GIT_COMMITTER_NAME: "e2e",
+				GIT_COMMITTER_EMAIL: "e2e@test.com",
+			},
+		});
+
+		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		await execa("git", ["remote", "add", "origin", pushUrl], {
+			cwd: workDir,
+		});
+		await execa(
+			"git",
+			["push", "-v", "origin", `${defaultBranch}:${defaultBranch}`],
+			{
+				cwd: workDir,
+				env: { GIT_TERMINAL_PROMPT: "0" },
+				timeout: 30_000,
+			},
+		);
+
+		// Navigate to the repo
+		await page.goto(`/repositories/${repoName}`, { waitUntil: "load" });
+		await waitForHydration(page);
+
+		// Should be on the tree URL
+		await expect(page).toHaveURL(
+			/\/repositories\/${repoName}\/tree\/${defaultBranch}/,
+		);
+
+		// Open branch switcher and click "New branch"
+		await page.getByRole("button", { name: defaultBranch }).click();
+		await page.getByRole("menuitem", { name: /New branch/ }).click();
+
+		// Fill in branch name and create
+		const input = page.getByPlaceholder("e.g. feature/awesome");
+		await input.fill("feature-from-e2e");
+		await page.getByRole("button", { name: /Create/ }).click();
+
+		// Should navigate to the new branch
+		await expect(page).toHaveURL(
+			/\/repositories\/${repoName}\/tree\/feature-from-e2e/,
+		);
+	} finally {
+		rmSync(workDir, { recursive: true, force: true });
+		rmSync(barePath, { recursive: true, force: true });
+	}
+});
+
 test("branch switcher lets user switch between branches", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-branch-${uid}`;

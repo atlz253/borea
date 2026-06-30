@@ -53,6 +53,18 @@ export async function listRepositoryCommits(
 	return gitProvider.listCommits(name, { ref, limit });
 }
 
+export async function createRepositoryBranch(
+	gitProvider: GitProvider,
+	name: string,
+	branch: string,
+	fromRef?: string,
+): Promise<BranchInfo> {
+	if (!(await gitProvider.exists(name))) {
+		throw new Error(`Repository "${name}" not found`);
+	}
+	return gitProvider.createBranch(name, branch, fromRef);
+}
+
 export async function countRepositoryCommits(
 	gitProvider: GitProvider,
 	name: string,

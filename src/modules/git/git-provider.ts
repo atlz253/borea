@@ -55,6 +55,11 @@ export interface GitProvider {
 		input: ReadableStream<Uint8Array>,
 	): Promise<ReadableStream<Uint8Array>>;
 	listBranches(name: string): Promise<BranchInfo[]>;
+	createBranch(
+		name: string,
+		branch: string,
+		fromRef?: string,
+	): Promise<BranchInfo>;
 	listCommits(
 		name: string,
 		options?: ListCommitsOptions,

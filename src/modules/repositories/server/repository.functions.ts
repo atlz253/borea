@@ -3,6 +3,7 @@ import { gitProvider } from "#/modules/git";
 import {
 	countRepositoryCommits,
 	createRepository,
+	createRepositoryBranch,
 	listRepositories,
 	listRepositoryBranches,
 	listRepositoryCommits,
@@ -10,6 +11,7 @@ import {
 } from "../repository.service";
 import {
 	countCommitsSchema,
+	createBranchSchema,
 	createRepositorySchema,
 	listBranchesSchema,
 	listCommitsSchema,
@@ -38,6 +40,17 @@ export const listBranchesFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => listBranchesSchema.parse(data))
 	.handler(async ({ data }) => {
 		return listRepositoryBranches(gitProvider, data.name);
+	});
+
+export const createBranchFn = createServerFn({ method: "POST" })
+	.validator((data: unknown) => createBranchSchema.parse(data))
+	.handler(async ({ data }) => {
+		return createRepositoryBranch(
+			gitProvider,
+			data.name,
+			data.branch,
+			data.from,
+		);
 	});
 
 export const listCommitsFn = createServerFn({ method: "GET" })

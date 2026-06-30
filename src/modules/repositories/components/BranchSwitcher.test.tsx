@@ -3,12 +3,17 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { BranchInfo } from "#/modules/git";
+import { createBranchFn } from "#/modules/repositories";
 import BranchSwitcher from "./BranchSwitcher";
 
 const navigateFn = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
 	useNavigate: () => navigateFn,
+}));
+
+vi.mock("#/modules/repositories", () => ({
+	createBranchFn: vi.fn(),
 }));
 
 vi.mock("@mantine/core", async (importOriginal) => {
@@ -38,6 +43,7 @@ vi.mock("@mantine/core", async (importOriginal) => {
 						{children}
 					</button>
 				),
+				Divider: () => <hr />,
 			},
 		),
 	};
@@ -70,11 +76,17 @@ describe("BranchSwitcher", () => {
 		expect(screen.getAllByText("main").length).toBeGreaterThanOrEqual(1);
 	});
 
-	it("returns null when there are 0 or 1 branches", () => {
+	it("returns null when there are 0 branches", () => {
+		renderSwitcher({ branches: [] });
+		expect(screen.queryByRole("button")).toBeNull();
+	});
+
+	it("renders for 1 branch with new branch option", () => {
 		renderSwitcher({
 			branches: [{ name: "main", isHead: true }],
 		});
-		expect(screen.queryByRole("button")).toBeNull();
+		expect(screen.getAllByText("main").length).toBeGreaterThanOrEqual(1);
+		expect(screen.getByText("New branch")).toBeInTheDocument();
 	});
 
 	it("lists branches in the dropdown", () => {
@@ -140,5 +152,62 @@ describe("BranchSwitcher", () => {
 			to: "/repositories/$name/tree/$branch",
 			params: { name: "my-repo", branch: "feature%2Flogin" },
 		});
+	});
+
+	it("shows New branch menu item", () => {
+		renderSwitcher();
+		expect(screen.getByText("New branch")).toBeInTheDocument();
+	});
+
+	it("opens modal on New branch click", async () => {
+		renderSwitcher();
+		const user = userEvent.setup();
+
+		await user.click(screen.getByText("New branch"));
+
+		expect(await screen.findByText("Create branch")).toBeInTheDocument();
+	});
+
+	it("creates branch and navigates on submit", async () => {
+		vi.mocked(createBranchFn).mockResolvedValue({
+			name: "new-branch",
+			isHead: false,
+		});
+		renderSwitcher();
+		const user = userEvent.setup();
+
+		await user.click(screen.getByText("New branch"));
+
+		const input = await screen.findByPlaceholderText("e.g. feature/awesome");
+		await user.type(input, "new-branch");
+
+		await user.click(screen.getByText("Create"));
+
+		expect(createBranchFn).toHaveBeenCalledWith({
+			data: { name: "my-repo", branch: "new-branch", from: "main" },
+		});
+		expect(navigateFn).toHaveBeenCalledWith({
+			to: "/repositories/$name/tree/$branch",
+			params: { name: "my-repo", branch: "new-branch" },
+		});
+	});
+
+	it("shows error on failure", async () => {
+		vi.mocked(createBranchFn).mockRejectedValue(
+			new Error("Branch already exists"),
+		);
+		renderSwitcher();
+		const user = userEvent.setup();
+
+		await user.click(screen.getByText("New branch"));
+
+		const input = await screen.findByPlaceholderText("e.g. feature/awesome");
+		await user.type(input, "dup-branch");
+
+		await user.click(screen.getByText("Create"));
+
+		expect(
+			await screen.findByText("Branch already exists"),
+		).toBeInTheDocument();
 	});
 });

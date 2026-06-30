@@ -7,6 +7,7 @@ export { default as RepositoryPage } from "./pages/RepositoryPage";
 export type { TreeEntry, TreeEntryType } from "./schemas";
 export {
 	countCommitsFn,
+	createBranchFn,
 	createRepositoryFn,
 	listBranchesFn,
 	listCommitsFn,
