@@ -1,4 +1,9 @@
-import type { GitProvider, TreeEntry } from "#/modules/git";
+import type {
+	BranchInfo,
+	CommitInfo,
+	GitProvider,
+	TreeEntry,
+} from "#/modules/git";
 import type { CreateRepositoryInput, Repository } from "./schemas";
 
 export async function createRepository(
@@ -23,4 +28,37 @@ export async function listRepositoryFiles(
 		throw new Error(`Repository "${name}" not found`);
 	}
 	return gitProvider.listFiles(name, { path });
+}
+
+export async function listRepositoryBranches(
+	gitProvider: GitProvider,
+	name: string,
+): Promise<BranchInfo[]> {
+	if (!(await gitProvider.exists(name))) {
+		throw new Error(`Repository "${name}" not found`);
+	}
+	return gitProvider.listBranches(name);
+}
+
+export async function listRepositoryCommits(
+	gitProvider: GitProvider,
+	name: string,
+	ref?: string,
+	limit?: number,
+): Promise<CommitInfo[]> {
+	if (!(await gitProvider.exists(name))) {
+		throw new Error(`Repository "${name}" not found`);
+	}
+	return gitProvider.listCommits(name, { ref, limit });
+}
+
+export async function countRepositoryCommits(
+	gitProvider: GitProvider,
+	name: string,
+	ref?: string,
+): Promise<number> {
+	if (!(await gitProvider.exists(name))) {
+		throw new Error(`Repository "${name}" not found`);
+	}
+	return gitProvider.countCommits(name, ref);
 }

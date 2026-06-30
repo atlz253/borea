@@ -62,6 +62,33 @@ export const listFilesSchema = z.object({
 	path: repoPathSchema.optional(),
 });
 
+const MAX_COMMIT_LIMIT = 500;
+
+export const refSchema = z
+	.string()
+	.max(MAX_PATH_LENGTH)
+	.refine((p) => !p.includes("\0"), "Ref cannot contain null bytes");
+
+export const listCommitsSchema = z.object({
+	name: repoNameSchema,
+	ref: refSchema.optional(),
+	limit: z
+		.number()
+		.int()
+		.positive()
+		.max(MAX_COMMIT_LIMIT, `Limit cannot exceed ${MAX_COMMIT_LIMIT}`)
+		.optional(),
+});
+
+export const countCommitsSchema = z.object({
+	name: repoNameSchema,
+	ref: refSchema.optional(),
+});
+
+export const listBranchesSchema = z.object({
+	name: repoNameSchema,
+});
+
 export type CreateRepositoryInput = z.infer<typeof createRepositorySchema>;
 export type Repository = z.infer<typeof repositorySchema>;
 export type TreeEntryType = z.infer<typeof treeEntryTypeSchema>;

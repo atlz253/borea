@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as RepositoriesIndexRouteImport } from './routes/repositories.index'
 import { Route as RepositoriesNameRouteImport } from './routes/repositories.$name'
 import { Route as RepositoriesNameIndexRouteImport } from './routes/repositories.$name.index'
+import { Route as RepositoriesNameCommitsRouteImport } from './routes/repositories.$name.commits'
 import { Route as ApiGitSplatRouteImport } from './routes/api/git/$'
 import { Route as RepositoriesNameTreeSplatRouteImport } from './routes/repositories.$name.tree.$'
 
@@ -42,6 +43,11 @@ const RepositoriesNameIndexRoute = RepositoriesNameIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RepositoriesNameRoute,
 } as any)
+const RepositoriesNameCommitsRoute = RepositoriesNameCommitsRouteImport.update({
+  id: '/commits',
+  path: '/commits',
+  getParentRoute: () => RepositoriesNameRoute,
+} as any)
 const ApiGitSplatRoute = ApiGitSplatRouteImport.update({
   id: '/api/git/$',
   path: '/api/git/$',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/repositories/$name': typeof RepositoriesNameRouteWithChildren
   '/repositories/': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/repositories/$name/commits': typeof RepositoriesNameCommitsRoute
   '/repositories/$name/': typeof RepositoriesNameIndexRoute
   '/repositories/$name/tree/$': typeof RepositoriesNameTreeSplatRoute
 }
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/repositories': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/repositories/$name/commits': typeof RepositoriesNameCommitsRoute
   '/repositories/$name': typeof RepositoriesNameIndexRoute
   '/repositories/$name/tree/$': typeof RepositoriesNameTreeSplatRoute
 }
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/repositories/$name': typeof RepositoriesNameRouteWithChildren
   '/repositories/': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/repositories/$name/commits': typeof RepositoriesNameCommitsRoute
   '/repositories/$name/': typeof RepositoriesNameIndexRoute
   '/repositories/$name/tree/$': typeof RepositoriesNameTreeSplatRoute
 }
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/repositories/$name'
     | '/repositories/'
     | '/api/git/$'
+    | '/repositories/$name/commits'
     | '/repositories/$name/'
     | '/repositories/$name/tree/$'
   fileRoutesByTo: FileRoutesByTo
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/repositories'
     | '/api/git/$'
+    | '/repositories/$name/commits'
     | '/repositories/$name'
     | '/repositories/$name/tree/$'
   id:
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
     | '/repositories/$name'
     | '/repositories/'
     | '/api/git/$'
+    | '/repositories/$name/commits'
     | '/repositories/$name/'
     | '/repositories/$name/tree/$'
   fileRoutesById: FileRoutesById
@@ -151,6 +163,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RepositoriesNameIndexRouteImport
       parentRoute: typeof RepositoriesNameRoute
     }
+    '/repositories/$name/commits': {
+      id: '/repositories/$name/commits'
+      path: '/commits'
+      fullPath: '/repositories/$name/commits'
+      preLoaderRoute: typeof RepositoriesNameCommitsRouteImport
+      parentRoute: typeof RepositoriesNameRoute
+    }
     '/api/git/$': {
       id: '/api/git/$'
       path: '/api/git/$'
@@ -169,11 +188,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface RepositoriesNameRouteChildren {
+  RepositoriesNameCommitsRoute: typeof RepositoriesNameCommitsRoute
   RepositoriesNameIndexRoute: typeof RepositoriesNameIndexRoute
   RepositoriesNameTreeSplatRoute: typeof RepositoriesNameTreeSplatRoute
 }
 
 const RepositoriesNameRouteChildren: RepositoriesNameRouteChildren = {
+  RepositoriesNameCommitsRoute: RepositoriesNameCommitsRoute,
   RepositoriesNameIndexRoute: RepositoriesNameIndexRoute,
   RepositoriesNameTreeSplatRoute: RepositoriesNameTreeSplatRoute,
 }

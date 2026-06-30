@@ -20,6 +20,26 @@ export interface ListFilesOptions {
 
 export type GitService = "git-upload-pack" | "git-receive-pack";
 
+export interface BranchInfo {
+	name: string;
+	isHead: boolean;
+}
+
+export interface CommitInfo {
+	sha: string;
+	shortSha: string;
+	authorName: string;
+	authorEmail: string;
+	authoredAt: Date;
+	committedAt: Date;
+	subject: string;
+}
+
+export interface ListCommitsOptions {
+	ref?: string;
+	limit?: number;
+}
+
 export interface GitProvider {
 	init(name: string, description?: string): Promise<RepositoryInfo>;
 	list(): Promise<RepositoryInfo[]>;
@@ -34,4 +54,10 @@ export interface GitProvider {
 		service: GitService,
 		input: ReadableStream<Uint8Array>,
 	): Promise<ReadableStream<Uint8Array>>;
+	listBranches(name: string): Promise<BranchInfo[]>;
+	listCommits(
+		name: string,
+		options?: ListCommitsOptions,
+	): Promise<CommitInfo[]>;
+	countCommits(name: string, ref?: string): Promise<number>;
 }

@@ -1,11 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
 import { gitProvider } from "#/modules/git";
 import {
+	countRepositoryCommits,
 	createRepository,
 	listRepositories,
+	listRepositoryBranches,
+	listRepositoryCommits,
 	listRepositoryFiles,
 } from "../repository.service";
-import { createRepositorySchema, listFilesSchema } from "../schemas";
+import {
+	countCommitsSchema,
+	createRepositorySchema,
+	listBranchesSchema,
+	listCommitsSchema,
+	listFilesSchema,
+} from "../schemas";
 
 export const listRepositoriesFn = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -23,4 +32,22 @@ export const listRepositoryFilesFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => listFilesSchema.parse(data))
 	.handler(async ({ data }) => {
 		return listRepositoryFiles(gitProvider, data.name, data.path);
+	});
+
+export const listBranchesFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => listBranchesSchema.parse(data))
+	.handler(async ({ data }) => {
+		return listRepositoryBranches(gitProvider, data.name);
+	});
+
+export const listCommitsFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => listCommitsSchema.parse(data))
+	.handler(async ({ data }) => {
+		return listRepositoryCommits(gitProvider, data.name, data.ref, data.limit);
+	});
+
+export const countCommitsFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => countCommitsSchema.parse(data))
+	.handler(async ({ data }) => {
+		return countRepositoryCommits(gitProvider, data.name, data.ref);
 	});

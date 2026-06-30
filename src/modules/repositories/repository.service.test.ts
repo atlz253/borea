@@ -14,6 +14,9 @@ function createMockGit(): GitProvider {
 		listFiles: vi.fn(),
 		advertiseRefs: vi.fn(),
 		invokeService: vi.fn(),
+		listBranches: vi.fn(),
+		listCommits: vi.fn(),
+		countCommits: vi.fn(),
 	};
 }
 

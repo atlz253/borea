@@ -1,6 +1,9 @@
 export type {
+	BranchInfo,
+	CommitInfo,
 	GitProvider,
 	GitService,
+	ListCommitsOptions,
 	ListFilesOptions,
 	RepositoryInfo,
 	TreeEntry,

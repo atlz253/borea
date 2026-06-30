@@ -21,7 +21,13 @@ vi.mock("@tanstack/react-router", () => ({
 function renderPage(props: Partial<Parameters<typeof RepositoryPage>[0]> = {}) {
 	return render(
 		<MantineProvider>
-			<RepositoryPage name="my-repo" path="" entries={[]} {...props} />
+			<RepositoryPage
+				name="my-repo"
+				path=""
+				entries={[]}
+				commitCount={0}
+				{...props}
+			/>
 		</MantineProvider>,
 	);
 }

@@ -193,6 +193,140 @@ describe("CliGitProvider", () => {
 		});
 	});
 
+	describe("listBranches", () => {
+		it("returns the default branch with isHead=true for a populated repo", async () => {
+			await provider.init("branches-repo");
+			await seedCommits(provider, "branches-repo", {
+				"README.md": "# branches\n",
+			});
+
+			const branches = await provider.listBranches("branches-repo");
+
+			expect(branches.length).toBeGreaterThanOrEqual(1);
+			const headBranch = branches.find((b) => b.isHead);
+			expect(headBranch).toBeDefined();
+			expect(headBranch?.name.length).toBeGreaterThan(0);
+		});
+
+		it("returns multiple branches and marks only one as HEAD", async () => {
+			await provider.init("multi-branch");
+			await seedCommits(provider, "multi-branch", {
+				"a.txt": "a\n",
+			});
+
+			const repoPath = join(tmpDir, "multi-branch");
+			await execa("git", ["--git-dir", repoPath, "branch", "feature-b"]);
+
+			const branches = await provider.listBranches("multi-branch");
+
+			const names = branches.map((b) => b.name).sort();
+			expect(names).toContain("feature-b");
+			expect(branches.filter((b) => b.isHead)).toHaveLength(1);
+		});
+
+		it("returns empty array for a repository without commits", async () => {
+			await provider.init("empty-branches");
+			const branches = await provider.listBranches("empty-branches");
+
+			expect(branches).toEqual([]);
+		});
+
+		it("throws for non-existent repository", async () => {
+			await expect(provider.listBranches("no-such-repo")).rejects.toThrow(
+				/not found/,
+			);
+		});
+	});
+
+	describe("listCommits", () => {
+		it("returns commits in reverse chronological order", async () => {
+			await provider.init("log-repo");
+			await seedCommits(provider, "log-repo", {
+				"first.txt": "first\n",
+			});
+			await seedCommits(provider, "log-repo", {
+				"second.txt": "second\n",
+			});
+
+			const commits = await provider.listCommits("log-repo");
+
+			expect(commits.length).toBe(2);
+			expect(commits[0].authoredAt.getTime()).toBeGreaterThanOrEqual(
+				commits[1].authoredAt.getTime(),
+			);
+		});
+
+		it("returns commit with proper fields", async () => {
+			await provider.init("fields-repo");
+			await seedCommits(provider, "fields-repo", {
+				"test.txt": "content\n",
+			});
+
+			const [commit] = await provider.listCommits("fields-repo", {
+				limit: 1,
+			});
+
+			expect(commit).toBeDefined();
+			expect(commit.sha).toMatch(/^[0-9a-f]{40}$/);
+			expect(commit.shortSha).toMatch(/^[0-9a-f]{7,}$/);
+			expect(commit.authorName).toBe("test");
+			expect(commit.authorEmail).toBe("test@example.com");
+			expect(commit.authoredAt).toBeInstanceOf(Date);
+			expect(commit.committedAt).toBeInstanceOf(Date);
+			expect(commit.subject).toBe("seed");
+		});
+
+		it("respects the limit option", async () => {
+			await provider.init("limit-repo");
+			await seedCommits(provider, "limit-repo", { "a.txt": "a\n" });
+			await seedCommits(provider, "limit-repo", { "b.txt": "b\n" });
+			await seedCommits(provider, "limit-repo", { "c.txt": "c\n" });
+
+			const two = await provider.listCommits("limit-repo", { limit: 2 });
+
+			expect(two).toHaveLength(2);
+		});
+
+		it("returns empty array for a repository without commits", async () => {
+			await provider.init("empty-log");
+			const commits = await provider.listCommits("empty-log");
+
+			expect(commits).toEqual([]);
+		});
+
+		it("throws for non-existent repository", async () => {
+			await expect(provider.listCommits("no-such-repo")).rejects.toThrow(
+				/not found/,
+			);
+		});
+	});
+
+	describe("countCommits", () => {
+		it("returns the correct commit count", async () => {
+			await provider.init("count-repo");
+			await seedCommits(provider, "count-repo", { "a.txt": "a\n" });
+			await seedCommits(provider, "count-repo", { "b.txt": "b\n" });
+			await seedCommits(provider, "count-repo", { "c.txt": "c\n" });
+
+			const count = await provider.countCommits("count-repo");
+
+			expect(count).toBe(3);
+		});
+
+		it("returns 0 for a repository without commits", async () => {
+			await provider.init("empty-count");
+			const count = await provider.countCommits("empty-count");
+
+			expect(count).toBe(0);
+		});
+
+		it("throws for non-existent repository", async () => {
+			await expect(provider.countCommits("no-such-repo")).rejects.toThrow(
+				/not found/,
+			);
+		});
+	});
+
 	describe("advertiseRefs", () => {
 		it("returns ref advertisement for a repo with commits", async () => {
 			await provider.init("pull-repo");

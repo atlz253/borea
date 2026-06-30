@@ -5,8 +5,11 @@ import { Readable } from "node:stream";
 import { type ExecaError, execa } from "execa";
 import { getConfig } from "#/platform/config";
 import type {
+	BranchInfo,
+	CommitInfo,
 	GitProvider,
 	GitService,
+	ListCommitsOptions,
 	ListFilesOptions,
 	RepositoryInfo,
 	TreeEntry,
@@ -23,6 +26,8 @@ const DEFAULT_REF = "HEAD";
 const LS_TREE_SEPARATOR = "\t";
 const SIZE_PLACEHOLDER = "-";
 const LS_TREE_MIN_PARTS = 4;
+const DEFAULT_LOG_LIMIT = 100;
+const LOG_FORMAT = "%H%x00%h%x00%an%x00%ae%x00%aI%x00%cI%x00%s";
 
 export class CliGitProvider implements GitProvider {
 	private readonly storagePath: string;
@@ -126,6 +131,100 @@ export class CliGitProvider implements GitProvider {
 		}
 
 		return this.parseLsTree(output);
+	}
+
+	async listBranches(name: string): Promise<BranchInfo[]> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		try {
+			const { stdout } = await execa(this.gitBin, [
+				"--git-dir",
+				repoPath,
+				"for-each-ref",
+				"--format=%(refname:short)%00%(HEAD)",
+				"refs/heads",
+			]);
+
+			if (!stdout) return [];
+
+			return stdout
+				.split("\n")
+				.filter((line) => line.length > 0)
+				.map((line) => {
+					const [branchName, headMarker] = line.split("\0");
+					return { name: branchName, isHead: headMarker === "*" };
+				});
+		} catch {
+			return [];
+		}
+	}
+
+	async listCommits(
+		name: string,
+		options?: ListCommitsOptions,
+	): Promise<CommitInfo[]> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		const ref = options?.ref ?? DEFAULT_REF;
+		const limit = options?.limit ?? DEFAULT_LOG_LIMIT;
+
+		if (!(await this.refExists(repoPath, ref))) {
+			return [];
+		}
+
+		try {
+			const { stdout } = await execa(this.gitBin, [
+				"--git-dir",
+				repoPath,
+				"log",
+				`--pretty=format:${LOG_FORMAT}`,
+				"-n",
+				String(limit),
+				ref,
+			]);
+
+			return this.parseLogOutput(stdout);
+		} catch {
+			return [];
+		}
+	}
+
+	async countCommits(name: string, ref?: string): Promise<number> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		const resolvedRef = ref ?? DEFAULT_REF;
+
+		if (!(await this.refExists(repoPath, resolvedRef))) {
+			return 0;
+		}
+
+		try {
+			const { stdout } = await execa(this.gitBin, [
+				"--git-dir",
+				repoPath,
+				"rev-list",
+				"--count",
+				resolvedRef,
+			]);
+			return Number.parseInt(stdout.trim(), 10);
+		} catch {
+			return 0;
+		}
 	}
 
 	async advertiseRefs(
@@ -272,6 +371,34 @@ export class CliGitProvider implements GitProvider {
 				throw new Error("Path cannot contain parent-directory segments");
 			}
 		}
+	}
+
+	private parseLogOutput(stdout: string): CommitInfo[] {
+		if (!stdout) return [];
+
+		return stdout
+			.split("\n")
+			.filter((line) => line.length > 0)
+			.map((line) => {
+				const [
+					sha,
+					shortSha,
+					authorName,
+					authorEmail,
+					authoredAt,
+					committedAt,
+					subject,
+				] = line.split("\0");
+				return {
+					sha,
+					shortSha,
+					authorName,
+					authorEmail,
+					authoredAt: new Date(authoredAt),
+					committedAt: new Date(committedAt),
+					subject,
+				};
+			});
 	}
 
 	private async getInfo(

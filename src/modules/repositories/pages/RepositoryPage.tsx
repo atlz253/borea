@@ -9,6 +9,7 @@ import {
 } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
+import CommitCountLink from "../components/CommitCountLink";
 import FileList from "../components/FileList";
 import GitCloneInfo from "../components/GitCloneInfo";
 import type { TreeEntry } from "../schemas";
@@ -17,6 +18,8 @@ interface RepositoryPageProps {
 	name: string;
 	path: string;
 	entries: TreeEntry[];
+	commitCount: number;
+	activeBranch?: string;
 }
 
 const LINK_STYLE = {
@@ -36,6 +39,8 @@ export default function RepositoryPage({
 	name,
 	path,
 	entries,
+	commitCount,
+	activeBranch,
 }: RepositoryPageProps) {
 	const segments = pathSegments(path);
 	const isEmpty = entries.length === 0;
@@ -68,7 +73,16 @@ export default function RepositoryPage({
 			</Title>
 
 			<Stack mb="lg">
-				<GitCloneInfo name={name} />
+				<Group justify="space-between" align="center">
+					<GitCloneInfo name={name} />
+					{activeBranch && commitCount > 0 && (
+						<CommitCountLink
+							repoName={name}
+							count={commitCount}
+							branchName={activeBranch}
+						/>
+					)}
+				</Group>
 			</Stack>
 
 			{segments.length > 0 && (
