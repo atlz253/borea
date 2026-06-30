@@ -4,6 +4,11 @@
     "context7": {
       "type": "remote",
       "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "mantine": {
+      "type": "local",
+      "command": ["npx", "-y", "@mantine/mcp-server"],
       "enabled": true,
     }
   }

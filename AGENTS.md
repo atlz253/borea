@@ -13,8 +13,9 @@ Nirvana is an open-source software development workspace (analogue of JetBrains 
 
 - **Full-stack framework:** TanStack Start (RC) on Nitro
 - **Routing:** TanStack Router, file-based (`src/routes/`)
-- **UI:** React 19 + Tailwind CSS v4
+- **UI:** React 19 + Mantine v9
 - **Build:** Vite 8
+- **Styling:** Mantine (CSS layers, style props, CSS variables) — no Tailwind
 - **Lint/format:** Biome 2
 - **Tests:** Vitest 4 + Testing Library + jsdom; E2E via Playwright 1 (`tests/e2e/`, `playwright.config.ts`)
 - **Language:** TypeScript, strict mode, `verbatimModuleSyntax`
@@ -41,9 +42,10 @@ npm run build       # Production build → dist/
 ## Code Conventions
 
 - **Formatting:** tabs for indentation, double quotes for strings (enforced by Biome). Do not reformat files outside the Biome `files.includes` set.
-- **Files Biome ignores:** `src/routeTree.gen.ts` (generated) and `src/styles.css`.
+- **Files Biome ignores:** `src/routeTree.gen.ts` (generated).
 - **Imports:** use the path aliases `#/*` or `@/*` (both map to `./src/*`). Run "organize imports" on save.
 - **Module boundaries:** cross-module imports must go through the barrel (`index.ts`). Deep imports into internal module subpaths are forbidden by Biome `style/noRestrictedImports`. See ADR 0003.
+- **Mantine imports:** import Mantine components from `@mantine/core`, hooks from `@mantine/hooks`, code highlighting from `@mantine/code-highlight`. Import Mantine CSS via side-effect: `import '@mantine/core/styles.css'` in root layout.
 - **No comments** unless explicitly requested by the user.
 - **Routing:** file-based — add a new route by creating a file in `src/routes/`; the route tree is auto-generated into `src/routeTree.gen.ts` (never edit by hand).
 - **Routes are thin:** route files in `src/routes/` should only contain `createFileRoute`, a loader, and rendering of a page component imported from `src/modules/<domain>/pages/`. Domain logic belongs in modules, not routes.
@@ -65,8 +67,8 @@ npm run build       # Production build → dist/
 | `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
 | `src/routes/api/` | Server routes for REST API and Git HTTP — delegates to module services |
 | `src/components/` | Shared presentational components |
-| `src/styles.css` | Global styles + CSS custom-property theme tokens (light/dark) |
-| `vite.config.ts` | Vite plugins: devtools, nitro, tailwindcss, tanstackStart, react |
+| `src/theme.ts` | Mantine theme customization (default: neutral dev-tool palette) |
+| `vite.config.ts` | Vite plugins: devtools, nitro, tanstackStart, react |
 | `biome.json` | Linter/formatter configuration |
 | `tsconfig.json` | TypeScript config (strict, `noEmit`, bundler resolution) |
 
@@ -89,6 +91,12 @@ Before marking a change complete:
 4. `npm run test:e2e` passes (add or update E2E tests per §10.3).
 5. If routes were added/removed, `src/routeTree.gen.ts` is regenerated.
 6. No secrets, keys, or credentials committed.
+
+<!-- mantine -->
+Use Mantine MCP (`list_items`, `get_item_doc`, `get_item_props`, `search_docs`) for Mantine-specific questions: component props, theming API, available components, usage examples. Prefer this over Context7 for Mantine queries — it draws from the authoritative `mantine.dev` source.
+
+For all other libraries (TanStack, Vitest, Playwright, etc.), use Context7.
+<!-- mantine -->
 
 <!-- context7 -->
 Use Context7 MCP to fetch current documentation whenever the user asks about a library, framework, SDK, API, CLI tool, or cloud service -- even well-known ones like React, Next.js, Prisma, Express, Tailwind, Django, or Spring Boot. This includes API syntax, configuration, version migration, library-specific debugging, setup instructions, and CLI tool usage. Use even when you think you know the answer -- your training data may not reflect recent changes. Prefer this over web search for library docs.
