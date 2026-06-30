@@ -40,12 +40,12 @@ export default function PullRequestsListPage({
 						borderRadius: "var(--mantine-radius-md)",
 					}}
 				>
-					<Text c="dimmed" size="sm">
-						<Group gap="xs" justify="center">
-							<GitPullRequest size={20} />
-							<span>No pull requests yet.</span>
-						</Group>
-					</Text>
+					<Group gap="xs" justify="center" c="dimmed">
+						<GitPullRequest size={20} />
+						<Text size="sm" span c="dimmed">
+							No pull requests yet.
+						</Text>
+					</Group>
 				</Group>
 			) : (
 				<PullRequestList repoName={repoName} pullRequests={pullRequests} />
