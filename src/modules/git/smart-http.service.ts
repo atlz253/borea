@@ -51,6 +51,14 @@ export function parseSmartHttpPath(
 		};
 	}
 
+	if (endpoint === "git-receive-pack") {
+		return {
+			repoName,
+			endpoint: "git-receive-pack",
+			service: "git-receive-pack",
+		};
+	}
+
 	return { repoName, endpoint: "unknown", service: "git-upload-pack" };
 }
 

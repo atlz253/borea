@@ -22,7 +22,8 @@ export const Route = createFileRoute("/api/git/$")({
 
 				if (
 					parsed.endpoint !== "info/refs" ||
-					parsed.service !== "git-upload-pack"
+					(parsed.service !== "git-upload-pack" &&
+						parsed.service !== "git-receive-pack")
 				) {
 					return new Response("Not Found", { status: 404 });
 				}
@@ -55,8 +56,8 @@ export const Route = createFileRoute("/api/git/$")({
 				);
 
 				if (
-					parsed.endpoint !== "git-upload-pack" ||
-					parsed.service !== "git-upload-pack"
+					parsed.endpoint !== "git-upload-pack" &&
+					parsed.endpoint !== "git-receive-pack"
 				) {
 					return new Response("Not Found", { status: 404 });
 				}

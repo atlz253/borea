@@ -1,12 +1,17 @@
 import { ActionIcon, CopyButton, TextInput, Tooltip } from "@mantine/core";
 import { Check, Copy } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface GitCloneInfoProps {
 	name: string;
 }
 
 export default function GitCloneInfo({ name }: GitCloneInfoProps) {
-	const cloneUrl = `${window.location.origin}/api/git/${name}.git`;
+	const [cloneUrl, setCloneUrl] = useState(`/api/git/${name}.git`);
+
+	useEffect(() => {
+		setCloneUrl(`${window.location.origin}/api/git/${name}.git`);
+	}, [name]);
 
 	return (
 		<TextInput

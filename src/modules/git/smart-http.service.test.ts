@@ -35,6 +35,16 @@ describe("parseSmartHttpPath", () => {
 		expect(result.service).toBe("git-upload-pack");
 	});
 
+	it("parses git-receive-pack endpoint", () => {
+		const result = parseSmartHttpPath(
+			"myrepo.git/git-receive-pack",
+			new URLSearchParams(),
+		);
+		expect(result.repoName).toBe("myrepo");
+		expect(result.endpoint).toBe("git-receive-pack");
+		expect(result.service).toBe("git-receive-pack");
+	});
+
 	it("defaults to git-upload-pack for info/refs without service param", () => {
 		const result = parseSmartHttpPath(
 			"repo.git/info/refs",
