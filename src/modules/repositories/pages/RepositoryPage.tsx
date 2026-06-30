@@ -9,6 +9,8 @@ import {
 } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
+import type { BranchInfo } from "#/modules/git";
+import BranchSwitcher from "../components/BranchSwitcher";
 import CommitCountLink from "../components/CommitCountLink";
 import FileList from "../components/FileList";
 import GitCloneInfo from "../components/GitCloneInfo";
@@ -19,7 +21,8 @@ interface RepositoryPageProps {
 	path: string;
 	entries: TreeEntry[];
 	commitCount: number;
-	activeBranch?: string;
+	branches: BranchInfo[];
+	selectedBranch: string;
 }
 
 const LINK_STYLE = {
@@ -40,16 +43,19 @@ export default function RepositoryPage({
 	path,
 	entries,
 	commitCount,
-	activeBranch,
+	branches,
+	selectedBranch,
 }: RepositoryPageProps) {
 	const segments = pathSegments(path);
 	const isEmpty = entries.length === 0;
 
+	const encodedBranch = encodeURIComponent(selectedBranch);
+
 	const breadcrumbItems = [
 		<Link
 			key="root"
-			to="/repositories/$name"
-			params={{ name }}
+			to="/repositories/$name/tree/$branch"
+			params={{ name, branch: encodedBranch }}
 			style={LINK_STYLE}
 		>
 			{name}
@@ -57,8 +63,12 @@ export default function RepositoryPage({
 		...segments.map((seg, i) => (
 			<Link
 				key={accumulatePath(segments, i)}
-				to="/repositories/$name/tree/$"
-				params={{ name, _splat: accumulatePath(segments, i) }}
+				to="/repositories/$name/tree/$branch/$"
+				params={{
+					name,
+					branch: encodedBranch,
+					_splat: accumulatePath(segments, i),
+				}}
 				style={LINK_STYLE}
 			>
 				{seg}
@@ -75,13 +85,23 @@ export default function RepositoryPage({
 			<Stack mb="lg">
 				<Group justify="space-between" align="center">
 					<GitCloneInfo name={name} />
-					{activeBranch && commitCount > 0 && (
-						<CommitCountLink
-							repoName={name}
-							count={commitCount}
-							branchName={activeBranch}
-						/>
-					)}
+					<Group gap="xs">
+						{branches.length > 1 && (
+							<BranchSwitcher
+								repoName={name}
+								branches={branches}
+								selectedBranch={selectedBranch}
+								currentTreePath={path || undefined}
+							/>
+						)}
+						{commitCount > 0 && (
+							<CommitCountLink
+								repoName={name}
+								count={commitCount}
+								branchName={selectedBranch}
+							/>
+						)}
+					</Group>
 				</Group>
 			</Stack>
 
@@ -108,7 +128,12 @@ export default function RepositoryPage({
 					</Text>
 				</Box>
 			) : (
-				<FileList entries={entries} repoName={name} currentPath={path} />
+				<FileList
+					entries={entries}
+					repoName={name}
+					currentPath={path}
+					branch={selectedBranch}
+				/>
 			)}
 		</Container>
 	);

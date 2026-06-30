@@ -57,17 +57,18 @@ export const repoPathSchema = z
 		"Path must be relative without leading or trailing slashes",
 	);
 
-export const listFilesSchema = z.object({
-	name: repoNameSchema,
-	path: repoPathSchema.optional(),
-});
-
-const MAX_COMMIT_LIMIT = 500;
-
 export const refSchema = z
 	.string()
 	.max(MAX_PATH_LENGTH)
 	.refine((p) => !p.includes("\0"), "Ref cannot contain null bytes");
+
+export const listFilesSchema = z.object({
+	name: repoNameSchema,
+	path: repoPathSchema.optional(),
+	ref: refSchema.optional(),
+});
+
+const MAX_COMMIT_LIMIT = 500;
 
 export const listCommitsSchema = z.object({
 	name: repoNameSchema,

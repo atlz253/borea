@@ -31,7 +31,7 @@ export const createRepositoryFn = createServerFn({ method: "POST" })
 export const listRepositoryFilesFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => listFilesSchema.parse(data))
 	.handler(async ({ data }) => {
-		return listRepositoryFiles(gitProvider, data.name, data.path);
+		return listRepositoryFiles(gitProvider, data.name, data.path, data.ref);
 	});
 
 export const listBranchesFn = createServerFn({ method: "GET" })

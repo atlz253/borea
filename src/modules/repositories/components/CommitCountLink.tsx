@@ -16,14 +16,15 @@ interface CommitCountLinkProps {
 export default function CommitCountLink({
 	repoName,
 	count,
-	branchName: _branchName,
+	branchName,
 }: CommitCountLinkProps) {
 	const label = count === 1 ? "1 commit" : `${count} commits`;
+	const encodedBranch = encodeURIComponent(branchName);
 
 	return (
 		<Link
-			to="/repositories/$name/commits"
-			params={{ name: repoName }}
+			to="/repositories/$name/tree/$branch/commits"
+			params={{ name: repoName, branch: encodedBranch }}
 			style={LINK_STYLE}
 		>
 			<Group gap={4}>

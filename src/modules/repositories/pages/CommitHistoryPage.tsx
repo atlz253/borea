@@ -11,11 +11,13 @@ import {
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, GitCommitHorizontal } from "lucide-react";
 import type { BranchInfo, CommitInfo } from "#/modules/git";
+import BranchSwitcher from "../components/BranchSwitcher";
 
 interface CommitHistoryPageProps {
 	name: string;
 	commits: CommitInfo[];
 	branches: BranchInfo[];
+	selectedBranch: string;
 }
 
 function formatDate(date: Date): string {
@@ -32,15 +34,16 @@ export default function CommitHistoryPage({
 	name,
 	commits,
 	branches,
+	selectedBranch,
 }: CommitHistoryPageProps) {
-	const activeBranch = branches.find((b) => b.isHead);
+	const encodedBranch = encodeURIComponent(selectedBranch);
 
 	return (
 		<Container size="lg" py="xl">
 			<Group mb="md">
 				<Link
-					to="/repositories/$name"
-					params={{ name }}
+					to="/repositories/$name/tree/$branch"
+					params={{ name, branch: encodedBranch }}
 					style={{
 						color: "var(--mantine-color-anchor-color)",
 						textDecoration: "none",
@@ -54,12 +57,18 @@ export default function CommitHistoryPage({
 			</Group>
 
 			<Stack gap={0} mb="lg">
-				<Title order={1}>Commits</Title>
-				{activeBranch && (
-					<Text size="sm" c="dimmed">
-						in {activeBranch.name}
-					</Text>
-				)}
+				<Group justify="space-between" align="flex-end">
+					<Title order={1}>Commits</Title>
+					<BranchSwitcher
+						repoName={name}
+						branches={branches}
+						selectedBranch={selectedBranch}
+						toCommits
+					/>
+				</Group>
+				<Text size="sm" c="dimmed">
+					in {selectedBranch}
+				</Text>
 			</Stack>
 
 			{commits.length === 0 ? (

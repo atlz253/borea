@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
-	countCommitsFn,
 	listBranchesFn,
 	listRepositoryFilesFn,
 	RepositoryError,
@@ -8,26 +7,41 @@ import {
 } from "#/modules/repositories";
 
 export const Route = createFileRoute("/repositories/$name/")({
-	loader: ({ params }) =>
-		Promise.all([
-			listRepositoryFilesFn({ data: { name: params.name } }),
-			countCommitsFn({ data: { name: params.name } }),
-			listBranchesFn({ data: { name: params.name } }),
-		]).then(([entries, commitCount, branches]) => ({
-			entries,
-			commitCount,
-			activeBranch: branches.find((b: { isHead: boolean }) => b.isHead)?.name,
-		})),
+	loader: async ({ params }) => {
+		const branches = await listBranchesFn({
+			data: { name: params.name },
+		});
+		const defaultBranch = branches.find(
+			(b: { isHead: boolean }) => b.isHead,
+		)?.name;
+
+		if (!defaultBranch) {
+			const entries = await listRepositoryFilesFn({
+				data: { name: params.name },
+			});
+			return { entries, commitCount: 0, branches: [], selectedBranch: "" };
+		}
+
+		throw redirect({
+			to: "/repositories/$name/tree/$branch",
+			params: {
+				name: params.name,
+				branch: encodeURIComponent(defaultBranch),
+			},
+		});
+	},
 	component: () => {
 		const { name } = Route.useParams();
-		const { entries, commitCount, activeBranch } = Route.useLoaderData();
+		const { entries, commitCount, branches, selectedBranch } =
+			Route.useLoaderData();
 		return (
 			<RepositoryPage
 				name={name}
 				path=""
 				entries={entries}
 				commitCount={commitCount}
-				activeBranch={activeBranch}
+				branches={branches}
+				selectedBranch={selectedBranch}
 			/>
 		);
 	},

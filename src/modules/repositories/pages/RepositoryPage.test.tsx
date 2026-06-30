@@ -1,8 +1,11 @@
 import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { BranchInfo } from "#/modules/git";
 import type { TreeEntry } from "../schemas";
 import RepositoryPage from "./RepositoryPage";
+
+const navigateFn = vi.fn();
 
 vi.mock("@tanstack/react-router", () => ({
 	Link: ({
@@ -12,11 +15,22 @@ vi.mock("@tanstack/react-router", () => ({
 		children: React.ReactNode;
 		params: Record<string, string>;
 	}) => (
-		<a href="/test" data-name={params.name} data-splat={params._splat}>
+		<a
+			href="/test"
+			data-name={params.name}
+			data-branch={params.branch}
+			data-splat={params._splat}
+		>
 			{children}
 		</a>
 	),
+	useNavigate: () => navigateFn,
 }));
+
+const branches: BranchInfo[] = [
+	{ name: "main", isHead: true },
+	{ name: "develop", isHead: false },
+];
 
 function renderPage(props: Partial<Parameters<typeof RepositoryPage>[0]> = {}) {
 	return render(
@@ -26,6 +40,8 @@ function renderPage(props: Partial<Parameters<typeof RepositoryPage>[0]> = {}) {
 				path=""
 				entries={[]}
 				commitCount={0}
+				branches={branches}
+				selectedBranch="main"
 				{...props}
 			/>
 		</MantineProvider>,
@@ -74,5 +90,11 @@ describe("RepositoryPage", () => {
 
 		expect(screen.getByText("src")).toBeInTheDocument();
 		expect(screen.getByText("components")).toBeInTheDocument();
+	});
+
+	it("renders branch switcher with selected branch", () => {
+		renderPage();
+
+		expect(screen.getByText("main")).toBeInTheDocument();
 	});
 });

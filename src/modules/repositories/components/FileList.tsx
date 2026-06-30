@@ -7,6 +7,7 @@ interface FileListProps {
 	entries: TreeEntry[];
 	repoName: string;
 	currentPath: string;
+	branch: string;
 }
 
 const BYTES_PER_KB = 1024;
@@ -40,15 +41,17 @@ function sortEntries(entries: TreeEntry[]): TreeEntry[] {
 	});
 }
 
-function parentDirLink(repoName: string, currentPath: string) {
+function parentDirLink(repoName: string, currentPath: string, branch: string) {
 	if (currentPath.length === 0) return null;
 
 	const slashIndex = currentPath.lastIndexOf("/");
+	const encodedBranch = encodeURIComponent(branch);
+
 	if (slashIndex === -1) {
 		return (
 			<Link
-				to="/repositories/$name"
-				params={{ name: repoName }}
+				to="/repositories/$name/tree/$branch"
+				params={{ name: repoName, branch: encodedBranch }}
 				style={LINK_STYLE}
 			>
 				<Group gap="xs">
@@ -61,8 +64,12 @@ function parentDirLink(repoName: string, currentPath: string) {
 
 	return (
 		<Link
-			to="/repositories/$name/tree/$"
-			params={{ name: repoName, _splat: currentPath.slice(0, slashIndex) }}
+			to="/repositories/$name/tree/$branch/$"
+			params={{
+				name: repoName,
+				branch: encodedBranch,
+				_splat: currentPath.slice(0, slashIndex),
+			}}
 			style={LINK_STYLE}
 		>
 			<Group gap="xs">
@@ -77,12 +84,14 @@ export default function FileList({
 	entries,
 	repoName,
 	currentPath,
+	branch,
 }: FileListProps) {
 	const sorted = sortEntries(entries);
+	const encodedBranch = encodeURIComponent(branch);
 
 	const rows = [];
 
-	const parentLink = parentDirLink(repoName, currentPath);
+	const parentLink = parentDirLink(repoName, currentPath, branch);
 	if (parentLink) {
 		rows.push(
 			<Table.Tr key="..">
@@ -100,8 +109,12 @@ export default function FileList({
 
 		const nameCell = isTree ? (
 			<Link
-				to="/repositories/$name/tree/$"
-				params={{ name: repoName, _splat: childPath(currentPath, entry.name) }}
+				to="/repositories/$name/tree/$branch/$"
+				params={{
+					name: repoName,
+					branch: encodedBranch,
+					_splat: childPath(currentPath, entry.name),
+				}}
 				style={LINK_STYLE}
 			>
 				<Group gap="xs">

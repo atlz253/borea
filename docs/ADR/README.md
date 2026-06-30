@@ -13,6 +13,7 @@ This directory contains Architecture Decision Records (ADRs) for Nirvana. Each A
 | 0007 | [Git Smart-HTTP Pull](0007-git-smart-http-pull.md) | Manual `git-upload-pack --stateless-rpc` for clone/fetch |
 | 0008 | [Git Smart-HTTP Push](0008-git-smart-http-push.md) | Manual `git-receive-pack --stateless-rpc` for push |
 | 0009 | [Commit History](0009-commit-history.md) | GitProvider extension for listing branches, commits, and counting commits |
+| 0010 | [Repository Branch URLs](0010-repository-branch-urls.md) | Path-segment branch under /tree/$branch, redirect from repo root |
 
 ## Adding a New ADR
 

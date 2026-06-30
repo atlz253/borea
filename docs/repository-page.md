@@ -22,11 +22,17 @@ After creation, the new repository appears in the list.
 
 ## Repository Page
 
-Opening a repository (`/repositories/<name>`) brings you to its main page.
+Opening a repository (`/repositories/<name>`) brings you to its main page. If the repository has commits, you are redirected to `/repositories/<name>/tree/<defaultBranch>`.
+
+### Branch Switcher
+
+At the top of the page, next to the clone URL, you'll find the **branch switcher** — a button showing the current branch name (e.g., `main`). Click it to open a dropdown with all available branches. Select any branch to switch to it — the URL updates and the file tree shows that branch's contents.
+
+Branch names containing `/` (e.g., `feature/logout`) are URL-encoded as `%2F` in the address bar.
 
 ### Clone URL
 
-At the top you'll find the **"Git pull URL"** field with the address for cloning the repository over HTTP. Click the copy button to copy it, then use it in your terminal:
+You'll find the **"Git pull URL"** field with the address for cloning the repository over HTTP. Click the copy button to copy it, then use it in your terminal:
 
 ```bash
 git clone http://localhost:3000/api/git/my-project.git
@@ -36,7 +42,7 @@ See [Working with Repositories via HTTP](git-http.md) for detailed instructions.
 
 ### Commit Count
 
-If the repository has commits, you'll see a **"N commits"** link next to the clone URL. Click it to view the commit history.
+If the repository has commits, you'll see a **"N commits"** link next to the clone URL. Click it to view the commit history for the current branch.
 
 ### File Browser
 
@@ -57,16 +63,16 @@ Push your first commit to make the file browser appear.
 
 ## Commit History
 
-Navigate to `/repositories/<name>/commits` to see the commit history.
+Navigate to `/repositories/<name>/tree/<branch>/commits` to see the commit history.
 
-- Click **"← Back to repository"** to return to the main repository page.
-- The active branch name is shown below the page title.
+- Click **"← Back to repository"** to return to the main repository page for the same branch.
+- The branch switcher is available at the top, so you can switch branches without leaving the commit history page.
 - Each commit in the table shows:
   - **Short hash** (e.g., `a1b2c3d`)
   - **Author** name
   - **Date** of the commit
   - **Message** (commit subject, up to two lines)
-- If no commits exist, you'll see "No commits yet. This branch has no commits."
+- If no commits exist on the selected branch, you'll see "No commits yet. This branch has no commits."
 
 ## Tips
 

@@ -1,3 +1,4 @@
+export { default as BranchSwitcher } from "./components/BranchSwitcher";
 export { default as FileList } from "./components/FileList";
 export { default as RepositoryError } from "./components/RepositoryError";
 export { default as CommitHistoryPage } from "./pages/CommitHistoryPage";

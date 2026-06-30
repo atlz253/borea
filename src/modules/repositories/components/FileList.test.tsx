@@ -12,7 +12,12 @@ vi.mock("@tanstack/react-router", () => ({
 		children: React.ReactNode;
 		params: Record<string, string>;
 	}) => (
-		<a href="/test" data-name={params.name} data-splat={params._splat}>
+		<a
+			href="/test"
+			data-name={params.name}
+			data-branch={params.branch}
+			data-splat={params._splat}
+		>
 			{children}
 		</a>
 	),
@@ -32,6 +37,7 @@ function renderList(props: Partial<Parameters<typeof FileList>[0]> = {}) {
 				entries={entries}
 				repoName="my-repo"
 				currentPath=""
+				branch="main"
 				{...props}
 			/>
 		</MantineProvider>,
@@ -48,12 +54,13 @@ describe("FileList", () => {
 		expect(screen.getByText("package.json")).toBeInTheDocument();
 	});
 
-	it("renders directories as links with correct splat param", () => {
+	it("renders directories as links with correct splat and branch params", () => {
 		renderList();
 
 		const srcLink = screen.getByText("src").closest("a");
 		expect(srcLink).not.toBeNull();
 		expect(srcLink?.getAttribute("data-splat")).toBe("src");
+		expect(srcLink?.getAttribute("data-branch")).toBe("main");
 	});
 
 	it("builds nested splat path from currentPath", () => {

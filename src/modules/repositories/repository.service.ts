@@ -23,11 +23,12 @@ export async function listRepositoryFiles(
 	gitProvider: GitProvider,
 	name: string,
 	path?: string,
+	ref?: string,
 ): Promise<TreeEntry[]> {
 	if (!(await gitProvider.exists(name))) {
 		throw new Error(`Repository "${name}" not found`);
 	}
-	return gitProvider.listFiles(name, { path });
+	return gitProvider.listFiles(name, { path, ref });
 }
 
 export async function listRepositoryBranches(
