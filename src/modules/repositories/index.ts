@@ -4,7 +4,7 @@ export { default as RepositoryError } from "./components/RepositoryError";
 export { default as CommitHistoryPage } from "./pages/CommitHistoryPage";
 export { default as RepositoriesPage } from "./pages/RepositoriesPage";
 export { default as RepositoryPage } from "./pages/RepositoryPage";
-export type { TreeEntry, TreeEntryType } from "./schemas";
+export type { Repository, TreeEntry, TreeEntryType } from "./schemas";
 export {
 	countCommitsFn,
 	createBranchFn,
