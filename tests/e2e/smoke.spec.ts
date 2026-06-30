@@ -1,21 +1,31 @@
 import { expect, test } from "@playwright/test";
 
-test("home page renders the main heading", async ({ page }) => {
+test("home page redirects to repositories", async ({ page }) => {
 	await page.goto("/");
+	await expect(page).toHaveURL("/repositories");
+});
+
+test("repositories page renders its heading", async ({ page }) => {
+	await page.goto("/repositories");
 	await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-		"Start simple, ship quickly.",
+		"Repositories",
 	);
 });
 
-test("about page renders its heading", async ({ page }) => {
-	await page.goto("/about");
-	await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-		"A small starter with room to grow.",
-	);
+test("sidebar navigation links to repositories page", async ({ page }) => {
+	await page.goto("/");
+	await page.getByRole("link", { name: "Repositories" }).click();
+	await expect(page).toHaveURL("/repositories");
 });
 
-test("navigation link goes to about page", async ({ page }) => {
-	await page.goto("/");
-	await page.getByRole("link", { name: "About This Starter" }).click();
-	await expect(page).toHaveURL("/about");
+test("header renders logo and theme toggle", async ({ page }) => {
+	await page.goto("/repositories");
+
+	await expect(page.getByRole("link", { name: "Nirvana" })).toHaveAttribute(
+		"href",
+		"/",
+	);
+	await expect(
+		page.getByRole("button", { name: /theme|auto|light|dark/i }),
+	).toBeVisible();
 });

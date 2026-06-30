@@ -11,15 +11,7 @@ export default function Footer() {
 				</Text>
 				<Group gap="md">
 					<Anchor
-						href="https://x.com/tan_stack"
-						target="_blank"
-						rel="noreferrer"
-						size="sm"
-					>
-						X (Twitter)
-					</Anchor>
-					<Anchor
-						href="https://github.com/TanStack"
+						href="https://github.com/nirvana"
 						target="_blank"
 						rel="noreferrer"
 						size="sm"

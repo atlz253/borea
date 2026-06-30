@@ -7,8 +7,7 @@ import {
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
+import AppShellLayout from "../components/AppShellLayout";
 import { theme } from "../theme";
 
 export const Route = createRootRoute({
@@ -50,9 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					defaultColorScheme="auto"
 					deduplicateInlineStyles
 				>
-					<Header />
-					{children}
-					<Footer />
+					<AppShellLayout>{children}</AppShellLayout>
 				</MantineProvider>
 				<TanStackDevtools
 					config={{ position: "bottom-right" }}

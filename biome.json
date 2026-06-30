@@ -31,6 +31,7 @@
 		"rules": {
 			"recommended": true,
 			"style": {
+				"noMagicNumbers": "error",
 				"noRestrictedImports": {
 					"level": "error",
 					"options": {
@@ -66,6 +67,7 @@
 			"linter": {
 				"rules": {
 					"style": {
+						"noMagicNumbers": "off",
 						"noRestrictedImports": "off"
 					}
 				}
