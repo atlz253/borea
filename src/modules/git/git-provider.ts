@@ -40,6 +40,22 @@ export interface ListCommitsOptions {
 	limit?: number;
 }
 
+export interface MergeStatus {
+	conflicts: boolean;
+	fastForward: boolean;
+	conflictingFiles: string[];
+}
+
+export interface MergeOptions {
+	fastForward?: boolean;
+	message?: string;
+}
+
+export interface MergeResult {
+	mergedSha: string;
+	fastForward: boolean;
+}
+
 export interface GitProvider {
 	init(name: string, description?: string): Promise<RepositoryInfo>;
 	list(): Promise<RepositoryInfo[]>;
@@ -65,4 +81,11 @@ export interface GitProvider {
 		options?: ListCommitsOptions,
 	): Promise<CommitInfo[]>;
 	countCommits(name: string, ref?: string): Promise<number>;
+	canMerge(name: string, head: string, base: string): Promise<MergeStatus>;
+	mergeBranch(
+		name: string,
+		head: string,
+		base: string,
+		options?: MergeOptions,
+	): Promise<MergeResult>;
 }

@@ -87,6 +87,37 @@ Navigate to `/repositories/<name>/tree/<branch>/commits` to see the commit histo
   - **Message** (commit subject, up to two lines)
 - If no commits exist on the selected branch, you'll see "No commits yet. This branch has no commits."
 
+## Pull Requests
+
+Each repository page has a **"Pull requests"** tab in the navigation bar next to the **"Code"** tab.
+
+### Creating a Pull Request
+
+1. Click the **"Pull requests"** tab, then click **"New pull request"**.
+2. Fill in the form:
+   - **Title** — a short description of the change.
+   - **Source branch** — the branch containing your changes.
+   - **Target branch** — the branch you want to merge into (default: the repository's default branch).
+3. Click **"Create pull request"**.
+
+You are redirected to the pull request detail page.
+
+### Merging a Pull Request
+
+On the pull request detail page:
+
+- If there are no conflicts, the **"Merge"** button is enabled.
+- If a fast-forward merge is possible, you'll see both a **"Merge (fast-forward)"** button and a **"Create merge commit"** button.
+- If there are merge conflicts, the "Merge" button is disabled and the conflicting files are listed in an alert.
+
+Click **"Merge"** to merge the pull request. The page updates to show the merged status and the merge commit SHA.
+
+### Merge Status
+
+- **Fast-forward**: The source branch is ahead of the target branch. No merge commit is created.
+- **Merge commit**: Both branches have diverged. A merge commit with two parents is created.
+- **Conflict**: Both branches modified the same file in different ways. The merge is blocked until the conflicts are resolved.
+
 ## Tips
 
 - After `git push`, refresh the repository page to see your new files and commits.

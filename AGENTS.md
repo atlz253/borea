@@ -77,7 +77,10 @@ npm run format      # Biome format
 | `tests/e2e/` | Playwright E2E test files |
 | `playwright.config.ts` | Playwright configuration |
 | `src/modules/` | Domain modules (git, auth, repositories, pull-requests) |
+| `src/modules/pull-requests/` | PR module: `schemas.ts`, `pull-request.store.ts`, `pull-request.service.ts`, `server/pull-request.functions.ts`, `components/`, `pages/` |
+| `src/modules/pull-requests/` | PR module: `schemas.ts`, `pull-request.store.ts`, `pull-request.service.ts`, `server/pull-request.functions.ts`, `components/`, `pages/` |
 | `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
+| `src/platform/config/` | AppConfig: `storagePath`, `pullRequestsPath`, `gitBinPath` — sourced from env (`REPOSITORIES_PATH`, `PULL_REQUESTS_PATH`, `GIT_BIN_PATH`) |
 | `src/routes/api/` | Server routes for REST API and Git HTTP — delegates to module services |
 | `src/components/` | Shared presentational components |
 | `src/theme.ts` | Mantine theme customization (default: neutral dev-tool palette) |

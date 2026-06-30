@@ -15,6 +15,7 @@ This directory contains Architecture Decision Records (ADRs) for Nirvana. Each A
 | 0009 | [Commit History](0009-commit-history.md) | GitProvider extension for listing branches, commits, and counting commits |
 | 0010 | [Repository Branch URLs](0010-repository-branch-urls.md) | Path-segment branch under /tree/$branch, redirect from repo root |
 | 0011 | [Create Branch UI](0011-create-branch-ui.md) | Create branch from BranchSwitcher menu via POST server function |
+| 0012 | [Pull Requests](0012-pull-requests.md) | PR metadata as JSON files, merge via `git merge-tree`/`commit-tree`, URL-driven PR tab |
 
 ## Adding a New ADR
 

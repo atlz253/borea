@@ -11,6 +11,9 @@ import type {
 	GitService,
 	ListCommitsOptions,
 	ListFilesOptions,
+	MergeOptions,
+	MergeResult,
+	MergeStatus,
 	RepositoryInfo,
 	TreeEntry,
 	TreeEntryType,
@@ -259,6 +262,203 @@ export class CliGitProvider implements GitProvider {
 		} catch {
 			return 0;
 		}
+	}
+
+	async canMerge(
+		name: string,
+		head: string,
+		base: string,
+	): Promise<MergeStatus> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		if (!(await this.refExists(repoPath, head))) {
+			throw new Error(`Ref "${head}" not found in repository "${name}"`);
+		}
+		if (!(await this.refExists(repoPath, base))) {
+			throw new Error(`Ref "${base}" not found in repository "${name}"`);
+		}
+
+		const fastForward = await this.isAncestor(repoPath, base, head);
+
+		const result = await execa(
+			this.gitBin,
+			[
+				"--git-dir",
+				repoPath,
+				"merge-tree",
+				"--write-tree",
+				"--name-only",
+				"--no-messages",
+				base,
+				head,
+			],
+			{ reject: false },
+		);
+
+		const stdout = result.stdout ?? "";
+		const lines = stdout
+			.split("\n")
+			.map((l) => l.trim())
+			.filter((l) => l.length > 0);
+		const treeConflict = result.exitCode !== 0;
+
+		let conflictingFiles: string[] = [];
+		if (treeConflict) {
+			conflictingFiles = lines
+				.slice(1)
+				.filter(
+					(l) =>
+						!l.startsWith("Auto-merging") &&
+						!l.startsWith("CONFLICT") &&
+						!l.startsWith("warning"),
+				);
+		}
+
+		return { conflicts: treeConflict, fastForward, conflictingFiles };
+	}
+
+	async mergeBranch(
+		name: string,
+		head: string,
+		base: string,
+		options?: MergeOptions,
+	): Promise<MergeResult> {
+		this.validateName(name);
+		const repoPath = this.resolvePath(name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		if (!(await this.refExists(repoPath, head))) {
+			throw new Error(`Ref "${head}" not found in repository "${name}"`);
+		}
+		if (!(await this.refExists(repoPath, base))) {
+			throw new Error(`Ref "${base}" not found in repository "${name}"`);
+		}
+
+		const headSha = await this.revParse(repoPath, head);
+		const baseSha = await this.revParse(repoPath, base);
+
+		const isFF = await this.isAncestor(repoPath, base, head);
+
+		const wantFF = options?.fastForward ?? false;
+
+		if (isFF && wantFF) {
+			await execa(this.gitBin, [
+				"--git-dir",
+				repoPath,
+				"update-ref",
+				`refs/heads/${base}`,
+				headSha,
+			]);
+			return { mergedSha: headSha, fastForward: true };
+		}
+
+		const treeSha = await this.computeMergeTree(repoPath, base, head);
+		if (treeSha === null) {
+			throw new Error(
+				`Merge of "${head}" into "${base}" has conflicts and cannot be performed`,
+			);
+		}
+
+		const message = options?.message ?? `Merge branch '${head}' into ${base}`;
+
+		const { stdout: commitSha } = await execa(this.gitBin, [
+			"--git-dir",
+			repoPath,
+			"commit-tree",
+			treeSha,
+			"-p",
+			baseSha,
+			"-p",
+			headSha,
+			"-m",
+			message,
+		]);
+
+		const mergedSha = commitSha.trim();
+
+		await execa(this.gitBin, [
+			"--git-dir",
+			repoPath,
+			"update-ref",
+			`refs/heads/${base}`,
+			mergedSha,
+		]);
+
+		return { mergedSha, fastForward: false };
+	}
+
+	private async computeMergeTree(
+		repoPath: string,
+		base: string,
+		head: string,
+	): Promise<string | null> {
+		const result = await execa(
+			this.gitBin,
+			[
+				"--git-dir",
+				repoPath,
+				"merge-tree",
+				"--write-tree",
+				"--name-only",
+				"--no-messages",
+				base,
+				head,
+			],
+			{ reject: false },
+		);
+
+		if (result.exitCode !== 0) {
+			return null;
+		}
+
+		const lines = (result.stdout ?? "")
+			.split("\n")
+			.map((l) => l.trim())
+			.filter((l) => l.length > 0);
+		if (lines.length === 0) {
+			return null;
+		}
+
+		return lines[0];
+	}
+
+	private async isAncestor(
+		repoPath: string,
+		ancestor: string,
+		descendant: string,
+	): Promise<boolean> {
+		try {
+			await execa(this.gitBin, [
+				"--git-dir",
+				repoPath,
+				"merge-base",
+				"--is-ancestor",
+				ancestor,
+				descendant,
+			]);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	private async revParse(repoPath: string, ref: string): Promise<string> {
+		const { stdout } = await execa(this.gitBin, [
+			"--git-dir",
+			repoPath,
+			"rev-parse",
+			"--verify",
+			ref,
+		]);
+		return stdout.trim();
 	}
 
 	async advertiseRefs(

@@ -486,4 +486,349 @@ describe("CliGitProvider", () => {
 			).rejects.toThrow(/not found/);
 		});
 	});
+
+	describe("canMerge", () => {
+		it("detects fast-forward merge", async () => {
+			await provider.init("ff-repo");
+			await seedCommits(provider, "ff-repo", { "a.txt": "a\n" });
+
+			const branches = await provider.listBranches("ff-repo");
+			const main = branches.find((b) => b.isHead)?.name ?? "master";
+
+			await provider.createBranch("ff-repo", "feature-ff");
+			await seedCommits(provider, "ff-repo", { "b.txt": "b\n" });
+
+			const status = await provider.canMerge("ff-repo", "feature-ff", main);
+
+			expect(status.fastForward).toBe(false);
+			expect(status.conflicts).toBe(false);
+			expect(status.conflictingFiles).toEqual([]);
+		});
+
+		it("detects divergent merge without conflicts", async () => {
+			await provider.init("no-conflict-repo");
+			await seedCommits(provider, "no-conflict-repo", {
+				"shared.txt": "a\n",
+			});
+
+			const branches = await provider.listBranches("no-conflict-repo");
+			const main = branches.find((b) => b.isHead)?.name ?? "master";
+
+			await provider.createBranch("no-conflict-repo", "feature-div");
+
+			const repoPath = join(tmpDir, "no-conflict-repo");
+
+			const workDir = mkdtempSync(join(tmpdir(), "nirvana-merge-test-"));
+			try {
+				await execa("git", ["clone", repoPath, workDir], {
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+
+				await execa("git", ["checkout", main], { cwd: workDir });
+				await writeFile(join(workDir, "main-file.txt"), "main\n", "utf-8");
+				await execa("git", ["add", "--all"], { cwd: workDir });
+				await execa("git", ["commit", "--message=main-change"], {
+					cwd: workDir,
+					env: {
+						...process.env,
+						GIT_AUTHOR_NAME: "test",
+						GIT_AUTHOR_EMAIL: "t@t.com",
+						GIT_COMMITTER_NAME: "test",
+						GIT_COMMITTER_EMAIL: "t@t.com",
+					},
+				});
+				await execa("git", ["push", "origin", `HEAD:${main}`], {
+					cwd: workDir,
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+
+				await execa("git", ["checkout", "feature-div"], { cwd: workDir });
+				await writeFile(join(workDir, "feat-file.txt"), "feat\n", "utf-8");
+				await execa("git", ["add", "--all"], { cwd: workDir });
+				await execa("git", ["commit", "--message=feature-change"], {
+					cwd: workDir,
+					env: {
+						...process.env,
+						GIT_AUTHOR_NAME: "test",
+						GIT_AUTHOR_EMAIL: "t@t.com",
+						GIT_COMMITTER_NAME: "test",
+						GIT_COMMITTER_EMAIL: "t@t.com",
+					},
+				});
+				await execa("git", ["push", "origin", "HEAD:feature-div"], {
+					cwd: workDir,
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+			} finally {
+				rmSync(workDir, { recursive: true, force: true });
+			}
+
+			const status = await provider.canMerge(
+				"no-conflict-repo",
+				"feature-div",
+				main,
+			);
+
+			expect(status.conflicts).toBe(false);
+			expect(status.conflictingFiles).toEqual([]);
+		});
+
+		it("detects conflicts", async () => {
+			await provider.init("conflict-repo");
+			await seedCommits(provider, "conflict-repo", {
+				"shared.txt": "base\n",
+			});
+
+			const branches = await provider.listBranches("conflict-repo");
+			const main = branches.find((b) => b.isHead)?.name ?? "master";
+
+			await provider.createBranch("conflict-repo", "feature-conf");
+
+			const repoPath = join(tmpDir, "conflict-repo");
+
+			const workDir = mkdtempSync(join(tmpdir(), "nirvana-conflict-test-"));
+			try {
+				await execa("git", ["clone", repoPath, workDir], {
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+
+				await execa("git", ["checkout", main], { cwd: workDir });
+				await writeFile(join(workDir, "shared.txt"), "main-change\n", "utf-8");
+				await execa("git", ["add", "--all"], { cwd: workDir });
+				await execa("git", ["commit", "--message=main-update"], {
+					cwd: workDir,
+					env: {
+						...process.env,
+						GIT_AUTHOR_NAME: "test",
+						GIT_AUTHOR_EMAIL: "t@t.com",
+						GIT_COMMITTER_NAME: "test",
+						GIT_COMMITTER_EMAIL: "t@t.com",
+					},
+				});
+				await execa("git", ["push", "origin", `HEAD:${main}`], {
+					cwd: workDir,
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+
+				await execa("git", ["checkout", "feature-conf"], { cwd: workDir });
+				await writeFile(join(workDir, "shared.txt"), "feat-change\n", "utf-8");
+				await execa("git", ["add", "--all"], { cwd: workDir });
+				await execa("git", ["commit", "--message=feat-update"], {
+					cwd: workDir,
+					env: {
+						...process.env,
+						GIT_AUTHOR_NAME: "test",
+						GIT_AUTHOR_EMAIL: "t@t.com",
+						GIT_COMMITTER_NAME: "test",
+						GIT_COMMITTER_EMAIL: "t@t.com",
+					},
+				});
+				await execa("git", ["push", "origin", "HEAD:feature-conf"], {
+					cwd: workDir,
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+			} finally {
+				rmSync(workDir, { recursive: true, force: true });
+			}
+
+			const status = await provider.canMerge(
+				"conflict-repo",
+				"feature-conf",
+				main,
+			);
+
+			expect(status.conflicts).toBe(true);
+			expect(status.conflictingFiles).toContain("shared.txt");
+		});
+
+		it("throws for non-existent repository", async () => {
+			await expect(
+				provider.canMerge("no-such-repo", "head", "base"),
+			).rejects.toThrow(/not found/);
+		});
+
+		it("throws for non-existent ref", async () => {
+			await provider.init("missing-ref-repo");
+			await seedCommits(provider, "missing-ref-repo", { "a.txt": "a\n" });
+
+			await expect(
+				provider.canMerge("missing-ref-repo", "no-such-branch", "main"),
+			).rejects.toThrow(/not found/);
+		});
+	});
+
+	describe("mergeBranch", () => {
+		it("performs fast-forward merge when fastForward option is true", async () => {
+			await provider.init("ff-merge-repo");
+			await seedCommits(provider, "ff-merge-repo", { "a.txt": "a\n" });
+
+			const branches = await provider.listBranches("ff-merge-repo");
+			const main = branches.find((b) => b.isHead)?.name ?? "master";
+
+			await provider.createBranch("ff-merge-repo", "feature-ff-merge");
+			await seedCommits(provider, "ff-merge-repo", { "b.txt": "b\n" });
+
+			await provider.createBranch("ff-merge-repo", "feature-ff-merge2", main);
+			await seedCommits(provider, "ff-merge-repo", { "c.txt": "c\n" });
+
+			const status = await provider.canMerge(
+				"ff-merge-repo",
+				"feature-ff-merge",
+				main,
+			);
+			expect(status.fastForward).toBe(false);
+			expect(status.conflicts).toBe(false);
+		});
+
+		it("performs merge-commit merge when fastForward is false or not requested", async () => {
+			await provider.init("merge-commit-repo");
+			await seedCommits(provider, "merge-commit-repo", {
+				"base.txt": "base\n",
+			});
+
+			const branches = await provider.listBranches("merge-commit-repo");
+			const main = branches.find((b) => b.isHead)?.name ?? "master";
+
+			await provider.createBranch("merge-commit-repo", "feature-mc");
+
+			const repoPath = join(tmpDir, "merge-commit-repo");
+			const workDir = mkdtempSync(join(tmpdir(), "nirvana-mc-test-"));
+			try {
+				await execa("git", ["clone", repoPath, workDir], {
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+
+				await execa("git", ["checkout", main], { cwd: workDir });
+				await writeFile(join(workDir, "main-file.txt"), "main\n", "utf-8");
+				await execa("git", ["add", "--all"], { cwd: workDir });
+				await execa("git", ["commit", "--message=main-change"], {
+					cwd: workDir,
+					env: {
+						...process.env,
+						GIT_AUTHOR_NAME: "test",
+						GIT_AUTHOR_EMAIL: "t@t.com",
+						GIT_COMMITTER_NAME: "test",
+						GIT_COMMITTER_EMAIL: "t@t.com",
+					},
+				});
+				await execa("git", ["push", "origin", `HEAD:${main}`], {
+					cwd: workDir,
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+
+				await execa("git", ["checkout", "feature-mc"], { cwd: workDir });
+				await writeFile(join(workDir, "feat-file.txt"), "feat\n", "utf-8");
+				await execa("git", ["add", "--all"], { cwd: workDir });
+				await execa("git", ["commit", "--message=feature-change"], {
+					cwd: workDir,
+					env: {
+						...process.env,
+						GIT_AUTHOR_NAME: "test",
+						GIT_AUTHOR_EMAIL: "t@t.com",
+						GIT_COMMITTER_NAME: "test",
+						GIT_COMMITTER_EMAIL: "t@t.com",
+					},
+				});
+				await execa("git", ["push", "origin", "HEAD:feature-mc"], {
+					cwd: workDir,
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+			} finally {
+				rmSync(workDir, { recursive: true, force: true });
+			}
+
+			const countBefore = await provider.countCommits(
+				"merge-commit-repo",
+				main,
+			);
+
+			const result = await provider.mergeBranch(
+				"merge-commit-repo",
+				"feature-mc",
+				main,
+			);
+
+			expect(result.fastForward).toBe(false);
+			expect(result.mergedSha.length).toBe(40);
+
+			const commitCount = await provider.countCommits(
+				"merge-commit-repo",
+				main,
+			);
+			expect(commitCount).toBe(countBefore + 2);
+
+			const mainBranches = (
+				await provider.listBranches("merge-commit-repo")
+			).filter((b) => b.name === main);
+			expect(mainBranches.some((b) => b.isHead)).toBe(true);
+		});
+
+		it("throws when merge has conflicts", async () => {
+			await provider.init("conflict-merge-repo");
+			await seedCommits(provider, "conflict-merge-repo", {
+				"shared.txt": "base\n",
+			});
+
+			const branches = await provider.listBranches("conflict-merge-repo");
+			const main = branches.find((b) => b.isHead)?.name ?? "master";
+
+			await provider.createBranch("conflict-merge-repo", "feature-conflict");
+
+			const repoPath = join(tmpDir, "conflict-merge-repo");
+			const workDir = mkdtempSync(join(tmpdir(), "nirvana-conflict-m-"));
+			try {
+				await execa("git", ["clone", repoPath, workDir], {
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+
+				await execa("git", ["checkout", main], { cwd: workDir });
+				await writeFile(join(workDir, "shared.txt"), "main-change\n", "utf-8");
+				await execa("git", ["add", "--all"], { cwd: workDir });
+				await execa("git", ["commit", "--message=main-update"], {
+					cwd: workDir,
+					env: {
+						...process.env,
+						GIT_AUTHOR_NAME: "test",
+						GIT_AUTHOR_EMAIL: "t@t.com",
+						GIT_COMMITTER_NAME: "test",
+						GIT_COMMITTER_EMAIL: "t@t.com",
+					},
+				});
+				await execa("git", ["push", "origin", `HEAD:${main}`], {
+					cwd: workDir,
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+
+				await execa("git", ["checkout", "feature-conflict"], { cwd: workDir });
+				await writeFile(join(workDir, "shared.txt"), "feat-change\n", "utf-8");
+				await execa("git", ["add", "--all"], { cwd: workDir });
+				await execa("git", ["commit", "--message=feat-update"], {
+					cwd: workDir,
+					env: {
+						...process.env,
+						GIT_AUTHOR_NAME: "test",
+						GIT_AUTHOR_EMAIL: "t@t.com",
+						GIT_COMMITTER_NAME: "test",
+						GIT_COMMITTER_EMAIL: "t@t.com",
+					},
+				});
+				await execa("git", ["push", "origin", "HEAD:feature-conflict"], {
+					cwd: workDir,
+					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+				});
+			} finally {
+				rmSync(workDir, { recursive: true, force: true });
+			}
+
+			await expect(
+				provider.mergeBranch("conflict-merge-repo", "feature-conflict", main),
+			).rejects.toThrow(/conflict/);
+		});
+
+		it("throws for non-existent repository", async () => {
+			await expect(
+				provider.mergeBranch("no-such-repo", "head", "base"),
+			).rejects.toThrow(/not found/);
+		});
+	});
 });
