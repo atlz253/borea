@@ -1,214 +1,106 @@
-Welcome to your new TanStack Start app!
+# Nirvana
 
-# Getting Started
+> Open-source software development workspace that unifies development tools in a single space — an analogue of JetBrains Space and Yandex SourceCraft.
 
-To run this application:
+Nirvana is a platform project, built as a modular monolith with provider-based abstractions. The MVP delivers a Git hosting service with repositories, pull/merge requests, code review, and a REST API — deployable as a single Docker container.
+
+**Status:** Pre-MVP (active scaffolding). Not production-ready.
+
+## Tech Stack
+
+| Area                 | Choice                                                                 |
+| -------------------- | ---------------------------------------------------------------------- |
+| Full-stack framework | [TanStack Start](https://tanstack.com/start) (RC) on Nitro             |
+| Routing              | [TanStack Router](https://tanstack.com/router) — file-based, type-safe |
+| UI runtime           | React 19                                                               |
+| Build tool           | Vite 8                                                                 |
+| Styling              | Tailwind CSS v4 + `@tailwindcss/typography`                            |
+| Lint & format        | Biome 2 (tabs, double quotes)                                          |
+| Testing              | Vitest 4 + Testing Library + jsdom                                     |
+| Package manager      | npm                                                                    |
+| Language             | TypeScript (strict)                                                    |
+
+## Quick Start
 
 ```bash
 npm install
-npm run dev
+npm run dev      # http://localhost:3000
 ```
 
-# Building For Production
+### Prerequisites
 
-To build this application for production:
+- Node.js (LTS recommended)
+- npm
 
-```bash
-npm run build
-```
+## Available Scripts
 
-## Testing
+| Script                    | Description                                    |
+| ------------------------- | ---------------------------------------------- |
+| `npm run dev`             | Start the dev server on port 3000              |
+| `npm run build`           | Build for production (outputs to `dist/`)      |
+| `npm run preview`         | Preview the production build                   |
+| `npm run generate-routes` | Regenerate the TanStack Router route tree      |
+| `npm run test`            | Run unit tests once (Vitest)                   |
+| `npm run lint`            | Lint with Biome                                |
+| `npm run format`          | Format with Biome                              |
+| `npm run check`           | Combined Biome check (lint + format)           |
+| `npx tsc --noEmit`        | Typecheck (no emit; `tsconfig.json` is strict) |
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+## Production Deploy
 
-```bash
-npm run test
-```
-
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
-
-## Linting & Formatting
-
-This project uses [Biome](https://biomejs.dev/) for linting and formatting. The following scripts are available:
-
-```bash
-npm run lint
-npm run format
-npm run check
-```
-
-## Deploy with Nitro
-
-This project uses Nitro as a generic server adapter, so it can run on any Node-compatible host.
+The build outputs a self-contained Nitro Node server:
 
 ```bash
 npm run build
 node dist/server/index.mjs
 ```
 
-The build output is a self-contained Node server. To deploy, push the `dist/` directory to your host (Render, Fly.io, your own VPS, etc.) and run the server command above.
+For host-specific Nitro presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.), see <https://v3.nitro.build/deploy>.
 
-For host-specific presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.) and tuning, see https://v3.nitro.build/deploy.
+## Project Structure
 
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
+```
+nirvana/
+├── docs/
+│   ├── MVP.md                       # Technical specification
+│   └── ADR/                         # Architecture Decision Records
+│       └── 0001-fullstack-framework.md
+├── public/                          # Static assets (favicon, logos, manifest)
+├── src/
+│   ├── components/                  # Shared UI components (Header, Footer, …)
+│   ├── routes/                      # File-based routes (TanStack Router)
+│   │   ├── __root.tsx               # Root layout / document shell
+│   │   ├── index.tsx                # Home page
+│   │   └── about.tsx                # About page
+│   ├── router.tsx                   # Router factory + type registration
+│   ├── routeTree.gen.ts             # ⚠ Generated — do not edit
+│   └── styles.css                   # Global styles + Tailwind theme tokens
+├── biome.json                       # Linter/formatter config
+├── tsconfig.json                    # TypeScript config (strict, bundler mode)
+├── tsr.config.json                  # TanStack Router CLI config
+└── vite.config.ts                   # Vite + TanStack Start + Nitro + Tailwind
 ```
 
-Then anywhere in your JSX you can use it like so:
+## Documentation
 
-```tsx
-<Link to="/about">About</Link>
-```
+- [Technical Specification (MVP)](docs/MVP.md) — full requirements, architecture, acceptance criteria
+- [ADR 0001: Full-Stack TypeScript Framework](docs/ADR/0001-fullstack-framework.md) — why TanStack Start was chosen
 
-This will create a link that will navigate to the `/about` route.
+## Architecture (summary)
 
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
+- **Modular monolith** with domain-based modules (git, auth, repositories, pull-requests)
+- **Provider abstractions** (GitProvider, DatabaseProvider, StorageProvider, AuthProvider) — all external dependencies accessed through swappable interfaces
+- **NoAuth mode** for MVP — all actions performed on behalf of a fixed user; blocked in production unless explicitly enabled
+- **REST API** with OpenAPI specification, accessible without authentication in MVP
 
-### Using A Layout
+See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/) for details.
 
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
+## Roadmap
 
-Here is an example layout that includes a header:
+- **v0.1.0 — MVP:** Git hosting, pull/merge requests, NoAuth mode, REST API, Docker deploy
+- **v0.2.0 — Authentication:** auth module, user registration/login, basic access control
+- **Future:** issue tracking, wiki, CI/CD integrations, OAuth/LDAP
 
-```tsx
-import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
+## License
 
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "My App" },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-});
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from "@tanstack/react-start";
-
-const getServerTime = createServerFn({
-  method: "GET",
-}).handler(async () => {
-  return new Date().toISOString();
-});
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState("");
-
-  useEffect(() => {
-    getServerTime().then(setTime);
-  }, []);
-
-  return <div>Server time: {time}</div>;
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from "@tanstack/react-router";
-import { json } from "@tanstack/react-start";
-
-export const Route = createFileRoute("/api/hello")({
-  server: {
-    handlers: {
-      GET: () => json({ message: "Hello, World!" }),
-    },
-  },
-});
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from "@tanstack/react-router";
-
-export const Route = createFileRoute("/people")({
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json();
-  },
-  component: PeopleComponent,
-});
-
-function PeopleComponent() {
-  const data = Route.useLoaderData();
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  );
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+[MIT](LICENSE)
