@@ -17,7 +17,7 @@
 
 ## API Reference
 
-- [API Reference](../API.md) — Git smart-HTTP endpoints with examples
+- [API Reference](../API.md) — REST API v1 and Git smart-HTTP endpoints with examples
 
 ## Architectural Decisions
 

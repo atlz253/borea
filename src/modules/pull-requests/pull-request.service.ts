@@ -5,6 +5,7 @@ import type {
 	MergeResult,
 	MergeStatus,
 } from "#/modules/git";
+import { ConflictError, NotFoundError } from "#/platform/errors";
 import type { PullRequestStore } from "./pull-request.store";
 import type { PullRequest } from "./schemas";
 
@@ -12,6 +13,24 @@ export function createPullRequestService(
 	gitProvider: GitProvider,
 	store: PullRequestStore,
 ) {
+	async function ensureRepositoryExists(repoName: string): Promise<void> {
+		if (!(await gitProvider.exists(repoName))) {
+			throw new NotFoundError(`Repository "${repoName}" not found`);
+		}
+	}
+
+	async function requirePullRequest(
+		repoName: string,
+		id: number,
+	): Promise<PullRequest> {
+		await ensureRepositoryExists(repoName);
+		const pullRequest = await store.get(repoName, id);
+		if (!pullRequest) {
+			throw new NotFoundError(`Pull request #${id} not found`);
+		}
+		return pullRequest;
+	}
+
 	return {
 		async createPullRequest(input: {
 			repoName: string;
@@ -46,14 +65,12 @@ export function createPullRequestService(
 		},
 
 		async listPullRequests(repoName: string): Promise<PullRequest[]> {
+			await ensureRepositoryExists(repoName);
 			return store.list(repoName);
 		},
 
-		async getPullRequest(
-			repoName: string,
-			id: number,
-		): Promise<PullRequest | undefined> {
-			return store.get(repoName, id);
+		async getPullRequest(repoName: string, id: number): Promise<PullRequest> {
+			return requirePullRequest(repoName, id);
 		},
 
 		async mergePullRequest(
@@ -64,12 +81,9 @@ export function createPullRequestService(
 			pullRequest: PullRequest;
 			mergeResult: MergeResult;
 		}> {
-			const pr = await store.get(repoName, id);
-			if (!pr) {
-				throw new Error(`Pull request #${id} not found`);
-			}
+			const pr = await requirePullRequest(repoName, id);
 			if (pr.status !== "open") {
-				throw new Error(
+				throw new ConflictError(
 					`Pull request #${id} is already ${pr.status} and cannot be merged`,
 				);
 			}
@@ -81,8 +95,9 @@ export function createPullRequestService(
 			);
 
 			if (mergeStatus.conflicts) {
-				throw new Error(
+				throw new ConflictError(
 					`Merge conflicts detected: ${mergeStatus.conflictingFiles.length > 0 ? mergeStatus.conflictingFiles.join(", ") : "unknown files"}`,
+					{ conflictingFiles: mergeStatus.conflictingFiles },
 				);
 			}
 
@@ -109,10 +124,7 @@ export function createPullRequestService(
 		},
 
 		async checkMergeStatus(repoName: string, id: number): Promise<MergeStatus> {
-			const pr = await store.get(repoName, id);
-			if (!pr) {
-				throw new Error(`Pull request #${id} not found`);
-			}
+			const pr = await requirePullRequest(repoName, id);
 
 			return gitProvider.canMerge(repoName, pr.sourceBranch, pr.targetBranch);
 		},
@@ -121,10 +133,7 @@ export function createPullRequestService(
 			repoName: string,
 			id: number,
 		): Promise<DiffFile[]> {
-			const pr = await store.get(repoName, id);
-			if (!pr) {
-				throw new Error(`Pull request #${id} not found`);
-			}
+			const pr = await requirePullRequest(repoName, id);
 
 			return gitProvider.getDiff(repoName, pr.targetBranch, pr.sourceBranch);
 		},
@@ -135,10 +144,7 @@ export function createPullRequestService(
 			filePath: string,
 			viewed: boolean,
 		): Promise<PullRequest> {
-			const pr = await store.get(repoName, id);
-			if (!pr) {
-				throw new Error(`Pull request #${id} not found`);
-			}
+			const pr = await requirePullRequest(repoName, id);
 
 			const files = await gitProvider.getDiff(
 				repoName,

@@ -4,6 +4,7 @@ import path from "node:path";
 import { Readable } from "node:stream";
 import { type ExecaError, execa } from "execa";
 import { getConfig } from "#/platform/config";
+import { NotFoundError } from "#/platform/errors";
 import type {
 	BranchInfo,
 	CommitDetail,
@@ -81,7 +82,7 @@ export class CliGitProvider implements GitProvider {
 			await writeFile(path.join(repoPath, "description"), description, "utf-8");
 		}
 
-		return this.getInfo(name, repoPath);
+		return readRepositoryInfo(name, repoPath);
 	}
 
 	async delete(name: string): Promise<void> {
@@ -89,7 +90,7 @@ export class CliGitProvider implements GitProvider {
 		const repoPath = resolvePath(this.storagePath, name);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
-			throw new Error(`Repository "${name}" not found`);
+			throw new NotFoundError(`Repository "${name}" not found`);
 		}
 
 		await rm(repoPath, { recursive: true });
@@ -107,7 +108,7 @@ export class CliGitProvider implements GitProvider {
 				}
 				const repoPath = path.join(this.storagePath, entry.name);
 				if (existsSync(path.join(repoPath, "HEAD"))) {
-					repos.push(await this.getInfo(entry.name, repoPath));
+					repos.push(await readRepositoryInfo(entry.name, repoPath));
 				}
 			}
 
@@ -116,6 +117,15 @@ export class CliGitProvider implements GitProvider {
 		} catch {
 			return [];
 		}
+	}
+
+	async get(name: string): Promise<RepositoryInfo | undefined> {
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			return undefined;
+		}
+		return readRepositoryInfo(name, repoPath);
 	}
 
 	async exists(name: string): Promise<boolean> {
@@ -584,13 +594,6 @@ export class CliGitProvider implements GitProvider {
 		subprocess.catch(() => {});
 
 		return Readable.toWeb(subprocess.stdout) as ReadableStream<Uint8Array>;
-	}
-
-	private async getInfo(
-		name: string,
-		repoPath: string,
-	): Promise<RepositoryInfo> {
-		return readRepositoryInfo(name, repoPath);
 	}
 }
 

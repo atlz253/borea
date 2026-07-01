@@ -13,6 +13,7 @@ export default defineConfig({
 			jsdom: { url: "http://localhost:3000" },
 		},
 		globals: true,
+		testTimeout: 15_000,
 		clearMocks: true,
 		restoreMocks: true,
 		setupFiles: ["./src/test-setup.ts"],

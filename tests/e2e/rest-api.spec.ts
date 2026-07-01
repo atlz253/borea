@@ -1,0 +1,196 @@
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { expect, test } from "@playwright/test";
+import { execa } from "execa";
+import { FileSystemPullRequestStore } from "../../src/modules/pull-requests/pull-request.store";
+
+const REPOSITORIES_PATH = "./data/repositories";
+const PULL_REQUESTS_PATH = "./data/pull-requests";
+const COMMIT_ENV = {
+	GIT_AUTHOR_NAME: "e2e",
+	GIT_AUTHOR_EMAIL: "e2e@test.com",
+	GIT_COMMITTER_NAME: "e2e",
+	GIT_COMMITTER_EMAIL: "e2e@test.com",
+};
+
+async function seedRepository(repoName: string, conflict: boolean) {
+	const barePath = resolve(REPOSITORIES_PATH, repoName);
+	const workDir = mkdtempSync(join(tmpdir(), `nirvana-rest-${repoName}-`));
+	await execa("git", ["init", "--bare", barePath]);
+	const { stdout: branchOutput } = await execa("git", [
+		"--git-dir",
+		barePath,
+		"symbolic-ref",
+		"--short",
+		"HEAD",
+	]);
+	const targetBranch = branchOutput.trim();
+
+	await execa("git", ["init", workDir]);
+	await writeFile(join(workDir, "file.txt"), "base\n", "utf-8");
+	await execa("git", ["add", "--all"], { cwd: workDir });
+	await execa("git", ["commit", "--message=base"], {
+		cwd: workDir,
+		env: COMMIT_ENV,
+	});
+	await execa("git", ["remote", "add", "origin", barePath], { cwd: workDir });
+	await execa("git", ["push", "origin", `HEAD:${targetBranch}`], {
+		cwd: workDir,
+	});
+
+	await execa("git", ["checkout", "-b", "feature"], { cwd: workDir });
+	await writeFile(
+		join(workDir, conflict ? "file.txt" : "feature.txt"),
+		"feature\n",
+		"utf-8",
+	);
+	await execa("git", ["add", "--all"], { cwd: workDir });
+	await execa("git", ["commit", "--message=feature"], {
+		cwd: workDir,
+		env: COMMIT_ENV,
+	});
+	await execa("git", ["push", "origin", "HEAD:feature"], { cwd: workDir });
+
+	if (conflict) {
+		await execa("git", ["checkout", targetBranch], { cwd: workDir });
+		await writeFile(join(workDir, "file.txt"), "target\n", "utf-8");
+		await execa("git", ["add", "--all"], { cwd: workDir });
+		await execa("git", ["commit", "--message=target"], {
+			cwd: workDir,
+			env: COMMIT_ENV,
+		});
+		await execa("git", ["push", "origin", `HEAD:${targetBranch}`], {
+			cwd: workDir,
+		});
+	}
+
+	const store = new FileSystemPullRequestStore(PULL_REQUESTS_PATH);
+	const pullRequest = await store.create({
+		repoName,
+		title: conflict ? "Conflicting change" : "Feature change",
+		sourceBranch: "feature",
+		targetBranch,
+		authorName: "e2e",
+	});
+
+	return { barePath, workDir, pullRequest };
+}
+
+test("REST API lists, reads, merges, and deletes repository data", async ({
+	request,
+}) => {
+	test.setTimeout(90000);
+	const repoName = `rest-api-${Date.now().toString(36)}`;
+	const seeded = await seedRepository(repoName, false);
+
+	try {
+		const listResponse = await request.get("/api/v1/repositories");
+		expect(listResponse.ok()).toBe(true);
+		expect(
+			(await listResponse.json()) as Array<{ name: string }>,
+		).toContainEqual(expect.objectContaining({ name: repoName }));
+
+		const repositoryResponse = await request.get(
+			`/api/v1/repositories/${repoName}`,
+		);
+		expect(repositoryResponse.ok()).toBe(true);
+		await expect(repositoryResponse.json()).resolves.toMatchObject({
+			name: repoName,
+			createdAt: expect.any(String),
+		});
+
+		const pullRequestsResponse = await request.get(
+			`/api/v1/repositories/${repoName}/pull-requests`,
+		);
+		expect(pullRequestsResponse.ok()).toBe(true);
+		await expect(pullRequestsResponse.json()).resolves.toHaveLength(1);
+
+		const pullRequestResponse = await request.get(
+			`/api/v1/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}`,
+		);
+		expect(pullRequestResponse.ok()).toBe(true);
+		await expect(pullRequestResponse.json()).resolves.toMatchObject({
+			id: seeded.pullRequest.id,
+			status: "open",
+		});
+
+		const mergeResponse = await request.post(
+			`/api/v1/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+			{ data: { fastForward: true } },
+		);
+		expect(mergeResponse.ok()).toBe(true);
+		await expect(mergeResponse.json()).resolves.toMatchObject({
+			pullRequest: { status: "merged" },
+			mergeResult: { fastForward: true },
+		});
+
+		const repeatedMerge = await request.post(
+			`/api/v1/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+		);
+		expect(repeatedMerge.status()).toBe(409);
+		await expect(repeatedMerge.json()).resolves.toMatchObject({
+			code: "conflict",
+		});
+
+		const deleteResponse = await request.delete(
+			`/api/v1/repositories/${repoName}`,
+		);
+		expect(deleteResponse.status()).toBe(204);
+		expect(existsSync(seeded.barePath)).toBe(false);
+		expect(existsSync(join(PULL_REQUESTS_PATH, repoName))).toBe(false);
+
+		const missingResponse = await request.get(
+			`/api/v1/repositories/${repoName}`,
+		);
+		expect(missingResponse.status()).toBe(404);
+	} finally {
+		rmSync(seeded.workDir, { recursive: true, force: true });
+		rmSync(seeded.barePath, { recursive: true, force: true });
+		rmSync(join(PULL_REQUESTS_PATH, repoName), {
+			recursive: true,
+			force: true,
+		});
+	}
+});
+
+test("REST API validates parameters and reports merge conflicts", async ({
+	request,
+}) => {
+	test.setTimeout(90000);
+	const repoName = `rest-conflict-${Date.now().toString(36)}`;
+	const seeded = await seedRepository(repoName, true);
+
+	try {
+		const invalidResponse = await request.get("/api/v1/repositories/.invalid");
+		expect(invalidResponse.status()).toBe(400);
+
+		const missingResponse = await request.get(
+			"/api/v1/repositories/missing-rest-repository",
+		);
+		expect(missingResponse.status()).toBe(404);
+
+		const conflictResponse = await request.post(
+			`/api/v1/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+		);
+		expect(conflictResponse.status()).toBe(409);
+		await expect(conflictResponse.json()).resolves.toMatchObject({
+			code: "conflict",
+			details: { conflictingFiles: expect.any(Array) },
+		});
+
+		const openApiResponse = await request.get("/api/v1/openapi.json");
+		expect(openApiResponse.ok()).toBe(true);
+		await expect(openApiResponse.json()).resolves.toMatchObject({
+			openapi: "3.1.0",
+		});
+	} finally {
+		rmSync(seeded.workDir, { recursive: true, force: true });
+		rmSync(seeded.barePath, { recursive: true, force: true });
+		rmSync(join(PULL_REQUESTS_PATH, repoName), {
+			recursive: true,
+			force: true,
+		});
+	}
+});

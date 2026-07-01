@@ -1,3 +1,4 @@
+import "#/platform/http/openapi-zod";
 import { z } from "zod";
 
 const MAX_REPO_NAME_LENGTH = 100;
@@ -65,14 +66,17 @@ export const getPullRequestSchema = z.object({
 		.max(MAX_PR_ID, "Pull request id is too large"),
 });
 
-export const mergePullRequestSchema = z.object({
-	repoName: repoNameSchema,
-	id: z
-		.number()
-		.int()
-		.positive()
-		.max(MAX_PR_ID, "Pull request id is too large"),
+export const mergePullRequestBodySchema = z.object({
 	fastForward: z.boolean().optional(),
+});
+
+export const mergePullRequestSchema = getPullRequestSchema.extend(
+	mergePullRequestBodySchema.shape,
+);
+
+export const mergeResultSchema = z.object({
+	mergedSha: z.string(),
+	fastForward: z.boolean(),
 });
 
 export const setPullRequestFileViewedSchema = getPullRequestSchema.extend({
@@ -94,6 +98,11 @@ export const pullRequestSchema = z.object({
 	viewedFiles: z.array(z.string()).default([]),
 	createdAt: z.string(),
 	updatedAt: z.string(),
+});
+
+export const mergePullRequestResponseSchema = z.object({
+	pullRequest: pullRequestSchema,
+	mergeResult: mergeResultSchema,
 });
 
 export type CreatePullRequestInput = z.infer<typeof createPullRequestSchema>;

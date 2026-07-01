@@ -71,7 +71,7 @@ For host-specific Nitro presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.),
 ```
 nirvana/
 ├── CONTRIBUTING.md                 # Contributor guide
-├── API.md                          # API reference (Git smart-HTTP)
+├── API.md                          # REST API and Git smart-HTTP reference
 ├── docs/
 │   ├── README.md                   # Documentation index
 │   ├── MVP.md                      # Technical specification
@@ -83,7 +83,7 @@ nirvana/
 │   ├── security/
 │   │   └── noauth-mode.md          # NoAuth mode description and risks
 │   └── ADR/                        # Architecture Decision Records
-│       └── README.md               # ADR index (0001–0009)
+│       └── README.md               # ADR index
 ├── public/                         # Static assets (favicon, logos, manifest)
 ├── src/
 │   ├── components/                 # Shared UI components (AppShellLayout, Header, Footer, Sidebar)
@@ -91,7 +91,7 @@ nirvana/
 │   │   ├── git/                    # GitProvider, smart-HTTP service, CLI provider
 │   │   ├── auth/                   # AuthProvider interface + NoAuthProvider
 │   │   ├── repositories/           # Repository listing, file tree, pages, server functions
-│   │   └── pull-requests/          # Pull/merge requests (scaffold)
+│   │   └── pull-requests/          # Pull/merge request services, storage, and UI
 │   ├── platform/                   # Cross-domain infrastructure
 │   │   ├── config/                 # App configuration (env variables)
 │   │   ├── database/               # DatabaseProvider interface (stub)
@@ -109,7 +109,8 @@ nirvana/
 │   │   ├── repositories.$name.commits.tsx  # Commit history
 │   │   ├── repositories.$name.tree.$branch.commits.$sha.tsx  # Commit diff viewer
 │   │   └── api/
-│   │       └── git/$.tsx           # Git smart-HTTP endpoints
+│   │       ├── git/$.tsx           # Git smart-HTTP endpoints
+│   │       └── v1/                 # Versioned REST API routes
 │   ├── router.tsx                  # Router factory + type registration
 │   ├── routeTree.gen.ts            # ⚠ Generated — do not edit
 │   └── theme.ts                    # Mantine theme customization
@@ -130,7 +131,7 @@ nirvana/
 - [Working with Repositories via HTTP](docs/git-http.md) — how to clone and push
 - [Using Repository Pages](docs/repository-page.md) — how to browse files and commits
 - [Pull Request Code Review](docs/code-review.md) — how to mark changed files as viewed
-- [API Reference](API.md) — Git smart-HTTP endpoints
+- [API Reference](API.md) — REST API v1 and Git smart-HTTP endpoints
 - [NoAuth Mode](docs/security/noauth-mode.md) — development-mode authentication
 - [Contributing Guide](CONTRIBUTING.md) — how to contribute
 
@@ -149,6 +150,7 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 | 0007 | Git Smart-HTTP Pull |
 | 0008 | Git Smart-HTTP Push |
 | 0009 | Commit History |
+| 0017 | REST API v1 |
 
 ## Architecture (summary)
 
@@ -161,7 +163,7 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 - **Commit history** — table view of commits with branch context (✅)
 - **Pull request review progress** — persistent Viewed marks collapse reviewed file diffs (✅)
 - **NoAuth mode** for MVP — all actions performed on behalf of a fixed user; blocked in production unless explicitly enabled
-- **REST API** with OpenAPI specification — planned (ADR 0001)
+- **REST API v1** — repository and pull request operations with OpenAPI 3.1 (✅)
 
 See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/README.md) for details.
 
@@ -171,7 +173,7 @@ See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/README.md) fo
   - ✅ Git hosting — repository creation, file tree browsing, commit history
   - ✅ Smart-HTTP pull (clone/fetch) and push
   - 🟨 Pull/Merge requests with code review (viewed-file tracking implemented)
-  - 🔲 REST API with OpenAPI specification
+  - ✅ REST API v1 with OpenAPI 3.1
   - 🔲 Docker deployment
   - 🔲 Complete documentation (in progress)
 - **v0.2.0 — Authentication:** auth module, user registration/login, basic access control

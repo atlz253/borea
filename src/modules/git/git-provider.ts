@@ -132,6 +132,7 @@ export interface GitProvider {
 	init(name: string, description?: string): Promise<RepositoryInfo>;
 	delete(name: string): Promise<void>;
 	list(): Promise<RepositoryInfo[]>;
+	get(name: string): Promise<RepositoryInfo | undefined>;
 	exists(name: string): Promise<boolean>;
 	listFiles(name: string, options?: ListFilesOptions): Promise<TreeEntry[]>;
 	getFile(name: string, options: GetFileOptions): Promise<FileContent>;

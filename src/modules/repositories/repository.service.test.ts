@@ -3,6 +3,7 @@ import type { GitProvider } from "#/modules/git";
 import {
 	createRepository,
 	deleteRepository,
+	getRepository,
 	getRepositoryFile,
 	listRepositories,
 	listRepositoryFiles,
@@ -13,6 +14,7 @@ function createMockGit(): GitProvider {
 		init: vi.fn(),
 		delete: vi.fn(),
 		list: vi.fn(),
+		get: vi.fn(),
 		exists: vi.fn(),
 		listFiles: vi.fn(),
 		getFile: vi.fn(),
@@ -103,6 +105,27 @@ describe("listRepositories", () => {
 
 		expect(mockGit.list).toHaveBeenCalledOnce();
 		expect(result).toBe(repos);
+	});
+});
+
+describe("getRepository", () => {
+	it("returns repository data from the provider", async () => {
+		const mockGit = createMockGit();
+		const repository = { name: "test", createdAt: new Date() };
+		vi.mocked(mockGit.get).mockResolvedValue(repository);
+
+		await expect(getRepository(mockGit, "test")).resolves.toBe(repository);
+		expect(mockGit.get).toHaveBeenCalledWith("test");
+	});
+
+	it("throws a typed not-found error for an unknown repository", async () => {
+		const mockGit = createMockGit();
+		vi.mocked(mockGit.get).mockResolvedValue(undefined);
+
+		await expect(getRepository(mockGit, "missing")).rejects.toMatchObject({
+			name: "NotFoundError",
+			message: 'Repository "missing" not found',
+		});
 	});
 });
 

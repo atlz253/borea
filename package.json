@@ -20,6 +20,7 @@
     "test:e2e:install": "playwright install"
   },
   "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.5.0",
     "@mantine/code-highlight": "^9.4.1",
     "@mantine/core": "^9.4.1",
     "@mantine/hooks": "^9.4.1",

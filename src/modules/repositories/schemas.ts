@@ -1,3 +1,4 @@
+import "#/platform/http/openapi-zod";
 import { z } from "zod";
 
 const MAX_NAME_LENGTH = 100;
@@ -44,6 +45,10 @@ export const repositorySchema = z.object({
 	name: z.string(),
 	description: z.string().optional(),
 	createdAt: z.date(),
+});
+
+export const repositoryResponseSchema = repositorySchema.extend({
+	createdAt: z.iso.datetime(),
 });
 
 export const treeEntryTypeSchema = z.enum(["blob", "tree"]);

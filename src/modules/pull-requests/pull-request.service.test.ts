@@ -8,7 +8,8 @@ function createMockGit(): GitProvider {
 		init: vi.fn(),
 		delete: vi.fn(),
 		list: vi.fn(),
-		exists: vi.fn(),
+		get: vi.fn(),
+		exists: vi.fn().mockResolvedValue(true),
 		listFiles: vi.fn(),
 		getFile: vi.fn(),
 		advertiseRefs: vi.fn(),
@@ -219,6 +220,19 @@ describe("listPullRequests", () => {
 		expect(result).toEqual([prData]);
 		expect(store.list).toHaveBeenCalledWith("my-repo");
 	});
+
+	it("throws not-found when the repository does not exist", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(git.exists).mockResolvedValue(false);
+
+		const svc = createPullRequestService(git, store);
+
+		await expect(svc.listPullRequests("missing")).rejects.toMatchObject({
+			name: "NotFoundError",
+		});
+		expect(store.list).not.toHaveBeenCalled();
+	});
 });
 
 describe("getPullRequest", () => {
@@ -232,6 +246,18 @@ describe("getPullRequest", () => {
 
 		expect(result).toBe(prData);
 		expect(store.get).toHaveBeenCalledWith("my-repo", 1);
+	});
+
+	it("throws a typed error when the pull request is missing", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(undefined);
+
+		const svc = createPullRequestService(git, store);
+
+		await expect(svc.getPullRequest("my-repo", 999)).rejects.toMatchObject({
+			name: "NotFoundError",
+		});
 	});
 });
 

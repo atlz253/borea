@@ -15,18 +15,24 @@ import { Route as RepositoriesIndexRouteImport } from './routes/repositories.ind
 import { Route as RepositoriesNameRouteImport } from './routes/repositories.$name'
 import { Route as RepositoriesNameIndexRouteImport } from './routes/repositories.$name.index'
 import { Route as RepositoriesNameSettingsRouteImport } from './routes/repositories.$name.settings'
+import { Route as ApiV1RepositoriesRouteImport } from './routes/api/v1/repositories'
+import { Route as ApiV1OpenapiDotjsonRouteImport } from './routes/api/v1/openapi[.]json'
 import { Route as ApiGitSplatRouteImport } from './routes/api/git/$'
 import { Route as RepositoriesNamePullsIndexRouteImport } from './routes/repositories.$name.pulls.index'
 import { Route as RepositoriesNamePullsNewRouteImport } from './routes/repositories.$name.pulls.new'
 import { Route as RepositoriesNamePullsPullIdRouteImport } from './routes/repositories.$name.pulls.$pullId'
+import { Route as ApiV1RepositoriesNameRouteImport } from './routes/api/v1/repositories.$name'
 import { Route as RepositoriesNameTreeBranchIndexRouteImport } from './routes/repositories.$name.tree.$branch.index'
 import { Route as RepositoriesNamePullsPullIdIndexRouteImport } from './routes/repositories.$name.pulls.$pullId.index'
 import { Route as RepositoriesNameTreeBranchCommitsRouteImport } from './routes/repositories.$name.tree.$branch.commits'
 import { Route as RepositoriesNameTreeBranchSplatRouteImport } from './routes/repositories.$name.tree.$branch.$'
 import { Route as RepositoriesNamePullsPullIdFilesRouteImport } from './routes/repositories.$name.pulls.$pullId.files'
 import { Route as RepositoriesNameBlobBranchSplatRouteImport } from './routes/repositories.$name.blob.$branch.$'
+import { Route as ApiV1RepositoriesNamePullRequestsRouteImport } from './routes/api/v1/repositories.$name.pull-requests'
 import { Route as RepositoriesNameTreeBranchCommitsIndexRouteImport } from './routes/repositories.$name.tree.$branch.commits.index'
 import { Route as RepositoriesNameTreeBranchCommitsShaRouteImport } from './routes/repositories.$name.tree.$branch.commits.$sha'
+import { Route as ApiV1RepositoriesNamePullRequestsPullIdRouteImport } from './routes/api/v1/repositories.$name.pull-requests.$pullId'
+import { Route as ApiV1RepositoriesNamePullRequestsPullIdMergeRouteImport } from './routes/api/v1/repositories.$name.pull-requests.$pullId.merge'
 
 const RepositoriesRoute = RepositoriesRouteImport.update({
   id: '/repositories',
@@ -59,6 +65,16 @@ const RepositoriesNameSettingsRoute =
     path: '/settings',
     getParentRoute: () => RepositoriesNameRoute,
   } as any)
+const ApiV1RepositoriesRoute = ApiV1RepositoriesRouteImport.update({
+  id: '/api/v1/repositories',
+  path: '/api/v1/repositories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1OpenapiDotjsonRoute = ApiV1OpenapiDotjsonRouteImport.update({
+  id: '/api/v1/openapi.json',
+  path: '/api/v1/openapi.json',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGitSplatRoute = ApiGitSplatRouteImport.update({
   id: '/api/git/$',
   path: '/api/git/$',
@@ -82,6 +98,11 @@ const RepositoriesNamePullsPullIdRoute =
     path: '/pulls/$pullId',
     getParentRoute: () => RepositoriesNameRoute,
   } as any)
+const ApiV1RepositoriesNameRoute = ApiV1RepositoriesNameRouteImport.update({
+  id: '/$name',
+  path: '/$name',
+  getParentRoute: () => ApiV1RepositoriesRoute,
+} as any)
 const RepositoriesNameTreeBranchIndexRoute =
   RepositoriesNameTreeBranchIndexRouteImport.update({
     id: '/tree/$branch/',
@@ -118,6 +139,12 @@ const RepositoriesNameBlobBranchSplatRoute =
     path: '/blob/$branch/$',
     getParentRoute: () => RepositoriesNameRoute,
   } as any)
+const ApiV1RepositoriesNamePullRequestsRoute =
+  ApiV1RepositoriesNamePullRequestsRouteImport.update({
+    id: '/pull-requests',
+    path: '/pull-requests',
+    getParentRoute: () => ApiV1RepositoriesNameRoute,
+  } as any)
 const RepositoriesNameTreeBranchCommitsIndexRoute =
   RepositoriesNameTreeBranchCommitsIndexRouteImport.update({
     id: '/',
@@ -130,6 +157,18 @@ const RepositoriesNameTreeBranchCommitsShaRoute =
     path: '/$sha',
     getParentRoute: () => RepositoriesNameTreeBranchCommitsRoute,
   } as any)
+const ApiV1RepositoriesNamePullRequestsPullIdRoute =
+  ApiV1RepositoriesNamePullRequestsPullIdRouteImport.update({
+    id: '/$pullId',
+    path: '/$pullId',
+    getParentRoute: () => ApiV1RepositoriesNamePullRequestsRoute,
+  } as any)
+const ApiV1RepositoriesNamePullRequestsPullIdMergeRoute =
+  ApiV1RepositoriesNamePullRequestsPullIdMergeRouteImport.update({
+    id: '/merge',
+    path: '/merge',
+    getParentRoute: () => ApiV1RepositoriesNamePullRequestsPullIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -137,35 +176,47 @@ export interface FileRoutesByFullPath {
   '/repositories/$name': typeof RepositoriesNameRouteWithChildren
   '/repositories/': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
+  '/api/v1/repositories': typeof ApiV1RepositoriesRouteWithChildren
   '/repositories/$name/settings': typeof RepositoriesNameSettingsRoute
   '/repositories/$name/': typeof RepositoriesNameIndexRoute
+  '/api/v1/repositories/$name': typeof ApiV1RepositoriesNameRouteWithChildren
   '/repositories/$name/pulls/$pullId': typeof RepositoriesNamePullsPullIdRouteWithChildren
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls/': typeof RepositoriesNamePullsIndexRoute
+  '/api/v1/repositories/$name/pull-requests': typeof ApiV1RepositoriesNamePullRequestsRouteWithChildren
   '/repositories/$name/blob/$branch/$': typeof RepositoriesNameBlobBranchSplatRoute
   '/repositories/$name/pulls/$pullId/files': typeof RepositoriesNamePullsPullIdFilesRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
   '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRouteWithChildren
   '/repositories/$name/pulls/$pullId/': typeof RepositoriesNamePullsPullIdIndexRoute
   '/repositories/$name/tree/$branch/': typeof RepositoriesNameTreeBranchIndexRoute
+  '/api/v1/repositories/$name/pull-requests/$pullId': typeof ApiV1RepositoriesNamePullRequestsPullIdRouteWithChildren
   '/repositories/$name/tree/$branch/commits/$sha': typeof RepositoriesNameTreeBranchCommitsShaRoute
   '/repositories/$name/tree/$branch/commits/': typeof RepositoriesNameTreeBranchCommitsIndexRoute
+  '/api/v1/repositories/$name/pull-requests/$pullId/merge': typeof ApiV1RepositoriesNamePullRequestsPullIdMergeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/repositories': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
+  '/api/v1/repositories': typeof ApiV1RepositoriesRouteWithChildren
   '/repositories/$name/settings': typeof RepositoriesNameSettingsRoute
   '/repositories/$name': typeof RepositoriesNameIndexRoute
+  '/api/v1/repositories/$name': typeof ApiV1RepositoriesNameRouteWithChildren
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls': typeof RepositoriesNamePullsIndexRoute
+  '/api/v1/repositories/$name/pull-requests': typeof ApiV1RepositoriesNamePullRequestsRouteWithChildren
   '/repositories/$name/blob/$branch/$': typeof RepositoriesNameBlobBranchSplatRoute
   '/repositories/$name/pulls/$pullId/files': typeof RepositoriesNamePullsPullIdFilesRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
   '/repositories/$name/pulls/$pullId': typeof RepositoriesNamePullsPullIdIndexRoute
   '/repositories/$name/tree/$branch': typeof RepositoriesNameTreeBranchIndexRoute
+  '/api/v1/repositories/$name/pull-requests/$pullId': typeof ApiV1RepositoriesNamePullRequestsPullIdRouteWithChildren
   '/repositories/$name/tree/$branch/commits/$sha': typeof RepositoriesNameTreeBranchCommitsShaRoute
   '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsIndexRoute
+  '/api/v1/repositories/$name/pull-requests/$pullId/merge': typeof ApiV1RepositoriesNamePullRequestsPullIdMergeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,19 +225,25 @@ export interface FileRoutesById {
   '/repositories/$name': typeof RepositoriesNameRouteWithChildren
   '/repositories/': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
+  '/api/v1/repositories': typeof ApiV1RepositoriesRouteWithChildren
   '/repositories/$name/settings': typeof RepositoriesNameSettingsRoute
   '/repositories/$name/': typeof RepositoriesNameIndexRoute
+  '/api/v1/repositories/$name': typeof ApiV1RepositoriesNameRouteWithChildren
   '/repositories/$name/pulls/$pullId': typeof RepositoriesNamePullsPullIdRouteWithChildren
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls/': typeof RepositoriesNamePullsIndexRoute
+  '/api/v1/repositories/$name/pull-requests': typeof ApiV1RepositoriesNamePullRequestsRouteWithChildren
   '/repositories/$name/blob/$branch/$': typeof RepositoriesNameBlobBranchSplatRoute
   '/repositories/$name/pulls/$pullId/files': typeof RepositoriesNamePullsPullIdFilesRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
   '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRouteWithChildren
   '/repositories/$name/pulls/$pullId/': typeof RepositoriesNamePullsPullIdIndexRoute
   '/repositories/$name/tree/$branch/': typeof RepositoriesNameTreeBranchIndexRoute
+  '/api/v1/repositories/$name/pull-requests/$pullId': typeof ApiV1RepositoriesNamePullRequestsPullIdRouteWithChildren
   '/repositories/$name/tree/$branch/commits/$sha': typeof RepositoriesNameTreeBranchCommitsShaRoute
   '/repositories/$name/tree/$branch/commits/': typeof RepositoriesNameTreeBranchCommitsIndexRoute
+  '/api/v1/repositories/$name/pull-requests/$pullId/merge': typeof ApiV1RepositoriesNamePullRequestsPullIdMergeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -196,35 +253,47 @@ export interface FileRouteTypes {
     | '/repositories/$name'
     | '/repositories/'
     | '/api/git/$'
+    | '/api/v1/openapi.json'
+    | '/api/v1/repositories'
     | '/repositories/$name/settings'
     | '/repositories/$name/'
+    | '/api/v1/repositories/$name'
     | '/repositories/$name/pulls/$pullId'
     | '/repositories/$name/pulls/new'
     | '/repositories/$name/pulls/'
+    | '/api/v1/repositories/$name/pull-requests'
     | '/repositories/$name/blob/$branch/$'
     | '/repositories/$name/pulls/$pullId/files'
     | '/repositories/$name/tree/$branch/$'
     | '/repositories/$name/tree/$branch/commits'
     | '/repositories/$name/pulls/$pullId/'
     | '/repositories/$name/tree/$branch/'
+    | '/api/v1/repositories/$name/pull-requests/$pullId'
     | '/repositories/$name/tree/$branch/commits/$sha'
     | '/repositories/$name/tree/$branch/commits/'
+    | '/api/v1/repositories/$name/pull-requests/$pullId/merge'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/repositories'
     | '/api/git/$'
+    | '/api/v1/openapi.json'
+    | '/api/v1/repositories'
     | '/repositories/$name/settings'
     | '/repositories/$name'
+    | '/api/v1/repositories/$name'
     | '/repositories/$name/pulls/new'
     | '/repositories/$name/pulls'
+    | '/api/v1/repositories/$name/pull-requests'
     | '/repositories/$name/blob/$branch/$'
     | '/repositories/$name/pulls/$pullId/files'
     | '/repositories/$name/tree/$branch/$'
     | '/repositories/$name/pulls/$pullId'
     | '/repositories/$name/tree/$branch'
+    | '/api/v1/repositories/$name/pull-requests/$pullId'
     | '/repositories/$name/tree/$branch/commits/$sha'
     | '/repositories/$name/tree/$branch/commits'
+    | '/api/v1/repositories/$name/pull-requests/$pullId/merge'
   id:
     | '__root__'
     | '/'
@@ -232,25 +301,33 @@ export interface FileRouteTypes {
     | '/repositories/$name'
     | '/repositories/'
     | '/api/git/$'
+    | '/api/v1/openapi.json'
+    | '/api/v1/repositories'
     | '/repositories/$name/settings'
     | '/repositories/$name/'
+    | '/api/v1/repositories/$name'
     | '/repositories/$name/pulls/$pullId'
     | '/repositories/$name/pulls/new'
     | '/repositories/$name/pulls/'
+    | '/api/v1/repositories/$name/pull-requests'
     | '/repositories/$name/blob/$branch/$'
     | '/repositories/$name/pulls/$pullId/files'
     | '/repositories/$name/tree/$branch/$'
     | '/repositories/$name/tree/$branch/commits'
     | '/repositories/$name/pulls/$pullId/'
     | '/repositories/$name/tree/$branch/'
+    | '/api/v1/repositories/$name/pull-requests/$pullId'
     | '/repositories/$name/tree/$branch/commits/$sha'
     | '/repositories/$name/tree/$branch/commits/'
+    | '/api/v1/repositories/$name/pull-requests/$pullId/merge'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   RepositoriesRoute: typeof RepositoriesRouteWithChildren
   ApiGitSplatRoute: typeof ApiGitSplatRoute
+  ApiV1OpenapiDotjsonRoute: typeof ApiV1OpenapiDotjsonRoute
+  ApiV1RepositoriesRoute: typeof ApiV1RepositoriesRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -297,6 +374,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RepositoriesNameSettingsRouteImport
       parentRoute: typeof RepositoriesNameRoute
     }
+    '/api/v1/repositories': {
+      id: '/api/v1/repositories'
+      path: '/api/v1/repositories'
+      fullPath: '/api/v1/repositories'
+      preLoaderRoute: typeof ApiV1RepositoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/openapi.json': {
+      id: '/api/v1/openapi.json'
+      path: '/api/v1/openapi.json'
+      fullPath: '/api/v1/openapi.json'
+      preLoaderRoute: typeof ApiV1OpenapiDotjsonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/git/$': {
       id: '/api/git/$'
       path: '/api/git/$'
@@ -324,6 +415,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/repositories/$name/pulls/$pullId'
       preLoaderRoute: typeof RepositoriesNamePullsPullIdRouteImport
       parentRoute: typeof RepositoriesNameRoute
+    }
+    '/api/v1/repositories/$name': {
+      id: '/api/v1/repositories/$name'
+      path: '/$name'
+      fullPath: '/api/v1/repositories/$name'
+      preLoaderRoute: typeof ApiV1RepositoriesNameRouteImport
+      parentRoute: typeof ApiV1RepositoriesRoute
     }
     '/repositories/$name/tree/$branch/': {
       id: '/repositories/$name/tree/$branch/'
@@ -367,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RepositoriesNameBlobBranchSplatRouteImport
       parentRoute: typeof RepositoriesNameRoute
     }
+    '/api/v1/repositories/$name/pull-requests': {
+      id: '/api/v1/repositories/$name/pull-requests'
+      path: '/pull-requests'
+      fullPath: '/api/v1/repositories/$name/pull-requests'
+      preLoaderRoute: typeof ApiV1RepositoriesNamePullRequestsRouteImport
+      parentRoute: typeof ApiV1RepositoriesNameRoute
+    }
     '/repositories/$name/tree/$branch/commits/': {
       id: '/repositories/$name/tree/$branch/commits/'
       path: '/'
@@ -380,6 +485,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/repositories/$name/tree/$branch/commits/$sha'
       preLoaderRoute: typeof RepositoriesNameTreeBranchCommitsShaRouteImport
       parentRoute: typeof RepositoriesNameTreeBranchCommitsRoute
+    }
+    '/api/v1/repositories/$name/pull-requests/$pullId': {
+      id: '/api/v1/repositories/$name/pull-requests/$pullId'
+      path: '/$pullId'
+      fullPath: '/api/v1/repositories/$name/pull-requests/$pullId'
+      preLoaderRoute: typeof ApiV1RepositoriesNamePullRequestsPullIdRouteImport
+      parentRoute: typeof ApiV1RepositoriesNamePullRequestsRoute
+    }
+    '/api/v1/repositories/$name/pull-requests/$pullId/merge': {
+      id: '/api/v1/repositories/$name/pull-requests/$pullId/merge'
+      path: '/merge'
+      fullPath: '/api/v1/repositories/$name/pull-requests/$pullId/merge'
+      preLoaderRoute: typeof ApiV1RepositoriesNamePullRequestsPullIdMergeRouteImport
+      parentRoute: typeof ApiV1RepositoriesNamePullRequestsPullIdRoute
     }
   }
 }
@@ -463,20 +582,68 @@ const RepositoriesRouteWithChildren = RepositoriesRoute._addFileChildren(
   RepositoriesRouteChildren,
 )
 
+interface ApiV1RepositoriesNamePullRequestsPullIdRouteChildren {
+  ApiV1RepositoriesNamePullRequestsPullIdMergeRoute: typeof ApiV1RepositoriesNamePullRequestsPullIdMergeRoute
+}
+
+const ApiV1RepositoriesNamePullRequestsPullIdRouteChildren: ApiV1RepositoriesNamePullRequestsPullIdRouteChildren =
+  {
+    ApiV1RepositoriesNamePullRequestsPullIdMergeRoute:
+      ApiV1RepositoriesNamePullRequestsPullIdMergeRoute,
+  }
+
+const ApiV1RepositoriesNamePullRequestsPullIdRouteWithChildren =
+  ApiV1RepositoriesNamePullRequestsPullIdRoute._addFileChildren(
+    ApiV1RepositoriesNamePullRequestsPullIdRouteChildren,
+  )
+
+interface ApiV1RepositoriesNamePullRequestsRouteChildren {
+  ApiV1RepositoriesNamePullRequestsPullIdRoute: typeof ApiV1RepositoriesNamePullRequestsPullIdRouteWithChildren
+}
+
+const ApiV1RepositoriesNamePullRequestsRouteChildren: ApiV1RepositoriesNamePullRequestsRouteChildren =
+  {
+    ApiV1RepositoriesNamePullRequestsPullIdRoute:
+      ApiV1RepositoriesNamePullRequestsPullIdRouteWithChildren,
+  }
+
+const ApiV1RepositoriesNamePullRequestsRouteWithChildren =
+  ApiV1RepositoriesNamePullRequestsRoute._addFileChildren(
+    ApiV1RepositoriesNamePullRequestsRouteChildren,
+  )
+
+interface ApiV1RepositoriesNameRouteChildren {
+  ApiV1RepositoriesNamePullRequestsRoute: typeof ApiV1RepositoriesNamePullRequestsRouteWithChildren
+}
+
+const ApiV1RepositoriesNameRouteChildren: ApiV1RepositoriesNameRouteChildren = {
+  ApiV1RepositoriesNamePullRequestsRoute:
+    ApiV1RepositoriesNamePullRequestsRouteWithChildren,
+}
+
+const ApiV1RepositoriesNameRouteWithChildren =
+  ApiV1RepositoriesNameRoute._addFileChildren(
+    ApiV1RepositoriesNameRouteChildren,
+  )
+
+interface ApiV1RepositoriesRouteChildren {
+  ApiV1RepositoriesNameRoute: typeof ApiV1RepositoriesNameRouteWithChildren
+}
+
+const ApiV1RepositoriesRouteChildren: ApiV1RepositoriesRouteChildren = {
+  ApiV1RepositoriesNameRoute: ApiV1RepositoriesNameRouteWithChildren,
+}
+
+const ApiV1RepositoriesRouteWithChildren =
+  ApiV1RepositoriesRoute._addFileChildren(ApiV1RepositoriesRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   RepositoriesRoute: RepositoriesRouteWithChildren,
   ApiGitSplatRoute: ApiGitSplatRoute,
+  ApiV1OpenapiDotjsonRoute: ApiV1OpenapiDotjsonRoute,
+  ApiV1RepositoriesRoute: ApiV1RepositoriesRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

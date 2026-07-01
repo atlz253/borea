@@ -7,7 +7,7 @@ Guidance for AI coding agents (and human contributors) working in this repositor
 Nirvana is an open-source software development workspace (analogue of JetBrains Space / Yandex SourceCraft). The MVP is a Git hosting service with repositories, pull/merge requests, code review, and a REST API — a modular monolith deployable as a single Docker container. Currently at the pre-MVP scaffolding stage.
 
 - **Spec:** `docs/MVP.md` — read this before making architectural changes.
-- **Decisions:** `docs/ADR/README.md` — index of all ADRs (0001–0009). Record any new architectural decision as a numbered ADR before implementing it.
+- **Decisions:** `docs/ADR/README.md` — index of all ADRs (0001–0017). Record any new architectural decision as a numbered ADR before implementing it.
 
 ## Tech Stack
 
@@ -21,6 +21,7 @@ Nirvana is an open-source software development workspace (analogue of JetBrains 
 - **Tests:** Vitest 4 + Testing Library + jsdom; E2E via Playwright 1 (`tests/e2e/`, `playwright.config.ts`)
 - **Git operations:** system Git CLI via execa
 - **Validation:** Zod v4
+- **OpenAPI:** `@asteasolutions/zod-to-openapi`, OpenAPI 3.1
 - **Language:** TypeScript, strict mode, `verbatimModuleSyntax`
 
 ## Commands
@@ -71,14 +72,14 @@ npm run format      # Biome format
 | --- | --- |
 | `docs/MVP.md` | Technical specification — source of truth for requirements |
 | `docs/ADR/` | Architecture Decision Records |
-| `docs/ADR/README.md` | ADR index (0001–0009) |
+| `docs/ADR/README.md` | ADR index (0001–0017) |
 | `docs/architecture.md` | Architecture overview for developers |
 | `docs/git-http.md` | User guide for clone/push over HTTP |
 | `docs/repository-page.md` | User guide for repository UI pages |
 | `docs/commit-diff.md` | User guide for commit diff viewing |
 | `docs/security/noauth-mode.md` | NoAuth mode documentation |
 | `CONTRIBUTING.md` | Contributor guide |
-| `API.md` | API reference (Git smart-HTTP) |
+| `API.md` | REST API v1 and Git smart-HTTP reference |
 | `src/routes/__root.tsx` | Root document shell (HTML, head, header/footer, devtools) |
 | `src/routes/` | File-based route definitions |
 | `src/router.tsx` | Router factory + router type registration (`declare module`) |
@@ -96,6 +97,7 @@ npm run format      # Biome format
 | `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
 | `src/platform/config/` | AppConfig: `storagePath`, `pullRequestsPath`, `gitBinPath` — sourced from env (`REPOSITORIES_PATH`, `PULL_REQUESTS_PATH`, `GIT_BIN_PATH`) |
 | `src/routes/api/` | Server routes for REST API and Git HTTP — delegates to module services |
+| `src/routes/api/v1/` | Versioned repository and pull request REST API routes |
 | `src/components/` | Shared presentational components |
 | `src/theme.ts` | Mantine theme customization (default: neutral dev-tool palette) |
 | `vite.config.ts` | Vite plugins: devtools, nitro, tanstackStart, react |

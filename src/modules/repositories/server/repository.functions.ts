@@ -7,6 +7,7 @@ import {
 	createRepository,
 	createRepositoryBranch,
 	deleteRepository,
+	getRepository,
 	getRepositoryCommit,
 	getRepositoryCommitDiff,
 	getRepositoryFile,
@@ -33,6 +34,12 @@ export const listRepositoriesFn = createServerFn({ method: "GET" }).handler(
 	},
 );
 
+export const getRepositoryFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => listBranchesSchema.parse(data))
+	.handler(async ({ data }) => {
+		return getRepository(gitProvider, data.name);
+	});
+
 export const createRepositoryFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => createRepositorySchema.parse(data))
 	.handler(async ({ data }) => {
@@ -47,6 +54,12 @@ const pullRequestDataDeleter = {
 
 export const deleteRepositoryFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => deleteRepositorySchema.parse(data))
+	.handler(async ({ data }) => {
+		await deleteRepository(gitProvider, pullRequestDataDeleter, data.name);
+	});
+
+export const deleteRepositoryApiFn = createServerFn({ method: "POST" })
+	.validator((data: unknown) => listBranchesSchema.parse(data))
 	.handler(async ({ data }) => {
 		await deleteRepository(gitProvider, pullRequestDataDeleter, data.name);
 	});

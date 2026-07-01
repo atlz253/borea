@@ -7,6 +7,7 @@ import type {
 	GitProvider,
 	TreeEntry,
 } from "#/modules/git";
+import { NotFoundError } from "#/platform/errors";
 import type { CreateRepositoryInput, Repository } from "./schemas";
 
 interface PullRequestDataDeleter {
@@ -33,6 +34,17 @@ export async function listRepositories(
 	gitProvider: GitProvider,
 ): Promise<Repository[]> {
 	return gitProvider.list();
+}
+
+export async function getRepository(
+	gitProvider: GitProvider,
+	name: string,
+): Promise<Repository> {
+	const repository = await gitProvider.get(name);
+	if (!repository) {
+		throw new NotFoundError(`Repository "${name}" not found`);
+	}
+	return repository;
 }
 
 export async function listRepositoryFiles(
