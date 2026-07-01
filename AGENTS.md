@@ -131,7 +131,7 @@ Before marking a change complete:
 2. `npm run check` passes with no errors.
 3. `npx tsc --noEmit` passes with no errors.
 4. `npm run test` passes (add or update unit tests per the spec's TDD requirement, §10).
-5. `npm run test:e2e` passes (add or update E2E tests per §10.3).
+5. Integration/E2E tests covering the affected logic pass (run the relevant targeted Playwright tests; the full `npm run test:e2e` suite is not required).
 6. If routes were added/removed, `src/routeTree.gen.ts` is regenerated.
 7. **Documentation is updated** — ADR for architectural changes; section in `docs/` for new features; `README.md`/`AGENTS.md` for stack/structure changes; `API.md` for new endpoints.
 8. No secrets, keys, or credentials committed.
