@@ -69,6 +69,16 @@ export const listFilesSchema = z.object({
 	ref: refSchema.optional(),
 });
 
+export const getFileSchema = z.object({
+	name: repoNameSchema,
+	path: repoPathSchema.refine(
+		(path) => path.length > 0,
+		"File path is required",
+	),
+	ref: refSchema.optional(),
+	loadLarge: z.boolean().optional().default(false),
+});
+
 const MAX_COMMIT_LIMIT = 500;
 
 export const listCommitsSchema = z.object({

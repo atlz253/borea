@@ -1,0 +1,12 @@
+const BYTES_PER_KIBIBYTE = 1024;
+const KIBIBYTES_PER_MEBIBYTE = 1024;
+const LARGE_FILE_LIMIT_MIB = 25;
+
+export const FILE_PREVIEW_MAX_BYTES =
+	BYTES_PER_KIBIBYTE * KIBIBYTES_PER_MEBIBYTE;
+export const FILE_OPEN_MAX_BYTES =
+	LARGE_FILE_LIMIT_MIB * FILE_PREVIEW_MAX_BYTES;
+
+export function resolveFileReadLimit(loadLarge: boolean): number {
+	return loadLarge ? FILE_OPEN_MAX_BYTES : FILE_PREVIEW_MAX_BYTES;
+}

@@ -1,0 +1,127 @@
+html[data-mantine-color-scheme="light"] .mantine-CodeHighlight-codeHighlight {
+	--ch-background: #ffffff;
+	--syntax-text: #24292e;
+	--syntax-keyword: #d73a49;
+	--syntax-entity: #6f42c1;
+	--syntax-constant: #005cc5;
+	--syntax-string: #032f62;
+	--syntax-variable: #e36209;
+	--syntax-comment: #6a737d;
+	--syntax-tag: #22863a;
+	--syntax-heading: #005cc5;
+	--syntax-list: #735c0f;
+	--syntax-addition: #22863a;
+	--syntax-addition-bg: #f0fff4;
+	--syntax-deletion: #b31d28;
+	--syntax-deletion-bg: #ffeef0;
+}
+
+html[data-mantine-color-scheme="dark"] .mantine-CodeHighlight-codeHighlight {
+	--ch-background: #0d1117;
+	--syntax-text: #c9d1d9;
+	--syntax-keyword: #ff7b72;
+	--syntax-entity: #d2a8ff;
+	--syntax-constant: #79c0ff;
+	--syntax-string: #a5d6ff;
+	--syntax-variable: #ffa657;
+	--syntax-comment: #8b949e;
+	--syntax-tag: #7ee787;
+	--syntax-heading: #1f6feb;
+	--syntax-list: #f2cc60;
+	--syntax-addition: #aff5b4;
+	--syntax-addition-bg: #033a16;
+	--syntax-deletion: #ffdcd7;
+	--syntax-deletion-bg: #67060c;
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs {
+	color: var(--syntax-text);
+	background-color: var(--ch-background);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-doctag,
+.mantine-CodeHighlight-codeHighlight .hljs-keyword,
+.mantine-CodeHighlight-codeHighlight .hljs-meta .hljs-keyword,
+.mantine-CodeHighlight-codeHighlight .hljs-template-tag,
+.mantine-CodeHighlight-codeHighlight .hljs-template-variable,
+.mantine-CodeHighlight-codeHighlight .hljs-type,
+.mantine-CodeHighlight-codeHighlight .hljs-variable.language_ {
+	color: var(--syntax-keyword);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-title,
+.mantine-CodeHighlight-codeHighlight .hljs-title.class_,
+.mantine-CodeHighlight-codeHighlight .hljs-title.class_.inherited__,
+.mantine-CodeHighlight-codeHighlight .hljs-title.function_ {
+	color: var(--syntax-entity);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-attr,
+.mantine-CodeHighlight-codeHighlight .hljs-attribute,
+.mantine-CodeHighlight-codeHighlight .hljs-literal,
+.mantine-CodeHighlight-codeHighlight .hljs-meta,
+.mantine-CodeHighlight-codeHighlight .hljs-number,
+.mantine-CodeHighlight-codeHighlight .hljs-operator,
+.mantine-CodeHighlight-codeHighlight .hljs-variable,
+.mantine-CodeHighlight-codeHighlight .hljs-selector-attr,
+.mantine-CodeHighlight-codeHighlight .hljs-selector-class,
+.mantine-CodeHighlight-codeHighlight .hljs-selector-id {
+	color: var(--syntax-constant);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-regexp,
+.mantine-CodeHighlight-codeHighlight .hljs-string,
+.mantine-CodeHighlight-codeHighlight .hljs-meta .hljs-string {
+	color: var(--syntax-string);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-built_in,
+.mantine-CodeHighlight-codeHighlight .hljs-symbol {
+	color: var(--syntax-variable);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-comment,
+.mantine-CodeHighlight-codeHighlight .hljs-code,
+.mantine-CodeHighlight-codeHighlight .hljs-formula {
+	color: var(--syntax-comment);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-name,
+.mantine-CodeHighlight-codeHighlight .hljs-quote,
+.mantine-CodeHighlight-codeHighlight .hljs-selector-tag,
+.mantine-CodeHighlight-codeHighlight .hljs-selector-pseudo {
+	color: var(--syntax-tag);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-subst,
+.mantine-CodeHighlight-codeHighlight .hljs-emphasis,
+.mantine-CodeHighlight-codeHighlight .hljs-strong {
+	color: var(--syntax-text);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-section {
+	color: var(--syntax-heading);
+	font-weight: bold;
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-bullet {
+	color: var(--syntax-list);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-emphasis {
+	font-style: italic;
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-strong {
+	font-weight: bold;
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-addition {
+	color: var(--syntax-addition);
+	background-color: var(--syntax-addition-bg);
+}
+
+.mantine-CodeHighlight-codeHighlight .hljs-deletion {
+	color: var(--syntax-deletion);
+	background-color: var(--syntax-deletion-bg);
+}

@@ -2,9 +2,9 @@ import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { DiffFile, DiffHunk, DiffLine } from "#/modules/git";
+import { detectLanguage } from "#/utils/code-language";
 import {
 	buildDiffRows,
-	detectLanguage,
 	getHighlightedLine,
 	default as SplitDiffView,
 } from "./SplitDiffView";

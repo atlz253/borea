@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { GitProvider } from "#/modules/git";
 import {
 	createRepository,
+	getRepositoryFile,
 	listRepositories,
 	listRepositoryFiles,
 } from "./repository.service";
@@ -12,6 +13,7 @@ function createMockGit(): GitProvider {
 		list: vi.fn(),
 		exists: vi.fn(),
 		listFiles: vi.fn(),
+		getFile: vi.fn(),
 		advertiseRefs: vi.fn(),
 		invokeService: vi.fn(),
 		listBranches: vi.fn(),
@@ -78,6 +80,7 @@ describe("listRepositoryFiles", () => {
 		expect(mockGit.exists).toHaveBeenCalledWith("my-repo");
 		expect(mockGit.listFiles).toHaveBeenCalledWith("my-repo", {
 			path: undefined,
+			ref: undefined,
 		});
 		expect(result).toBe(entries);
 	});
@@ -91,6 +94,7 @@ describe("listRepositoryFiles", () => {
 
 		expect(mockGit.listFiles).toHaveBeenCalledWith("my-repo", {
 			path: "src/components",
+			ref: undefined,
 		});
 	});
 
@@ -102,5 +106,44 @@ describe("listRepositoryFiles", () => {
 			/not found/,
 		);
 		expect(mockGit.listFiles).not.toHaveBeenCalled();
+	});
+});
+
+describe("getRepositoryFile", () => {
+	it("delegates to gitProvider.getFile with the server-selected limit", async () => {
+		const mockGit = createMockGit();
+		const expected = {
+			status: "text" as const,
+			path: "README.md",
+			size: 6,
+			content: "hello\n",
+		};
+		vi.mocked(mockGit.exists).mockResolvedValue(true);
+		vi.mocked(mockGit.getFile).mockResolvedValue(expected);
+
+		const result = await getRepositoryFile(
+			mockGit,
+			"my-repo",
+			"README.md",
+			"main",
+			1024,
+		);
+
+		expect(mockGit.getFile).toHaveBeenCalledWith("my-repo", {
+			path: "README.md",
+			ref: "main",
+			maxBytes: 1024,
+		});
+		expect(result).toBe(expected);
+	});
+
+	it("does not read a file when the repository does not exist", async () => {
+		const mockGit = createMockGit();
+		vi.mocked(mockGit.exists).mockResolvedValue(false);
+
+		await expect(
+			getRepositoryFile(mockGit, "missing", "README.md", "main", 1024),
+		).rejects.toThrow(/not found/);
+		expect(mockGit.getFile).not.toHaveBeenCalled();
 	});
 });

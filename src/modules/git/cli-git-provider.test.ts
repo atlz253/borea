@@ -9,7 +9,7 @@ import { CliGitProvider } from "./providers/cli-git-provider";
 async function seedCommits(
 	provider: CliGitProvider,
 	repoName: string,
-	files: Record<string, string>,
+	files: Record<string, string | Uint8Array>,
 ): Promise<void> {
 	const storagePath = (provider as unknown as { storagePath: string })
 		.storagePath;

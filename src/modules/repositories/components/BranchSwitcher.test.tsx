@@ -130,6 +130,22 @@ describe("BranchSwitcher", () => {
 		});
 	});
 
+	it("navigates to the same blob path when currentBlobPath is set", async () => {
+		renderSwitcher({ currentBlobPath: "src/index.ts" });
+		const user = userEvent.setup();
+
+		await user.click(screen.getByText("develop"));
+
+		expect(navigateFn).toHaveBeenCalledWith({
+			to: "/repositories/$name/blob/$branch/$",
+			params: {
+				name: "my-repo",
+				branch: "develop",
+				_splat: "src/index.ts",
+			},
+		});
+	});
+
 	it("navigates to commits when toCommits is set", async () => {
 		renderSwitcher({ toCommits: true });
 		const user = userEvent.setup();

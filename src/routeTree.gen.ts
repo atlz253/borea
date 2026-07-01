@@ -23,6 +23,7 @@ import { Route as RepositoriesNamePullsPullIdIndexRouteImport } from './routes/r
 import { Route as RepositoriesNameTreeBranchCommitsRouteImport } from './routes/repositories.$name.tree.$branch.commits'
 import { Route as RepositoriesNameTreeBranchSplatRouteImport } from './routes/repositories.$name.tree.$branch.$'
 import { Route as RepositoriesNamePullsPullIdFilesRouteImport } from './routes/repositories.$name.pulls.$pullId.files'
+import { Route as RepositoriesNameBlobBranchSplatRouteImport } from './routes/repositories.$name.blob.$branch.$'
 import { Route as RepositoriesNameTreeBranchCommitsIndexRouteImport } from './routes/repositories.$name.tree.$branch.commits.index'
 import { Route as RepositoriesNameTreeBranchCommitsShaRouteImport } from './routes/repositories.$name.tree.$branch.commits.$sha'
 
@@ -104,6 +105,12 @@ const RepositoriesNamePullsPullIdFilesRoute =
     path: '/files',
     getParentRoute: () => RepositoriesNamePullsPullIdRoute,
   } as any)
+const RepositoriesNameBlobBranchSplatRoute =
+  RepositoriesNameBlobBranchSplatRouteImport.update({
+    id: '/blob/$branch/$',
+    path: '/blob/$branch/$',
+    getParentRoute: () => RepositoriesNameRoute,
+  } as any)
 const RepositoriesNameTreeBranchCommitsIndexRoute =
   RepositoriesNameTreeBranchCommitsIndexRouteImport.update({
     id: '/',
@@ -127,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/repositories/$name/pulls/$pullId': typeof RepositoriesNamePullsPullIdRouteWithChildren
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls/': typeof RepositoriesNamePullsIndexRoute
+  '/repositories/$name/blob/$branch/$': typeof RepositoriesNameBlobBranchSplatRoute
   '/repositories/$name/pulls/$pullId/files': typeof RepositoriesNamePullsPullIdFilesRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
   '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRouteWithChildren
@@ -142,6 +150,7 @@ export interface FileRoutesByTo {
   '/repositories/$name': typeof RepositoriesNameIndexRoute
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls': typeof RepositoriesNamePullsIndexRoute
+  '/repositories/$name/blob/$branch/$': typeof RepositoriesNameBlobBranchSplatRoute
   '/repositories/$name/pulls/$pullId/files': typeof RepositoriesNamePullsPullIdFilesRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
   '/repositories/$name/pulls/$pullId': typeof RepositoriesNamePullsPullIdIndexRoute
@@ -160,6 +169,7 @@ export interface FileRoutesById {
   '/repositories/$name/pulls/$pullId': typeof RepositoriesNamePullsPullIdRouteWithChildren
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls/': typeof RepositoriesNamePullsIndexRoute
+  '/repositories/$name/blob/$branch/$': typeof RepositoriesNameBlobBranchSplatRoute
   '/repositories/$name/pulls/$pullId/files': typeof RepositoriesNamePullsPullIdFilesRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
   '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRouteWithChildren
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/repositories/$name/pulls/$pullId'
     | '/repositories/$name/pulls/new'
     | '/repositories/$name/pulls/'
+    | '/repositories/$name/blob/$branch/$'
     | '/repositories/$name/pulls/$pullId/files'
     | '/repositories/$name/tree/$branch/$'
     | '/repositories/$name/tree/$branch/commits'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/repositories/$name'
     | '/repositories/$name/pulls/new'
     | '/repositories/$name/pulls'
+    | '/repositories/$name/blob/$branch/$'
     | '/repositories/$name/pulls/$pullId/files'
     | '/repositories/$name/tree/$branch/$'
     | '/repositories/$name/pulls/$pullId'
@@ -212,6 +224,7 @@ export interface FileRouteTypes {
     | '/repositories/$name/pulls/$pullId'
     | '/repositories/$name/pulls/new'
     | '/repositories/$name/pulls/'
+    | '/repositories/$name/blob/$branch/$'
     | '/repositories/$name/pulls/$pullId/files'
     | '/repositories/$name/tree/$branch/$'
     | '/repositories/$name/tree/$branch/commits'
@@ -327,6 +340,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RepositoriesNamePullsPullIdFilesRouteImport
       parentRoute: typeof RepositoriesNamePullsPullIdRoute
     }
+    '/repositories/$name/blob/$branch/$': {
+      id: '/repositories/$name/blob/$branch/$'
+      path: '/blob/$branch/$'
+      fullPath: '/repositories/$name/blob/$branch/$'
+      preLoaderRoute: typeof RepositoriesNameBlobBranchSplatRouteImport
+      parentRoute: typeof RepositoriesNameRoute
+    }
     '/repositories/$name/tree/$branch/commits/': {
       id: '/repositories/$name/tree/$branch/commits/'
       path: '/'
@@ -385,6 +405,7 @@ interface RepositoriesNameRouteChildren {
   RepositoriesNamePullsPullIdRoute: typeof RepositoriesNamePullsPullIdRouteWithChildren
   RepositoriesNamePullsNewRoute: typeof RepositoriesNamePullsNewRoute
   RepositoriesNamePullsIndexRoute: typeof RepositoriesNamePullsIndexRoute
+  RepositoriesNameBlobBranchSplatRoute: typeof RepositoriesNameBlobBranchSplatRoute
   RepositoriesNameTreeBranchSplatRoute: typeof RepositoriesNameTreeBranchSplatRoute
   RepositoriesNameTreeBranchCommitsRoute: typeof RepositoriesNameTreeBranchCommitsRouteWithChildren
   RepositoriesNameTreeBranchIndexRoute: typeof RepositoriesNameTreeBranchIndexRoute
@@ -396,6 +417,7 @@ const RepositoriesNameRouteChildren: RepositoriesNameRouteChildren = {
     RepositoriesNamePullsPullIdRouteWithChildren,
   RepositoriesNamePullsNewRoute: RepositoriesNamePullsNewRoute,
   RepositoriesNamePullsIndexRoute: RepositoriesNamePullsIndexRoute,
+  RepositoriesNameBlobBranchSplatRoute: RepositoriesNameBlobBranchSplatRoute,
   RepositoriesNameTreeBranchSplatRoute: RepositoriesNameTreeBranchSplatRoute,
   RepositoriesNameTreeBranchCommitsRoute:
     RepositoriesNameTreeBranchCommitsRouteWithChildren,

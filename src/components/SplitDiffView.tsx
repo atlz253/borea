@@ -1,6 +1,7 @@
 import { Badge, Code, Group, Paper, Text } from "@mantine/core";
 import hljs from "highlight.js";
 import type { DiffFile, DiffHunk, DiffLine } from "#/modules/git";
+import { detectLanguage } from "#/utils/code-language";
 
 interface SplitDiffViewProps {
 	file: DiffFile;
@@ -303,56 +304,6 @@ function buildDiffRows(hunk: DiffHunk): Array<{
 	}
 
 	return rows;
-}
-
-const LANG_MAP: Record<string, string> = {
-	ts: "typescript",
-	tsx: "tsx",
-	js: "javascript",
-	jsx: "jsx",
-	json: "json",
-	md: "markdown",
-	css: "css",
-	scss: "scss",
-	less: "less",
-	html: "html",
-	yaml: "yaml",
-	yml: "yaml",
-	xml: "xml",
-	sh: "bash",
-	bash: "bash",
-	zsh: "bash",
-	py: "python",
-	rb: "ruby",
-	rs: "rust",
-	go: "go",
-	java: "java",
-	kt: "kotlin",
-	swift: "swift",
-	c: "c",
-	cpp: "cpp",
-	h: "c",
-	hpp: "cpp",
-	cs: "csharp",
-	php: "php",
-	r: "r",
-	dart: "dart",
-	sql: "sql",
-	graphql: "graphql",
-	svelte: "svelte",
-	vue: "vue",
-	astro: "astro",
-	toml: "ini",
-	cfg: "ini",
-	env: "ini",
-	gitignore: "plaintext",
-	lock: "plaintext",
-	snap: "plaintext",
-};
-
-export function detectLanguage(filename: string): string {
-	const ext = filename.split(".").pop()?.toLowerCase() ?? "";
-	return LANG_MAP[ext] ?? "plaintext";
 }
 
 export function getHighlightedLine(

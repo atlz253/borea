@@ -10,6 +10,7 @@ interface BranchSwitcherProps {
 	branches: BranchInfo[];
 	selectedBranch: string;
 	currentTreePath?: string;
+	currentBlobPath?: string;
 	toCommits?: boolean;
 }
 
@@ -18,6 +19,7 @@ export default function BranchSwitcher({
 	branches,
 	selectedBranch,
 	currentTreePath,
+	currentBlobPath,
 	toCommits,
 }: BranchSwitcherProps) {
 	const navigate = useNavigate();
@@ -36,6 +38,15 @@ export default function BranchSwitcher({
 			void navigate({
 				to: "/repositories/$name/tree/$branch/commits" as const,
 				params: { name: repoName, branch: encodedBranch },
+			});
+		} else if (currentBlobPath) {
+			void navigate({
+				to: "/repositories/$name/blob/$branch/$" as const,
+				params: {
+					name: repoName,
+					branch: encodedBranch,
+					_splat: currentBlobPath,
+				},
 			});
 		} else if (currentTreePath) {
 			void navigate({

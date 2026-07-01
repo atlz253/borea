@@ -1,11 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { gitProvider } from "#/modules/git";
+import { resolveFileReadLimit } from "../file-limits";
 import {
 	countRepositoryCommits,
 	createRepository,
 	createRepositoryBranch,
 	getRepositoryCommit,
 	getRepositoryCommitDiff,
+	getRepositoryFile,
 	listRepositories,
 	listRepositoryBranches,
 	listRepositoryCommits,
@@ -16,6 +18,7 @@ import {
 	createBranchSchema,
 	createRepositorySchema,
 	getCommitDiffSchema,
+	getFileSchema,
 	listBranchesSchema,
 	listCommitsSchema,
 	listFilesSchema,
@@ -37,6 +40,18 @@ export const listRepositoryFilesFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => listFilesSchema.parse(data))
 	.handler(async ({ data }) => {
 		return listRepositoryFiles(gitProvider, data.name, data.path, data.ref);
+	});
+
+export const getRepositoryFileFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => getFileSchema.parse(data))
+	.handler(async ({ data }) => {
+		return getRepositoryFile(
+			gitProvider,
+			data.name,
+			data.path,
+			data.ref,
+			resolveFileReadLimit(data.loadLarge),
+		);
 	});
 
 export const listBranchesFn = createServerFn({ method: "GET" })

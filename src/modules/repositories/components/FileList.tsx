@@ -123,10 +123,20 @@ export default function FileList({
 				</Group>
 			</Link>
 		) : (
-			<Group gap="xs">
-				{icon}
-				<Text>{entry.name}</Text>
-			</Group>
+			<Link
+				to="/repositories/$name/blob/$branch/$"
+				params={{
+					name: repoName,
+					branch: encodedBranch,
+					_splat: childPath(currentPath, entry.name),
+				}}
+				style={LINK_STYLE}
+			>
+				<Group gap="xs">
+					{icon}
+					<Text>{entry.name}</Text>
+				</Group>
+			</Link>
 		);
 
 		rows.push(

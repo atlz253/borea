@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { type ExecaError, execa } from "execa";
@@ -10,6 +10,7 @@ import type {
 	CommitInfo,
 	DiffFile,
 	GetCommitDiffResult,
+	GetFileOptions,
 	GitProvider,
 	GitService,
 	ListCommitsOptions,
@@ -20,6 +21,7 @@ import type {
 	RepositoryInfo,
 	TreeEntry,
 } from "../git-provider";
+import { readFileContent } from "./cli-git-file";
 import {
 	computeDiff,
 	computeMergeTree,
@@ -38,8 +40,8 @@ import {
 	parseNameStatus,
 	parseUnifiedDiff,
 } from "./cli-git-parsers";
+import { readRepositoryInfo } from "./cli-git-repository";
 import {
-	DEFAULT_DESC,
 	normalizePath,
 	resolvePath,
 	validateName,
@@ -145,6 +147,10 @@ export class CliGitProvider implements GitProvider {
 		}
 
 		return parseLsTree(output);
+	}
+
+	async getFile(name: string, options: GetFileOptions) {
+		return readFileContent(this.gitBin, this.storagePath, name, options);
 	}
 
 	async createBranch(
@@ -573,27 +579,7 @@ export class CliGitProvider implements GitProvider {
 		name: string,
 		repoPath: string,
 	): Promise<RepositoryInfo> {
-		let description: string | undefined;
-
-		try {
-			const descContent = await readFile(
-				path.join(repoPath, "description"),
-				"utf-8",
-			);
-			const trimmed = descContent.trim();
-			if (trimmed && trimmed !== DEFAULT_DESC) {
-				description = trimmed;
-			}
-		} catch {
-			// description file missing
-		}
-
-		const stats = await stat(repoPath);
-		return {
-			name,
-			description,
-			createdAt: stats.birthtime ?? stats.mtime,
-		};
+		return readRepositoryInfo(name, repoPath);
 	}
 }
 

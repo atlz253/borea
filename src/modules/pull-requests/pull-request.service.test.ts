@@ -9,6 +9,7 @@ function createMockGit(): GitProvider {
 		list: vi.fn(),
 		exists: vi.fn(),
 		listFiles: vi.fn(),
+		getFile: vi.fn(),
 		advertiseRefs: vi.fn(),
 		invokeService: vi.fn(),
 		listBranches: vi.fn(),

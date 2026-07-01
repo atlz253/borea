@@ -70,11 +70,13 @@ describe("FileList", () => {
 		expect(docsLink?.getAttribute("data-splat")).toBe("src/components/docs");
 	});
 
-	it("does not render files as links", () => {
+	it("renders files as blob links", () => {
 		renderList();
 
-		expect(screen.getByText("README.md").closest("a")).toBeNull();
-		expect(screen.getByText("package.json").closest("a")).toBeNull();
+		const readmeLink = screen.getByText("README.md").closest("a");
+		const packageLink = screen.getByText("package.json").closest("a");
+		expect(readmeLink?.getAttribute("data-splat")).toBe("README.md");
+		expect(packageLink?.getAttribute("data-splat")).toBe("package.json");
 	});
 
 	it("sorts directories before files", () => {

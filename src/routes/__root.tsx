@@ -1,5 +1,10 @@
 import "@mantine/core/styles.css";
 import "@mantine/code-highlight/styles.css";
+import "../styles/code-highlight.css";
+import {
+	CodeHighlightAdapterProvider,
+	createHighlightJsAdapter,
+} from "@mantine/code-highlight";
 import {
 	ColorSchemeScript,
 	MantineProvider,
@@ -8,8 +13,11 @@ import {
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import hljs from "highlight.js";
 import AppShellLayout from "../components/AppShellLayout";
 import { theme } from "../theme";
+
+const codeHighlightAdapter = createHighlightJsAdapter(hljs);
 
 export const Route = createRootRoute({
 	head: () => ({
@@ -50,7 +58,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					defaultColorScheme="auto"
 					deduplicateInlineStyles
 				>
-					<AppShellLayout>{children}</AppShellLayout>
+					<CodeHighlightAdapterProvider adapter={codeHighlightAdapter}>
+						<AppShellLayout>{children}</AppShellLayout>
+					</CodeHighlightAdapterProvider>
 				</MantineProvider>
 				<TanStackDevtools
 					config={{ position: "bottom-right" }}

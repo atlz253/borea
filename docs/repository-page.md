@@ -63,8 +63,19 @@ Below the clone URL is the file browser — a table with two columns: **Name** a
 
 - **Directories** are listed first (with a folder icon), followed by **files** (with a file icon), sorted alphabetically.
 - Click a directory name to navigate inside it.
+- Click a file name to open its contents at `/repositories/<name>/blob/<branch>/<path>`.
 - Use the **`..`** entry at the top to go up one level.
 - **Breadcrumbs** above the table show your current path inside the repository. Click any part of the breadcrumb to jump directly to that folder.
+
+### File Contents
+
+UTF-8 text files up to 1 MiB open with syntax highlighting, line numbers, and a copy button. The language is detected from the file extension; unknown extensions are shown as plain text. The editor colors follow the application's light or dark theme.
+
+For files between 1 and 25 MiB, the page first displays a large-file warning. Click **"Open file"** to load the contents without syntax highlighting. Line numbers and copying remain available.
+
+Binary files cannot be displayed. Files larger than 25 MiB are not loaded in the browser. Image previews, raw downloads, streaming, and non-UTF-8 encodings are not supported.
+
+The branch switcher preserves the file path. If the file does not exist on the selected branch, the page displays an error.
 
 ### Empty Repository
 

@@ -18,6 +18,35 @@ export interface ListFilesOptions {
 	ref?: string;
 }
 
+export interface GetFileOptions {
+	path: string;
+	ref?: string;
+	maxBytes: number;
+}
+
+interface FileContentBase {
+	path: string;
+	size: number;
+}
+
+export interface TextFileContent extends FileContentBase {
+	status: "text";
+	content: string;
+}
+
+export interface BinaryFileContent extends FileContentBase {
+	status: "binary";
+}
+
+export interface TooLargeFileContent extends FileContentBase {
+	status: "too-large";
+}
+
+export type FileContent =
+	| TextFileContent
+	| BinaryFileContent
+	| TooLargeFileContent;
+
 export type GitService = "git-upload-pack" | "git-receive-pack";
 
 export interface BranchInfo {
@@ -104,6 +133,7 @@ export interface GitProvider {
 	list(): Promise<RepositoryInfo[]>;
 	exists(name: string): Promise<boolean>;
 	listFiles(name: string, options?: ListFilesOptions): Promise<TreeEntry[]>;
+	getFile(name: string, options: GetFileOptions): Promise<FileContent>;
 	advertiseRefs(
 		name: string,
 		service: GitService,

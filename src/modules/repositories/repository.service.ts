@@ -2,6 +2,7 @@ import type {
 	BranchInfo,
 	CommitDetail,
 	CommitInfo,
+	FileContent,
 	GetCommitDiffResult,
 	GitProvider,
 	TreeEntry,
@@ -31,6 +32,19 @@ export async function listRepositoryFiles(
 		throw new Error(`Repository "${name}" not found`);
 	}
 	return gitProvider.listFiles(name, { path, ref });
+}
+
+export async function getRepositoryFile(
+	gitProvider: GitProvider,
+	name: string,
+	path: string,
+	ref: string | undefined,
+	maxBytes: number,
+): Promise<FileContent> {
+	if (!(await gitProvider.exists(name))) {
+		throw new Error(`Repository "${name}" not found`);
+	}
+	return gitProvider.getFile(name, { path, ref, maxBytes });
 }
 
 export async function listRepositoryBranches(

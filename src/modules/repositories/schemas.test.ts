@@ -3,6 +3,7 @@ import {
 	branchNameSchema,
 	createBranchSchema,
 	createRepositorySchema,
+	getFileSchema,
 	listFilesSchema,
 	repoNameSchema,
 	treeEntrySchema,
@@ -43,6 +44,30 @@ describe("repoNameSchema", () => {
 
 	it("rejects overly long names", () => {
 		expect(() => repoNameSchema.parse("a".repeat(101))).toThrow();
+	});
+});
+
+describe("getFileSchema", () => {
+	it("accepts a relative path and defaults loadLarge to false", () => {
+		expect(
+			getFileSchema.parse({
+				name: "my-repo",
+				path: "src/index.ts",
+				ref: "main",
+			}),
+		).toEqual({
+			name: "my-repo",
+			path: "src/index.ts",
+			ref: "main",
+			loadLarge: false,
+		});
+	});
+
+	it("rejects an empty or parent-relative path", () => {
+		expect(() => getFileSchema.parse({ name: "my-repo", path: "" })).toThrow();
+		expect(() =>
+			getFileSchema.parse({ name: "my-repo", path: "../secret" }),
+		).toThrow();
 	});
 });
 
