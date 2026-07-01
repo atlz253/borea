@@ -23,6 +23,8 @@ function RepositoryLayout() {
 
 	const pathname = location.pathname;
 	const isPulls = pathname.startsWith(`/repositories/${name}/pulls`);
+	const isSettings = pathname.startsWith(`/repositories/${name}/settings`);
+	const activeTab = isSettings ? "settings" : isPulls ? "pulls" : "code";
 
 	return (
 		<>
@@ -39,7 +41,7 @@ function RepositoryLayout() {
 					</Text>
 				</Group>
 
-				<Tabs value={isPulls ? "pulls" : "code"} mb="lg">
+				<Tabs value={activeTab} mb="lg">
 					<Tabs.List>
 						<Tabs.Tab
 							value="code"
@@ -59,6 +61,17 @@ function RepositoryLayout() {
 							}
 						>
 							Pull requests
+						</Tabs.Tab>
+						<Tabs.Tab
+							value="settings"
+							onClick={() =>
+								navigate({
+									to: "/repositories/$name/settings",
+									params: { name },
+								})
+							}
+						>
+							Settings
 						</Tabs.Tab>
 					</Tabs.List>
 				</Tabs>

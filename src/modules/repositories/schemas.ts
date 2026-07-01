@@ -30,6 +30,16 @@ export const createRepositorySchema = z.object({
 		.default(""),
 });
 
+export const deleteRepositorySchema = z
+	.object({
+		name: repoNameSchema,
+		confirmation: z.string(),
+	})
+	.refine((data) => data.confirmation === data.name, {
+		message: "Repository name confirmation does not match",
+		path: ["confirmation"],
+	});
+
 export const repositorySchema = z.object({
 	name: z.string(),
 	description: z.string().optional(),
@@ -133,6 +143,7 @@ export const getCommitDiffSchema = z.object({
 });
 
 export type CreateRepositoryInput = z.infer<typeof createRepositorySchema>;
+export type DeleteRepositoryInput = z.infer<typeof deleteRepositorySchema>;
 export type Repository = z.infer<typeof repositorySchema>;
 export type TreeEntryType = z.infer<typeof treeEntryTypeSchema>;
 export type TreeEntry = z.infer<typeof treeEntrySchema>;

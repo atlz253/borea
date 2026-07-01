@@ -118,6 +118,20 @@ describe("FileSystemPullRequestStore", () => {
 		expect(bList[0].repoName).toBe("repo-b");
 	});
 
+	it("deletes all pull requests for one repository", async () => {
+		await store.create({ ...prInput, repoName: "delete-me" });
+		await store.create({ ...prInput, repoName: "keep-me" });
+
+		await store.deleteAll("delete-me");
+
+		expect(await store.list("delete-me")).toEqual([]);
+		expect(await store.list("keep-me")).toHaveLength(1);
+	});
+
+	it("allows deleting pull request data that does not exist", async () => {
+		await expect(store.deleteAll("missing")).resolves.toBeUndefined();
+	});
+
 	it("writes to disk so file exists", async () => {
 		await store.create(prInput);
 		const filePath = join(tmpDir, "my-repo", "1.json");

@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { type ExecaError, execa } from "execa";
@@ -82,6 +82,17 @@ export class CliGitProvider implements GitProvider {
 		}
 
 		return this.getInfo(name, repoPath);
+	}
+
+	async delete(name: string): Promise<void> {
+		validateName(name);
+		const repoPath = resolvePath(this.storagePath, name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		await rm(repoPath, { recursive: true });
 	}
 
 	async list(): Promise<RepositoryInfo[]> {

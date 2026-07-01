@@ -10,11 +10,13 @@ export { default as CommitHistoryPage } from "./pages/CommitHistoryPage";
 export { default as FileContentPage } from "./pages/FileContentPage";
 export { default as RepositoriesPage } from "./pages/RepositoriesPage";
 export { default as RepositoryPage } from "./pages/RepositoryPage";
+export { default as RepositorySettingsPage } from "./pages/RepositorySettingsPage";
 export type { Repository, TreeEntry, TreeEntryType } from "./schemas";
 export {
 	countCommitsFn,
 	createBranchFn,
 	createRepositoryFn,
+	deleteRepositoryFn,
 	getCommitDiffFn,
 	getCommitFn,
 	getRepositoryFileFn,

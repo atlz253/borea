@@ -6,6 +6,7 @@ import type { PullRequestStore } from "./pull-request.store";
 function createMockGit(): GitProvider {
 	return {
 		init: vi.fn(),
+		delete: vi.fn(),
 		list: vi.fn(),
 		exists: vi.fn(),
 		listFiles: vi.fn(),
@@ -30,6 +31,7 @@ function createMockStore(): PullRequestStore {
 		list: vi.fn(),
 		get: vi.fn(),
 		update: vi.fn(),
+		deleteAll: vi.fn(),
 	};
 }
 

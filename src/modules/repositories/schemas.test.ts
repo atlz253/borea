@@ -3,6 +3,7 @@ import {
 	branchNameSchema,
 	createBranchSchema,
 	createRepositorySchema,
+	deleteRepositorySchema,
 	getFileSchema,
 	listFilesSchema,
 	repoNameSchema,
@@ -101,6 +102,41 @@ describe("createRepositorySchema", () => {
 				description: "x".repeat(501),
 			}),
 		).toThrow();
+	});
+});
+
+describe("deleteRepositorySchema", () => {
+	it("accepts an exact repository name confirmation", () => {
+		expect(
+			deleteRepositorySchema.parse({
+				name: "my-repo",
+				confirmation: "my-repo",
+			}),
+		).toEqual({ name: "my-repo", confirmation: "my-repo" });
+	});
+
+	it("rejects a mismatched or differently cased confirmation", () => {
+		expect(() =>
+			deleteRepositorySchema.parse({
+				name: "my-repo",
+				confirmation: "other",
+			}),
+		).toThrow(/does not match/);
+		expect(() =>
+			deleteRepositorySchema.parse({
+				name: "my-repo",
+				confirmation: "My-Repo",
+			}),
+		).toThrow(/does not match/);
+	});
+
+	it("does not trim the confirmation", () => {
+		expect(() =>
+			deleteRepositorySchema.parse({
+				name: "my-repo",
+				confirmation: " my-repo ",
+			}),
+		).toThrow(/does not match/);
 	});
 });
 

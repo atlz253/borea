@@ -130,6 +130,7 @@ export interface GetCommitDiffResult {
 
 export interface GitProvider {
 	init(name: string, description?: string): Promise<RepositoryInfo>;
+	delete(name: string): Promise<void>;
 	list(): Promise<RepositoryInfo[]>;
 	exists(name: string): Promise<boolean>;
 	listFiles(name: string, options?: ListFilesOptions): Promise<TreeEntry[]>;

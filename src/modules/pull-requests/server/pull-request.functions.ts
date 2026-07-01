@@ -23,6 +23,14 @@ export const listPullRequestsFn = createServerFn({ method: "GET" })
 		return service.listPullRequests(data.repoName);
 	});
 
+export const deletePullRequestsForRepositoryFn = createServerFn({
+	method: "POST",
+})
+	.validator((data: unknown) => listPullRequestsSchema.parse(data))
+	.handler(async ({ data }) => {
+		await pullRequestStore.deleteAll(data.repoName);
+	});
+
 export const getPullRequestFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => getPullRequestSchema.parse(data))
 	.handler(async ({ data }) => {

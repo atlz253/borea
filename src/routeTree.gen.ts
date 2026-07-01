@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as RepositoriesIndexRouteImport } from './routes/repositories.index'
 import { Route as RepositoriesNameRouteImport } from './routes/repositories.$name'
 import { Route as RepositoriesNameIndexRouteImport } from './routes/repositories.$name.index'
+import { Route as RepositoriesNameSettingsRouteImport } from './routes/repositories.$name.settings'
 import { Route as ApiGitSplatRouteImport } from './routes/api/git/$'
 import { Route as RepositoriesNamePullsIndexRouteImport } from './routes/repositories.$name.pulls.index'
 import { Route as RepositoriesNamePullsNewRouteImport } from './routes/repositories.$name.pulls.new'
@@ -52,6 +53,12 @@ const RepositoriesNameIndexRoute = RepositoriesNameIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RepositoriesNameRoute,
 } as any)
+const RepositoriesNameSettingsRoute =
+  RepositoriesNameSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => RepositoriesNameRoute,
+  } as any)
 const ApiGitSplatRoute = ApiGitSplatRouteImport.update({
   id: '/api/git/$',
   path: '/api/git/$',
@@ -130,6 +137,7 @@ export interface FileRoutesByFullPath {
   '/repositories/$name': typeof RepositoriesNameRouteWithChildren
   '/repositories/': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/repositories/$name/settings': typeof RepositoriesNameSettingsRoute
   '/repositories/$name/': typeof RepositoriesNameIndexRoute
   '/repositories/$name/pulls/$pullId': typeof RepositoriesNamePullsPullIdRouteWithChildren
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
@@ -147,6 +155,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/repositories': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/repositories/$name/settings': typeof RepositoriesNameSettingsRoute
   '/repositories/$name': typeof RepositoriesNameIndexRoute
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls': typeof RepositoriesNamePullsIndexRoute
@@ -165,6 +174,7 @@ export interface FileRoutesById {
   '/repositories/$name': typeof RepositoriesNameRouteWithChildren
   '/repositories/': typeof RepositoriesIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
+  '/repositories/$name/settings': typeof RepositoriesNameSettingsRoute
   '/repositories/$name/': typeof RepositoriesNameIndexRoute
   '/repositories/$name/pulls/$pullId': typeof RepositoriesNamePullsPullIdRouteWithChildren
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/repositories/$name'
     | '/repositories/'
     | '/api/git/$'
+    | '/repositories/$name/settings'
     | '/repositories/$name/'
     | '/repositories/$name/pulls/$pullId'
     | '/repositories/$name/pulls/new'
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/'
     | '/repositories'
     | '/api/git/$'
+    | '/repositories/$name/settings'
     | '/repositories/$name'
     | '/repositories/$name/pulls/new'
     | '/repositories/$name/pulls'
@@ -220,6 +232,7 @@ export interface FileRouteTypes {
     | '/repositories/$name'
     | '/repositories/'
     | '/api/git/$'
+    | '/repositories/$name/settings'
     | '/repositories/$name/'
     | '/repositories/$name/pulls/$pullId'
     | '/repositories/$name/pulls/new'
@@ -275,6 +288,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/repositories/$name/'
       preLoaderRoute: typeof RepositoriesNameIndexRouteImport
+      parentRoute: typeof RepositoriesNameRoute
+    }
+    '/repositories/$name/settings': {
+      id: '/repositories/$name/settings'
+      path: '/settings'
+      fullPath: '/repositories/$name/settings'
+      preLoaderRoute: typeof RepositoriesNameSettingsRouteImport
       parentRoute: typeof RepositoriesNameRoute
     }
     '/api/git/$': {
@@ -401,6 +421,7 @@ const RepositoriesNameTreeBranchCommitsRouteWithChildren =
   )
 
 interface RepositoriesNameRouteChildren {
+  RepositoriesNameSettingsRoute: typeof RepositoriesNameSettingsRoute
   RepositoriesNameIndexRoute: typeof RepositoriesNameIndexRoute
   RepositoriesNamePullsPullIdRoute: typeof RepositoriesNamePullsPullIdRouteWithChildren
   RepositoriesNamePullsNewRoute: typeof RepositoriesNamePullsNewRoute
@@ -412,6 +433,7 @@ interface RepositoriesNameRouteChildren {
 }
 
 const RepositoriesNameRouteChildren: RepositoriesNameRouteChildren = {
+  RepositoriesNameSettingsRoute: RepositoriesNameSettingsRoute,
   RepositoriesNameIndexRoute: RepositoriesNameIndexRoute,
   RepositoriesNamePullsPullIdRoute:
     RepositoriesNamePullsPullIdRouteWithChildren,

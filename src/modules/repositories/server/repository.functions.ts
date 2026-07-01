@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { gitProvider } from "#/modules/git";
+import { deletePullRequestsForRepositoryFn } from "#/modules/pull-requests";
 import { resolveFileReadLimit } from "../file-limits";
 import {
 	countRepositoryCommits,
 	createRepository,
 	createRepositoryBranch,
+	deleteRepository,
 	getRepositoryCommit,
 	getRepositoryCommitDiff,
 	getRepositoryFile,
@@ -17,6 +19,7 @@ import {
 	countCommitsSchema,
 	createBranchSchema,
 	createRepositorySchema,
+	deleteRepositorySchema,
 	getCommitDiffSchema,
 	getFileSchema,
 	listBranchesSchema,
@@ -34,6 +37,18 @@ export const createRepositoryFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => createRepositorySchema.parse(data))
 	.handler(async ({ data }) => {
 		return createRepository(gitProvider, data);
+	});
+
+const pullRequestDataDeleter = {
+	async deleteAll(repoName: string): Promise<void> {
+		await deletePullRequestsForRepositoryFn({ data: { repoName } });
+	},
+};
+
+export const deleteRepositoryFn = createServerFn({ method: "POST" })
+	.validator((data: unknown) => deleteRepositorySchema.parse(data))
+	.handler(async ({ data }) => {
+		await deleteRepository(gitProvider, pullRequestDataDeleter, data.name);
 	});
 
 export const listRepositoryFilesFn = createServerFn({ method: "GET" })

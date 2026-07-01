@@ -20,6 +20,7 @@ export {
 export {
 	checkMergeStatusFn,
 	createPullRequestFn,
+	deletePullRequestsForRepositoryFn,
 	getPullRequestDiffFn,
 	getPullRequestFn,
 	listPullRequestsFn,

@@ -129,6 +129,21 @@ Click **"Merge"** to merge the pull request. The page updates to show the merged
 - **Merge commit**: Both branches have diverged. A merge commit with two parents is created.
 - **Conflict**: Both branches modified the same file in different ways. The merge is blocked until the conflicts are resolved.
 
+## Repository Settings
+
+Open the **"Settings"** tab on a repository page to manage the repository.
+
+### Deleting a Repository
+
+The **"Danger zone"** section contains the permanent repository deletion
+action. Click **"Delete repository"**, then enter the repository name exactly
+as shown to enable the confirmation button. The confirmation is case-sensitive
+and whitespace is not removed.
+
+Deleting a repository also permanently deletes all pull requests associated
+with it. This action cannot be undone. After deletion, you are returned to the
+repositories list.
+
 ## Tips
 
 - After `git push`, refresh the repository page to see your new files and commits.

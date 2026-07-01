@@ -9,11 +9,24 @@ import type {
 } from "#/modules/git";
 import type { CreateRepositoryInput, Repository } from "./schemas";
 
+interface PullRequestDataDeleter {
+	deleteAll(repoName: string): Promise<void>;
+}
+
 export async function createRepository(
 	gitProvider: GitProvider,
 	input: CreateRepositoryInput,
 ): Promise<Repository> {
 	return gitProvider.init(input.name, input.description);
+}
+
+export async function deleteRepository(
+	gitProvider: GitProvider,
+	pullRequestDataDeleter: PullRequestDataDeleter,
+	name: string,
+): Promise<void> {
+	await gitProvider.delete(name);
+	await pullRequestDataDeleter.deleteAll(name);
 }
 
 export async function listRepositories(

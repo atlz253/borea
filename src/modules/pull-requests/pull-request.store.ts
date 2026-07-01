@@ -1,5 +1,12 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
+import {
+	mkdir,
+	readdir,
+	readFile,
+	rename,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import path from "node:path";
 import { getConfig } from "#/platform/config";
 import type { PullRequest } from "./schemas";
@@ -23,6 +30,7 @@ export interface PullRequestStore {
 		id: number,
 		data: Partial<PullRequest>,
 	): Promise<PullRequest>;
+	deleteAll(repoName: string): Promise<void>;
 }
 
 export class FileSystemPullRequestStore implements PullRequestStore {
@@ -126,6 +134,13 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 		const repoDir = path.join(this.basePath, repoName);
 		await this.writePrFile(repoDir, updated);
 		return updated;
+	}
+
+	async deleteAll(repoName: string): Promise<void> {
+		await rm(path.join(this.basePath, repoName), {
+			recursive: true,
+			force: true,
+		});
 	}
 
 	private prFilePath(repoName: string, id: number): string {
