@@ -4,6 +4,7 @@ const MAX_REPO_NAME_LENGTH = 100;
 const MAX_BRANCH_NAME_LENGTH = 200;
 const MAX_TITLE_LENGTH = 500;
 const MAX_AUTHOR_NAME_LENGTH = 200;
+const MAX_FILE_PATH_LENGTH = 4096;
 const MAX_PR_ID = Number.MAX_SAFE_INTEGER;
 
 export const repoNameSchema = z
@@ -74,6 +75,11 @@ export const mergePullRequestSchema = z.object({
 	fastForward: z.boolean().optional(),
 });
 
+export const setPullRequestFileViewedSchema = getPullRequestSchema.extend({
+	filePath: z.string().min(1).max(MAX_FILE_PATH_LENGTH),
+	viewed: z.boolean(),
+});
+
 export const pullRequestStatusSchema = z.enum(["open", "merged", "closed"]);
 
 export const pullRequestSchema = z.object({
@@ -85,6 +91,7 @@ export const pullRequestSchema = z.object({
 	status: pullRequestStatusSchema,
 	mergeCommitSha: z.string().optional(),
 	authorName: z.string(),
+	viewedFiles: z.array(z.string()).default([]),
 	createdAt: z.string(),
 	updatedAt: z.string(),
 });
@@ -93,5 +100,8 @@ export type CreatePullRequestInput = z.infer<typeof createPullRequestSchema>;
 export type ListPullRequestsInput = z.infer<typeof listPullRequestsSchema>;
 export type GetPullRequestInput = z.infer<typeof getPullRequestSchema>;
 export type MergePullRequestInput = z.infer<typeof mergePullRequestSchema>;
+export type SetPullRequestFileViewedInput = z.infer<
+	typeof setPullRequestFileViewedSchema
+>;
 export type PullRequest = z.infer<typeof pullRequestSchema>;
 export type PullRequestStatus = z.infer<typeof pullRequestStatusSchema>;

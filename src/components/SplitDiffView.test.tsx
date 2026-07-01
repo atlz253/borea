@@ -298,4 +298,40 @@ describe("SplitDiffView", () => {
 		});
 		expect(screen.getByText(/5/)).toBeInTheDocument();
 	});
+
+	it("renders a header action", () => {
+		render(
+			<MantineProvider>
+				<SplitDiffView
+					file={makeFile()}
+					headerAction={<button type="button">Review action</button>}
+				/>
+			</MantineProvider>,
+		);
+
+		expect(
+			screen.getByRole("button", { name: "Review action" }),
+		).toBeInTheDocument();
+	});
+
+	it("hides diff content when collapsed", () => {
+		render(
+			<MantineProvider>
+				<SplitDiffView
+					file={makeFile({
+						hunks: [
+							makeHunk({
+								lines: [makeLine({ content: "collapsed content" })],
+							}),
+						],
+					})}
+					collapsed
+				/>
+			</MantineProvider>,
+		);
+
+		for (const element of screen.getAllByText("collapsed content")) {
+			expect(element).not.toBeVisible();
+		}
+	});
 });

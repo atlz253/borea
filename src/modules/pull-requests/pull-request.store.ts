@@ -9,7 +9,7 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { getConfig } from "#/platform/config";
-import type { PullRequest } from "./schemas";
+import { type PullRequest, pullRequestSchema } from "./schemas";
 
 interface RepoMeta {
 	nextId: number;
@@ -30,11 +30,18 @@ export interface PullRequestStore {
 		id: number,
 		data: Partial<PullRequest>,
 	): Promise<PullRequest>;
+	setFileViewed(
+		repoName: string,
+		id: number,
+		filePath: string,
+		viewed: boolean,
+	): Promise<PullRequest>;
 	deleteAll(repoName: string): Promise<void>;
 }
 
 export class FileSystemPullRequestStore implements PullRequestStore {
 	private readonly basePath: string;
+	private readonly writeLocks = new Map<string, Promise<void>>();
 
 	constructor(basePath?: string) {
 		const cfg = getConfig();
@@ -62,6 +69,7 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 			targetBranch: input.targetBranch,
 			status: "open",
 			authorName: input.authorName,
+			viewedFiles: [],
 			createdAt: now,
 			updatedAt: now,
 		};
@@ -88,7 +96,7 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 			}
 			try {
 				const content = await readFile(path.join(repoDir, entry.name), "utf-8");
-				const pr = JSON.parse(content) as PullRequest;
+				const pr = pullRequestSchema.parse(JSON.parse(content));
 				prs.push(pr);
 			} catch {}
 		}
@@ -107,7 +115,7 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 		}
 		try {
 			const content = await readFile(filePath, "utf-8");
-			return JSON.parse(content) as PullRequest;
+			return pullRequestSchema.parse(JSON.parse(content));
 		} catch {
 			return undefined;
 		}
@@ -118,22 +126,54 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 		id: number,
 		data: Partial<PullRequest>,
 	): Promise<PullRequest> {
-		const existing = await this.get(repoName, id);
-		if (!existing) {
-			throw new Error(`Pull request #${id} not found in "${repoName}"`);
-		}
+		return this.withWriteLock(repoName, id, async () => {
+			const existing = await this.get(repoName, id);
+			if (!existing) {
+				throw new Error(`Pull request #${id} not found in "${repoName}"`);
+			}
 
-		const updated: PullRequest = {
-			...existing,
-			...data,
-			id: existing.id,
-			repoName: existing.repoName,
-			updatedAt: new Date().toISOString(),
-		};
+			const updated: PullRequest = {
+				...existing,
+				...data,
+				id: existing.id,
+				repoName: existing.repoName,
+				updatedAt: new Date().toISOString(),
+			};
 
-		const repoDir = path.join(this.basePath, repoName);
-		await this.writePrFile(repoDir, updated);
-		return updated;
+			const repoDir = path.join(this.basePath, repoName);
+			await this.writePrFile(repoDir, updated);
+			return updated;
+		});
+	}
+
+	async setFileViewed(
+		repoName: string,
+		id: number,
+		filePath: string,
+		viewed: boolean,
+	): Promise<PullRequest> {
+		return this.withWriteLock(repoName, id, async () => {
+			const existing = await this.get(repoName, id);
+			if (!existing) {
+				throw new Error(`Pull request #${id} not found in "${repoName}"`);
+			}
+
+			const viewedFiles = new Set(existing.viewedFiles);
+			if (viewed) {
+				viewedFiles.add(filePath);
+			} else {
+				viewedFiles.delete(filePath);
+			}
+
+			const updated: PullRequest = {
+				...existing,
+				viewedFiles: [...viewedFiles],
+				updatedAt: new Date().toISOString(),
+			};
+			const repoDir = path.join(this.basePath, repoName);
+			await this.writePrFile(repoDir, updated);
+			return updated;
+		});
 	}
 
 	async deleteAll(repoName: string): Promise<void> {
@@ -152,6 +192,31 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 		const finalPath = path.join(repoDir, `${pr.id}.json`);
 		await writeFile(tmpPath, JSON.stringify(pr, null, "\t"), "utf-8");
 		await rename(tmpPath, finalPath);
+	}
+
+	private async withWriteLock<T>(
+		repoName: string,
+		id: number,
+		operation: () => Promise<T>,
+	): Promise<T> {
+		const key = `${repoName}:${id}`;
+		const previous = this.writeLocks.get(key) ?? Promise.resolve();
+		let release: (() => void) | undefined;
+		const current = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		const queued = previous.then(() => current);
+		this.writeLocks.set(key, queued);
+
+		await previous;
+		try {
+			return await operation();
+		} finally {
+			release?.();
+			if (this.writeLocks.get(key) === queued) {
+				this.writeLocks.delete(key);
+			}
+		}
 	}
 
 	private async nextId(repoDir: string): Promise<number> {

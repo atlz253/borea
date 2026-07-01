@@ -12,6 +12,7 @@
 
 - [Working with Repositories via HTTP](git-http.md) — how to clone and push using Git
 - [Using Repository Pages](repository-page.md) — how to browse repositories, files, and commit history
+- [Pull Request Code Review](code-review.md) — how to mark changed files as viewed
 - [NoAuth Mode](security/noauth-mode.md) — what NoAuth is, risks, and how to configure it
 
 ## API Reference
@@ -20,7 +21,7 @@
 
 ## Architectural Decisions
 
-- [ADR Index](ADR/README.md) — all ADRs 0001–0009 with summaries
+- [ADR Index](ADR/README.md) — all architectural decisions with summaries
 
 ## Contributing
 

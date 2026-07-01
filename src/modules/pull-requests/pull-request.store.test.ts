@@ -1,4 +1,5 @@
 import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -34,6 +35,7 @@ describe("FileSystemPullRequestStore", () => {
 		expect(pr.sourceBranch).toBe("feature");
 		expect(pr.targetBranch).toBe("main");
 		expect(pr.authorName).toBe("anonymous");
+		expect(pr.viewedFiles).toEqual([]);
 		expect(pr.status).toBe("open");
 		expect(pr.createdAt).toBeTruthy();
 		expect(pr.updatedAt).toBe(pr.createdAt);
@@ -147,5 +149,46 @@ describe("FileSystemPullRequestStore", () => {
 		const list = await secondStore.list("my-repo");
 
 		expect(list).toHaveLength(2);
+	});
+
+	it("normalizes legacy pull requests without viewedFiles", async () => {
+		const repoDir = join(tmpDir, "my-repo");
+		const pr = await store.create(prInput);
+		await writeFile(
+			join(repoDir, "1.json"),
+			JSON.stringify(pr, (key, value) =>
+				key === "viewedFiles" ? undefined : value,
+			),
+			"utf-8",
+		);
+
+		const found = await store.get("my-repo", 1);
+
+		expect(found?.viewedFiles).toEqual([]);
+	});
+
+	it("adds and removes viewed files without duplicates", async () => {
+		const pr = await store.create(prInput);
+
+		await store.setFileViewed("my-repo", pr.id, "src/file.ts", true);
+		await store.setFileViewed("my-repo", pr.id, "src/file.ts", true);
+		let found = await store.get("my-repo", pr.id);
+		expect(found?.viewedFiles).toEqual(["src/file.ts"]);
+
+		await store.setFileViewed("my-repo", pr.id, "src/file.ts", false);
+		found = await store.get("my-repo", pr.id);
+		expect(found?.viewedFiles).toEqual([]);
+	});
+
+	it("serializes concurrent viewed file updates", async () => {
+		const pr = await store.create(prInput);
+
+		await Promise.all([
+			store.setFileViewed("my-repo", pr.id, "a.ts", true),
+			store.setFileViewed("my-repo", pr.id, "b.ts", true),
+		]);
+
+		const found = await store.get("my-repo", pr.id);
+		expect(found?.viewedFiles).toEqual(["a.ts", "b.ts"]);
 	});
 });

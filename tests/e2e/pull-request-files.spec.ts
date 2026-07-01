@@ -100,6 +100,31 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		await expect(page.getByText("feature.txt")).toBeVisible();
 		await expect(page.getByText("feature content")).toBeVisible();
 
+		const viewedCheckbox = page.getByRole("checkbox", {
+			name: "Mark feature.txt as viewed",
+		});
+		await viewedCheckbox.check();
+		await expect(viewedCheckbox).toBeChecked();
+		await expect(viewedCheckbox).toBeDisabled();
+		await expect(viewedCheckbox).toBeEnabled();
+		await expect(page.getByText("feature content")).toBeHidden();
+
+		await page.reload();
+		await waitForHydration(page);
+		await expect(viewedCheckbox).toBeChecked();
+		await expect(page.getByText("feature content")).toBeHidden();
+
+		await viewedCheckbox.uncheck();
+		await expect(viewedCheckbox).not.toBeChecked();
+		await expect(viewedCheckbox).toBeDisabled();
+		await expect(viewedCheckbox).toBeEnabled();
+		await expect(page.getByText("feature content")).toBeVisible();
+
+		await page.reload();
+		await waitForHydration(page);
+		await expect(viewedCheckbox).not.toBeChecked();
+		await expect(page.getByText("feature content")).toBeVisible();
+
 		await page.getByRole("tab", { name: /Conversation/i }).click();
 		await page.waitForURL(new RegExp(`/repositories/${repoName}/pulls/\\d+$`));
 		await waitForHydration(page);

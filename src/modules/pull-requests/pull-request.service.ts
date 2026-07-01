@@ -128,6 +128,34 @@ export function createPullRequestService(
 
 			return gitProvider.getDiff(repoName, pr.targetBranch, pr.sourceBranch);
 		},
+
+		async setPullRequestFileViewed(
+			repoName: string,
+			id: number,
+			filePath: string,
+			viewed: boolean,
+		): Promise<PullRequest> {
+			const pr = await store.get(repoName, id);
+			if (!pr) {
+				throw new Error(`Pull request #${id} not found`);
+			}
+
+			const files = await gitProvider.getDiff(
+				repoName,
+				pr.targetBranch,
+				pr.sourceBranch,
+			);
+			const fileExists = files.some(
+				(file) => (file.newPath ?? file.oldPath) === filePath,
+			);
+			if (!fileExists) {
+				throw new Error(
+					`File "${filePath}" is not part of pull request #${id}`,
+				);
+			}
+
+			return store.setFileViewed(repoName, id, filePath, viewed);
+		},
 	};
 }
 

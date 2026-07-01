@@ -11,11 +11,13 @@ export type {
 	MergePullRequestInput,
 	PullRequest,
 	PullRequestStatus,
+	SetPullRequestFileViewedInput,
 } from "./schemas";
 export {
 	createPullRequestSchema,
 	mergePullRequestSchema,
 	pullRequestSchema,
+	setPullRequestFileViewedSchema,
 } from "./schemas";
 export {
 	checkMergeStatusFn,
@@ -25,4 +27,5 @@ export {
 	getPullRequestFn,
 	listPullRequestsFn,
 	mergePullRequestFn,
+	setPullRequestFileViewedFn,
 } from "./server/pull-request.functions";

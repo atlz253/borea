@@ -7,6 +7,7 @@ import {
 	getPullRequestSchema,
 	listPullRequestsSchema,
 	mergePullRequestSchema,
+	setPullRequestFileViewedSchema,
 } from "../schemas";
 
 const service = createPullRequestService(gitProvider, pullRequestStore);
@@ -55,4 +56,15 @@ export const getPullRequestDiffFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => getPullRequestSchema.parse(data))
 	.handler(async ({ data }) => {
 		return service.getPullRequestDiff(data.repoName, data.id);
+	});
+
+export const setPullRequestFileViewedFn = createServerFn({ method: "POST" })
+	.validator((data: unknown) => setPullRequestFileViewedSchema.parse(data))
+	.handler(async ({ data }) => {
+		return service.setPullRequestFileViewed(
+			data.repoName,
+			data.id,
+			data.filePath,
+			data.viewed,
+		);
 	});

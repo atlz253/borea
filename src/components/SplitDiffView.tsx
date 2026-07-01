@@ -1,45 +1,57 @@
-import { Badge, Code, Group, Paper, Text } from "@mantine/core";
+import { Badge, Code, Collapse, Group, Paper, Text } from "@mantine/core";
 import hljs from "highlight.js";
+import type { ReactNode } from "react";
 import type { DiffFile, DiffHunk, DiffLine } from "#/modules/git";
 import { detectLanguage } from "#/utils/code-language";
 
 interface SplitDiffViewProps {
 	file: DiffFile;
+	collapsed?: boolean;
+	headerAction?: ReactNode;
 }
 
-export default function SplitDiffView({ file }: SplitDiffViewProps) {
+export default function SplitDiffView({
+	file,
+	collapsed = false,
+	headerAction,
+}: SplitDiffViewProps) {
 	const language = detectLanguage(file.newPath ?? file.oldPath ?? "");
 
 	return (
 		<Paper withBorder p="md" mb="md">
-			<Group gap="sm" mb="xs">
-				<Badge color={statusColor(file.status)} variant="light" size="sm">
-					{statusLabel(file.status)}
-				</Badge>
-				<Text size="sm" fw={600} ff="monospace">
-					{file.status === "renamed"
-						? `${file.oldPath} → ${file.newPath}`
-						: (file.newPath ?? file.oldPath)}
-				</Text>
+			<Group justify="space-between" align="flex-start" gap="sm" mb="xs">
+				<Group gap="sm">
+					<Badge color={statusColor(file.status)} variant="light" size="sm">
+						{statusLabel(file.status)}
+					</Badge>
+					<Text size="sm" fw={600} ff="monospace">
+						{file.status === "renamed"
+							? `${file.oldPath} → ${file.newPath}`
+							: (file.newPath ?? file.oldPath)}
+					</Text>
+				</Group>
+				{headerAction}
 			</Group>
 
-			{file.isBinary ? (
-				<Text size="sm" c="dimmed" fs="italic">
-					Binary file not shown
-				</Text>
-			) : file.hunks.length === 0 ? (
-				<Text size="sm" c="dimmed" fs="italic">
-					No inline diff available for this file
-				</Text>
-			) : (
-				file.hunks.map((hunk) => (
-					<DiffHunkView
-						key={`${hunk.oldStart}-${hunk.newStart}`}
-						hunk={hunk}
-						language={language}
-					/>
-				))
-			)}
+			<Collapse expanded={!collapsed}>
+				{file.isBinary ? (
+					<Text size="sm" c="dimmed" fs="italic">
+						Binary file not shown
+					</Text>
+				) : file.hunks.length === 0 ? (
+					<Text size="sm" c="dimmed" fs="italic">
+						No inline diff available for this file
+					</Text>
+				) : (
+					file.hunks.map((hunk) => (
+						<DiffHunkView
+							key={`${hunk.oldStart}-${hunk.newStart}`}
+							hunk={hunk}
+							language={language}
+						/>
+					))
+				)}
+			</Collapse>
 		</Paper>
 	);
 }

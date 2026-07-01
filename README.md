@@ -78,6 +78,7 @@ nirvana/
 │   ├── architecture.md             # Architecture overview
 │   ├── git-http.md                 # Clone/push via HTTP (user guide)
 │   ├── commit-diff.md              # Commit diff viewing (user guide)
+│   ├── code-review.md              # Pull request review progress (user guide)
 │   ├── repository-page.md          # Repository UI pages (user guide)
 │   ├── security/
 │   │   └── noauth-mode.md          # NoAuth mode description and risks
@@ -128,6 +129,7 @@ nirvana/
 - [Architecture Overview](docs/architecture.md) — project structure, modules, providers
 - [Working with Repositories via HTTP](docs/git-http.md) — how to clone and push
 - [Using Repository Pages](docs/repository-page.md) — how to browse files and commits
+- [Pull Request Code Review](docs/code-review.md) — how to mark changed files as viewed
 - [API Reference](API.md) — Git smart-HTTP endpoints
 - [NoAuth Mode](docs/security/noauth-mode.md) — development-mode authentication
 - [Contributing Guide](CONTRIBUTING.md) — how to contribute
@@ -157,6 +159,7 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 - **Git smart-HTTP** — HTTP clone and push through `/api/git/<name>.git/` (pull ✅, push ✅)
 - **File tree browsing** — navigate repository files with breadcrumbs and directory listing (✅)
 - **Commit history** — table view of commits with branch context (✅)
+- **Pull request review progress** — persistent Viewed marks collapse reviewed file diffs (✅)
 - **NoAuth mode** for MVP — all actions performed on behalf of a fixed user; blocked in production unless explicitly enabled
 - **REST API** with OpenAPI specification — planned (ADR 0001)
 
@@ -167,7 +170,7 @@ See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/README.md) fo
 - **v0.1.0 — MVP:**
   - ✅ Git hosting — repository creation, file tree browsing, commit history
   - ✅ Smart-HTTP pull (clone/fetch) and push
-  - 🔲 Pull/Merge requests with code review
+  - 🟨 Pull/Merge requests with code review (viewed-file tracking implemented)
   - 🔲 REST API with OpenAPI specification
   - 🔲 Docker deployment
   - 🔲 Complete documentation (in progress)

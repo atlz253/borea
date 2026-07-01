@@ -31,6 +31,7 @@ function createMockStore(): PullRequestStore {
 		list: vi.fn(),
 		get: vi.fn(),
 		update: vi.fn(),
+		setFileViewed: vi.fn(),
 		deleteAll: vi.fn(),
 	};
 }
@@ -43,6 +44,7 @@ const prData = {
 	targetBranch: "main",
 	status: "open" as const,
 	authorName: "anonymous",
+	viewedFiles: [],
 	createdAt: "2026-01-01T00:00:00.000Z",
 	updatedAt: "2026-01-01T00:00:00.000Z",
 };
@@ -295,5 +297,94 @@ describe("getPullRequestDiff", () => {
 		await expect(svc.getPullRequestDiff("my-repo", 999)).rejects.toThrow(
 			"not found",
 		);
+	});
+});
+
+describe("setPullRequestFileViewed", () => {
+	it("persists a viewed file that belongs to the pull request diff", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(prData);
+		vi.mocked(git.getDiff).mockResolvedValue([
+			{
+				oldPath: null,
+				newPath: "src/file.ts",
+				status: "added",
+				hunks: [],
+				isBinary: false,
+			},
+		]);
+		vi.mocked(store.setFileViewed).mockResolvedValue({
+			...prData,
+			viewedFiles: ["src/file.ts"],
+		});
+
+		const svc = createPullRequestService(git, store);
+		const result = await svc.setPullRequestFileViewed(
+			"my-repo",
+			1,
+			"src/file.ts",
+			true,
+		);
+
+		expect(result.viewedFiles).toEqual(["src/file.ts"]);
+		expect(store.setFileViewed).toHaveBeenCalledWith(
+			"my-repo",
+			1,
+			"src/file.ts",
+			true,
+		);
+	});
+
+	it("supports deleted files by their old path", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(prData);
+		vi.mocked(git.getDiff).mockResolvedValue([
+			{
+				oldPath: "deleted.ts",
+				newPath: null,
+				status: "deleted",
+				hunks: [],
+				isBinary: false,
+			},
+		]);
+		vi.mocked(store.setFileViewed).mockResolvedValue(prData);
+
+		const svc = createPullRequestService(git, store);
+		await svc.setPullRequestFileViewed("my-repo", 1, "deleted.ts", false);
+
+		expect(store.setFileViewed).toHaveBeenCalledWith(
+			"my-repo",
+			1,
+			"deleted.ts",
+			false,
+		);
+	});
+
+	it("rejects a file that is not in the current diff", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(prData);
+		vi.mocked(git.getDiff).mockResolvedValue([]);
+
+		const svc = createPullRequestService(git, store);
+
+		await expect(
+			svc.setPullRequestFileViewed("my-repo", 1, "unknown.ts", true),
+		).rejects.toThrow("is not part of pull request");
+		expect(store.setFileViewed).not.toHaveBeenCalled();
+	});
+
+	it("rejects an unknown pull request", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(undefined);
+
+		const svc = createPullRequestService(git, store);
+
+		await expect(
+			svc.setPullRequestFileViewed("my-repo", 999, "file.ts", true),
+		).rejects.toThrow("not found");
 	});
 });

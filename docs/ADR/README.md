@@ -19,6 +19,7 @@ This directory contains Architecture Decision Records (ADRs) for Nirvana. Each A
 | 0013 | [Commit Diff](0013-commit-diff.md) | GitProvider extension for viewing structured commit diffs (side-by-side, hunk-based) |
 | 0014 | [Pull Request Diff](0014-pull-request-diff.md) | GitProvider extension for three-dot range diff between arbitrary refs (base…head) for PR file viewing |
 | 0015 | [Repository File Viewing](0015-repository-file-viewing.md) | Branch-aware blob pages with bounded two-stage UTF-8 file loading |
+| 0016 | [Pull Request Viewed Files](0016-pull-request-viewed-files.md) | Persistent path-based Viewed state for pull request files in NoAuth mode |
 
 ## Adding a New ADR
 
