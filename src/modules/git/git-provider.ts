@@ -133,4 +133,5 @@ export interface GitProvider {
 	): Promise<MergeResult>;
 	getCommit(name: string, sha: string): Promise<CommitDetail>;
 	getCommitDiff(name: string, sha: string): Promise<GetCommitDiffResult>;
+	getDiff(name: string, base: string, head: string): Promise<DiffFile[]>;
 }

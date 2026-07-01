@@ -19,6 +19,7 @@ function createMockGit(): GitProvider {
 		mergeBranch: vi.fn(),
 		getCommit: vi.fn(),
 		getCommitDiff: vi.fn(),
+		getDiff: vi.fn(),
 	};
 }
 
@@ -254,6 +255,41 @@ describe("checkMergeStatus", () => {
 
 		const svc = createPullRequestService(git, store);
 		await expect(svc.checkMergeStatus("my-repo", 999)).rejects.toThrow(
+			"not found",
+		);
+	});
+});
+
+describe("getPullRequestDiff", () => {
+	it("delegates to gitProvider.getDiff with target and source branches", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(prData);
+		const expectedDiff = [
+			{
+				oldPath: null,
+				newPath: "file.ts",
+				status: "added" as const,
+				hunks: [],
+				isBinary: false,
+			},
+		];
+		vi.mocked(git.getDiff).mockResolvedValue(expectedDiff);
+
+		const svc = createPullRequestService(git, store);
+		const files = await svc.getPullRequestDiff("my-repo", 1);
+
+		expect(git.getDiff).toHaveBeenCalledWith("my-repo", "main", "feature");
+		expect(files).toEqual(expectedDiff);
+	});
+
+	it("throws when PR not found", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(undefined);
+
+		const svc = createPullRequestService(git, store);
+		await expect(svc.getPullRequestDiff("my-repo", 999)).rejects.toThrow(
 			"not found",
 		);
 	});

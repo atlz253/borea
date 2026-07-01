@@ -9,9 +9,9 @@ import {
 } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, GitCommitHorizontal, Info } from "lucide-react";
+import SplitDiffView from "#/components/SplitDiffView";
 import type { BranchInfo, GetCommitDiffResult } from "#/modules/git";
 import BranchSwitcher from "../components/BranchSwitcher";
-import SplitDiffView from "../components/SplitDiffView";
 
 interface CommitDiffPageProps {
 	name: string;

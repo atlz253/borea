@@ -42,3 +42,9 @@ export const checkMergeStatusFn = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		return service.checkMergeStatus(data.repoName, data.id);
 	});
+
+export const getPullRequestDiffFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => getPullRequestSchema.parse(data))
+	.handler(async ({ data }) => {
+		return service.getPullRequestDiff(data.repoName, data.id);
+	});

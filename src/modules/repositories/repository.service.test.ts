@@ -22,6 +22,7 @@ function createMockGit(): GitProvider {
 		mergeBranch: vi.fn(),
 		getCommit: vi.fn(),
 		getCommitDiff: vi.fn(),
+		getDiff: vi.fn(),
 	};
 }
 

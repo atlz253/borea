@@ -89,7 +89,10 @@ npm run format      # Biome format
 | `src/modules/pull-requests/` | PR module: `schemas.ts`, `pull-request.store.ts`, `pull-request.service.ts`, `server/pull-request.functions.ts`, `components/`, `pages/` |
 | `src/routes/repositories.$name.tree.$branch.commits.$sha.tsx` | Route for commit diff viewing |
 | `src/modules/repositories/pages/CommitDiffPage.tsx` | Commit diff detail page |
-| `src/modules/repositories/components/SplitDiffView.tsx` | Side-by-side diff viewer component |
+| `src/components/SplitDiffView.tsx` | Side-by-side diff viewer component (shared) |
+| `src/routes/repositories.$name.pulls.$pullId.tsx` | PR detail layout (Conversation / Files changed tabs) |
+| `src/routes/repositories.$name.pulls.$pullId.index.tsx` | PR Conversation tab (detail + merge controls) |
+| `src/routes/repositories.$name.pulls.$pullId.files.tsx` | PR Files changed tab (diff view) |
 | `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
 | `src/platform/config/` | AppConfig: `storagePath`, `pullRequestsPath`, `gitBinPath` — sourced from env (`REPOSITORIES_PATH`, `PULL_REQUESTS_PATH`, `GIT_BIN_PATH`) |
 | `src/routes/api/` | Server routes for REST API and Git HTTP — delegates to module services |

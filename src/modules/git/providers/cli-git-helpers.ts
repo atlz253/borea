@@ -1,5 +1,9 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { execa } from "execa";
-import type { GitService } from "../git-provider";
+import type { DiffFile, GitService } from "../git-provider";
+import { parseNameStatus, parseUnifiedDiff } from "./cli-git-parsers";
+import { resolvePath, validateName } from "./cli-git-validators";
 
 export async function computeMergeTree(
 	gitBin: string,
@@ -35,6 +39,22 @@ export async function computeMergeTree(
 	}
 
 	return lines[0];
+}
+
+export async function mergeBase(
+	gitBin: string,
+	repoPath: string,
+	base: string,
+	head: string,
+): Promise<string> {
+	const { stdout } = await execa(gitBin, [
+		"--git-dir",
+		repoPath,
+		"merge-base",
+		base,
+		head,
+	]);
+	return stdout.trim();
 }
 
 export async function isAncestor(
@@ -100,4 +120,77 @@ export function gitCommandName(service: GitService): string {
 		case "git-receive-pack":
 			return "receive-pack";
 	}
+}
+
+export async function computeDiff(
+	gitBin: string,
+	storagePath: string,
+	name: string,
+	base: string,
+	head: string,
+): Promise<DiffFile[]> {
+	validateName(name);
+	const repoPath = resolvePath(storagePath, name);
+
+	if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+		throw new Error(`Repository "${name}" not found`);
+	}
+
+	if (!(await refExists(gitBin, repoPath, base))) {
+		throw new Error(`Ref "${base}" not found in repository "${name}"`);
+	}
+	if (!(await refExists(gitBin, repoPath, head))) {
+		throw new Error(`Ref "${head}" not found in repository "${name}"`);
+	}
+
+	const mergeBaseSha = await mergeBase(gitBin, repoPath, base, head);
+
+	const { stdout: nameStatusStdout } = await execa(gitBin, [
+		"--git-dir",
+		repoPath,
+		"diff-tree",
+		"-r",
+		"--name-status",
+		mergeBaseSha,
+		head,
+	]);
+	const entries = parseNameStatus(nameStatusStdout);
+
+	const files: DiffFile[] = entries.map((e) => ({
+		oldPath: e.status === "added" ? null : e.oldPath,
+		newPath: e.status === "deleted" ? null : e.newPath,
+		status: e.status,
+		hunks: [],
+		isBinary: false,
+	}));
+
+	const { stdout: patchStdout } = await execa(gitBin, [
+		"--git-dir",
+		repoPath,
+		"diff-tree",
+		"-r",
+		"-p",
+		mergeBaseSha,
+		head,
+	]);
+
+	if (patchStdout) {
+		const patchFiles = parseUnifiedDiff(patchStdout);
+		for (const patchFile of patchFiles) {
+			const matched = files.find(
+				(f) =>
+					(f.oldPath != null && f.oldPath === patchFile.oldPath) ||
+					(f.newPath != null && f.newPath === patchFile.newPath),
+			);
+			if (matched) {
+				matched.hunks = patchFile.hunks;
+				matched.isBinary = patchFile.isBinary;
+				if (patchFile.isBinary) {
+					matched.hunks = [];
+				}
+			}
+		}
+	}
+
+	return files;
 }

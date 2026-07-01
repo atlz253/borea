@@ -21,6 +21,7 @@ import type {
 	TreeEntry,
 } from "../git-provider";
 import {
+	computeDiff,
 	computeMergeTree,
 	gitCommandName,
 	isAncestor,
@@ -48,7 +49,6 @@ import {
 export class CliGitProvider implements GitProvider {
 	private readonly storagePath: string;
 	private readonly gitBin: string;
-
 	constructor(storagePath?: string, gitBin?: string) {
 		const cfg = getConfig();
 		this.storagePath = storagePath ?? cfg.storagePath;
@@ -62,9 +62,7 @@ export class CliGitProvider implements GitProvider {
 		if (existsSync(repoPath)) {
 			throw new Error(`Repository "${name}" already exists`);
 		}
-
 		await mkdir(this.storagePath, { recursive: true });
-
 		try {
 			await execa(this.gitBin, ["init", "--bare", repoPath]);
 		} catch (error) {
@@ -383,6 +381,10 @@ export class CliGitProvider implements GitProvider {
 		}
 
 		return { commit, files };
+	}
+
+	async getDiff(name: string, base: string, head: string): Promise<DiffFile[]> {
+		return computeDiff(this.gitBin, this.storagePath, name, base, head);
 	}
 
 	async canMerge(

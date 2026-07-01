@@ -1,4 +1,5 @@
 import type {
+	DiffFile,
 	GitProvider,
 	MergeOptions,
 	MergeResult,
@@ -114,6 +115,18 @@ export function createPullRequestService(
 			}
 
 			return gitProvider.canMerge(repoName, pr.sourceBranch, pr.targetBranch);
+		},
+
+		async getPullRequestDiff(
+			repoName: string,
+			id: number,
+		): Promise<DiffFile[]> {
+			const pr = await store.get(repoName, id);
+			if (!pr) {
+				throw new Error(`Pull request #${id} not found`);
+			}
+
+			return gitProvider.getDiff(repoName, pr.targetBranch, pr.sourceBranch);
 		},
 	};
 }

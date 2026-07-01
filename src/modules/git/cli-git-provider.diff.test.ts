@@ -232,3 +232,102 @@ describe("CliGitProvider — getCommitDiff", () => {
 		).rejects.toThrow(/not found/);
 	});
 });
+
+describe("CliGitProvider — getDiff", () => {
+	let provider: CliGitProvider;
+	let storageDir: string;
+
+	beforeEach(() => {
+		storageDir = mkdtempSync(join(tmpdir(), "nirvana-diff-"));
+		provider = new CliGitProvider(storageDir);
+	});
+
+	afterEach(() => {
+		rmSync(storageDir, { recursive: true, force: true });
+	});
+
+	it("returns changes on source branch since divergence from base (three-dot)", async () => {
+		await provider.init("branch-diff-repo");
+		await seedCommits(provider, "branch-diff-repo", {
+			"shared.ts": "common\n",
+		});
+		await seedCommits(provider, "branch-diff-repo", {
+			"shared.ts": "common\nbase change\n",
+		});
+		const baseName = "HEAD";
+
+		await provider.createBranch("branch-diff-repo", "feature");
+		const storagePath = provider as unknown as { storagePath: string };
+		const barePath = join(storagePath.storagePath, "branch-diff-repo");
+		const workDir = mkdtempSync(join(tmpdir(), "nirvana-work-feat-"));
+		try {
+			await execa("git", ["clone", barePath, workDir], {
+				env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+			});
+			await execa("git", ["checkout", "feature"], { cwd: workDir });
+			await writeFile(join(workDir, "feature.ts"), "feature change\n", "utf-8");
+			await execa("git", ["add", "--all"], { cwd: workDir });
+			await execa("git", ["commit", "--message=feat: add feature.ts"], {
+				cwd: workDir,
+				env: {
+					...process.env,
+					GIT_AUTHOR_NAME: "test",
+					GIT_AUTHOR_EMAIL: "test@example.com",
+					GIT_COMMITTER_NAME: "test",
+					GIT_COMMITTER_EMAIL: "test@example.com",
+				},
+			});
+			await execa("git", ["push", "origin", "feature"], {
+				cwd: workDir,
+				env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
+			});
+		} finally {
+			rmSync(workDir, { recursive: true, force: true });
+		}
+
+		const files = await provider.getDiff(
+			"branch-diff-repo",
+			baseName,
+			"feature",
+		);
+
+		expect(files).toHaveLength(1);
+		expect(files[0].status).toBe("added");
+		expect(files[0].newPath).toBe("feature.ts");
+	});
+
+	it("returns empty array when branches are identical", async () => {
+		await provider.init("empty-diff-repo");
+		await seedCommits(provider, "empty-diff-repo", {
+			"file.ts": "content\n",
+		});
+		const baseName = "HEAD";
+
+		await provider.createBranch("empty-diff-repo", "feature");
+
+		const files = await provider.getDiff(
+			"empty-diff-repo",
+			baseName,
+			"feature",
+		);
+
+		expect(files).toHaveLength(0);
+	});
+
+	it("throws for non-existent ref", async () => {
+		await provider.init("bad-ref-repo");
+		await seedCommits(provider, "bad-ref-repo", {
+			"file.ts": "content\n",
+		});
+
+		await expect(
+			provider.getDiff("bad-ref-repo", "main", "no-such-branch"),
+		).rejects.toThrow(/not found/);
+	});
+
+	it("throws for non-existent repository", async () => {
+		await expect(
+			provider.getDiff("no-such-repo", "main", "feature"),
+		).rejects.toThrow(/not found/);
+	});
+});
