@@ -11,6 +11,9 @@ const config = defineConfig({
 	optimizeDeps: {
 		exclude: ["unicorn-magic"],
 	},
+	server: process.env.DISABLE_HMR_OVERLAY
+		? { hmr: { overlay: false } }
+		: undefined,
 	plugins: [
 		devtools(),
 		nitro({ rollupConfig: { external: [/^@sentry\//] } }),

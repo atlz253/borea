@@ -4,21 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { execa } from "execa";
+import { waitForHydration } from "./helpers";
 
 const STORAGE_PATH = "./data/repositories";
 const BASE_URL = "http://localhost:3000";
-
-async function waitForHydration(page: import("@playwright/test").Page) {
-	await page.waitForFunction(
-		() => {
-			const btn = document.querySelector("button");
-			return (
-				!!btn && Object.keys(btn).some((k) => k.startsWith("__reactProps"))
-			);
-		},
-		{ timeout: 10000 },
-	);
-}
 
 test("create branch from branch switcher", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -72,7 +61,7 @@ test("create branch from branch switcher", async ({ page }) => {
 
 		// Should be on the tree URL
 		await expect(page).toHaveURL(
-			/\/repositories\/${repoName}\/tree\/${defaultBranch}/,
+			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}`),
 		);
 
 		// Open branch switcher and click "New branch"
@@ -86,7 +75,7 @@ test("create branch from branch switcher", async ({ page }) => {
 
 		// Should navigate to the new branch
 		await expect(page).toHaveURL(
-			/\/repositories\/${repoName}\/tree\/feature-from-e2e/,
+			new RegExp(`/repositories/${repoName}/tree/feature-from-e2e`),
 		);
 	} finally {
 		rmSync(workDir, { recursive: true, force: true });
@@ -167,14 +156,16 @@ test("branch switcher lets user switch between branches", async ({ page }) => {
 
 		// Should be on the tree URL
 		await expect(page).toHaveURL(
-			/\/repositories\/${repoName}\/tree\/${defaultBranch}/,
+			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}`),
 		);
 		await expect(page.getByText("file.txt")).toBeVisible();
 
 		// Switch to feature-x branch
 		await page.getByRole("button", { name: defaultBranch }).click();
 		await page.getByRole("menuitem", { name: /feature-x/ }).click();
-		await page.waitForURL(/\/repositories\/${repoName}\/tree\/feature-x/);
+		await page.waitForURL(
+			new RegExp(`/repositories/${repoName}/tree/feature-x`),
+		);
 
 		// Feature branch should show feature.txt, not file.txt (in this structure)
 		// Actually file.txt exists in both branches; feature.txt only in feature-x

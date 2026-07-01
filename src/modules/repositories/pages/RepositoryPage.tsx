@@ -86,7 +86,7 @@ export default function RepositoryPage({
 				<Group justify="space-between" align="center">
 					<GitCloneInfo name={name} />
 					<Group gap="xs">
-						{branches.length > 1 && (
+						{branches.length > 0 && (
 							<BranchSwitcher
 								repoName={name}
 								branches={branches}

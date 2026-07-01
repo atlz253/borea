@@ -125,13 +125,14 @@ Every new feature or architectural change must be documented. Follow these rules
 ## Definition of Done for Code Changes
 
 Before marking a change complete:
-1. `npm run check` passes with no errors.
-2. `npx tsc --noEmit` passes with no errors.
-3. `npm run test` passes (add or update unit tests per the spec's TDD requirement, §10).
-4. `npm run test:e2e` passes (add or update E2E tests per §10.3).
-5. If routes were added/removed, `src/routeTree.gen.ts` is regenerated.
-6. **Documentation is updated** — ADR for architectural changes; section in `docs/` for new features; `README.md`/`AGENTS.md` for stack/structure changes; `API.md` for new endpoints.
-7. No secrets, keys, or credentials committed.
+1. **Integration/E2E tests are written** for the feature or change — placed in `tests/e2e/`. A task is not considered done without automated browser-level coverage of the user-facing behaviour.
+2. `npm run check` passes with no errors.
+3. `npx tsc --noEmit` passes with no errors.
+4. `npm run test` passes (add or update unit tests per the spec's TDD requirement, §10).
+5. `npm run test:e2e` passes (add or update E2E tests per §10.3).
+6. If routes were added/removed, `src/routeTree.gen.ts` is regenerated.
+7. **Documentation is updated** — ADR for architectural changes; section in `docs/` for new features; `README.md`/`AGENTS.md` for stack/structure changes; `API.md` for new endpoints.
+8. No secrets, keys, or credentials committed.
 
 <!-- mantine -->
 Use Mantine MCP (`list_items`, `get_item_doc`, `get_item_props`, `search_docs`) for Mantine-specific questions: component props, theming API, available components, usage examples. Prefer this over Context7 for Mantine queries — it draws from the authoritative `mantine.dev` source.

@@ -14,7 +14,7 @@ test("repositories page renders its heading", async ({ page }) => {
 
 test("sidebar navigation links to repositories page", async ({ page }) => {
 	await page.goto("/");
-	await page.getByRole("link", { name: "Repositories" }).click();
+	await page.getByRole("button", { name: "Repositories" }).click();
 	await expect(page).toHaveURL("/repositories");
 });
 
