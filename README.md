@@ -77,6 +77,7 @@ nirvana/
 │   ├── MVP.md                      # Technical specification
 │   ├── architecture.md             # Architecture overview
 │   ├── git-http.md                 # Clone/push via HTTP (user guide)
+│   ├── commit-diff.md              # Commit diff viewing (user guide)
 │   ├── repository-page.md          # Repository UI pages (user guide)
 │   ├── security/
 │   │   └── noauth-mode.md          # NoAuth mode description and risks
@@ -105,6 +106,7 @@ nirvana/
 │   │   ├── repositories.$name.index.tsx  # Repository page
 │   │   ├── repositories.$name.tree.$.tsx  # File tree browser
 │   │   ├── repositories.$name.commits.tsx  # Commit history
+│   │   ├── repositories.$name.tree.$branch.commits.$sha.tsx  # Commit diff viewer
 │   │   └── api/
 │   │       └── git/$.tsx           # Git smart-HTTP endpoints
 │   ├── router.tsx                  # Router factory + type registration

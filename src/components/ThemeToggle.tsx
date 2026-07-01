@@ -1,22 +1,20 @@
 import { Button, useMantineColorScheme } from "@mantine/core";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type Scheme = "auto" | "light" | "dark";
 
-function getStoredScheme(): Scheme {
-	if (typeof window === "undefined") {
-		return "auto";
-	}
-	const stored = window.localStorage.getItem("mantine-color-scheme-value");
-	if (stored === "light" || stored === "dark" || stored === "auto") {
-		return stored;
-	}
-	return "auto";
-}
-
 export default function ThemeToggle() {
 	const { setColorScheme } = useMantineColorScheme();
-	const [scheme, setScheme] = useState<Scheme>(getStoredScheme);
+	const [mounted, setMounted] = useState(false);
+	const [scheme, setScheme] = useState<Scheme>("auto");
+
+	useEffect(() => {
+		setMounted(true);
+		const stored = window.localStorage.getItem("mantine-color-scheme-value");
+		if (stored === "light" || stored === "dark" || stored === "auto") {
+			setScheme(stored);
+		}
+	}, []);
 
 	const toggle = useCallback(() => {
 		const next: Scheme =
@@ -24,6 +22,14 @@ export default function ThemeToggle() {
 		setScheme(next);
 		setColorScheme(next);
 	}, [scheme, setColorScheme]);
+
+	if (!mounted) {
+		return (
+			<Button variant="default" size="compact-sm" disabled>
+				Auto
+			</Button>
+		);
+	}
 
 	const label = `Theme: ${scheme}`;
 

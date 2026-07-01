@@ -1,6 +1,13 @@
 export type {
 	BranchInfo,
+	CommitDetail,
 	CommitInfo,
+	DiffFile,
+	DiffFileStatus,
+	DiffHunk,
+	DiffLine,
+	DiffLineType,
+	GetCommitDiffResult,
 	GitProvider,
 	GitService,
 	ListCommitsOptions,

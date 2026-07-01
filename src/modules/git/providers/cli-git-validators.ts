@@ -58,3 +58,14 @@ export function normalizePath(p: string | undefined): string | undefined {
 	validatePath(p);
 	return p;
 }
+
+const SHA_RE = /^[0-9a-f]{7,40}$/;
+
+export function validateSha(sha: string): void {
+	if (!sha) {
+		throw new Error("SHA is required");
+	}
+	if (!SHA_RE.test(sha)) {
+		throw new Error("SHA must be a 7-40 character hex string");
+	}
+}

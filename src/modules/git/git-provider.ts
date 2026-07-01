@@ -56,6 +56,49 @@ export interface MergeResult {
 	fastForward: boolean;
 }
 
+export type DiffFileStatus = "added" | "modified" | "deleted" | "renamed";
+
+export type DiffLineType = "context" | "added" | "removed";
+
+export interface DiffLine {
+	type: DiffLineType;
+	oldLineNumber: number | null;
+	newLineNumber: number | null;
+	content: string;
+}
+
+export interface DiffHunk {
+	oldStart: number;
+	oldCount: number;
+	newStart: number;
+	newCount: number;
+	lines: DiffLine[];
+}
+
+export interface DiffFile {
+	oldPath: string | null;
+	newPath: string | null;
+	status: DiffFileStatus;
+	hunks: DiffHunk[];
+	isBinary: boolean;
+}
+
+export interface CommitDetail {
+	sha: string;
+	shortSha: string;
+	authorName: string;
+	authorEmail: string;
+	authoredAt: Date;
+	committedAt: Date;
+	subject: string;
+	parentSha: string | null;
+}
+
+export interface GetCommitDiffResult {
+	commit: CommitDetail;
+	files: DiffFile[];
+}
+
 export interface GitProvider {
 	init(name: string, description?: string): Promise<RepositoryInfo>;
 	list(): Promise<RepositoryInfo[]>;
@@ -88,4 +131,6 @@ export interface GitProvider {
 		base: string,
 		options?: MergeOptions,
 	): Promise<MergeResult>;
+	getCommit(name: string, sha: string): Promise<CommitDetail>;
+	getCommitDiff(name: string, sha: string): Promise<GetCommitDiffResult>;
 }

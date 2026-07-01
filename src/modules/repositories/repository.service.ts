@@ -1,6 +1,8 @@
 import type {
 	BranchInfo,
+	CommitDetail,
 	CommitInfo,
+	GetCommitDiffResult,
 	GitProvider,
 	TreeEntry,
 } from "#/modules/git";
@@ -74,4 +76,26 @@ export async function countRepositoryCommits(
 		throw new Error(`Repository "${name}" not found`);
 	}
 	return gitProvider.countCommits(name, ref);
+}
+
+export async function getRepositoryCommit(
+	gitProvider: GitProvider,
+	name: string,
+	sha: string,
+): Promise<CommitDetail> {
+	if (!(await gitProvider.exists(name))) {
+		throw new Error(`Repository "${name}" not found`);
+	}
+	return gitProvider.getCommit(name, sha);
+}
+
+export async function getRepositoryCommitDiff(
+	gitProvider: GitProvider,
+	name: string,
+	sha: string,
+): Promise<GetCommitDiffResult> {
+	if (!(await gitProvider.exists(name))) {
+		throw new Error(`Repository "${name}" not found`);
+	}
+	return gitProvider.getCommitDiff(name, sha);
 }

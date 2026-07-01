@@ -75,6 +75,7 @@ npm run format      # Biome format
 | `docs/architecture.md` | Architecture overview for developers |
 | `docs/git-http.md` | User guide for clone/push over HTTP |
 | `docs/repository-page.md` | User guide for repository UI pages |
+| `docs/commit-diff.md` | User guide for commit diff viewing |
 | `docs/security/noauth-mode.md` | NoAuth mode documentation |
 | `CONTRIBUTING.md` | Contributor guide |
 | `API.md` | API reference (Git smart-HTTP) |
@@ -86,7 +87,9 @@ npm run format      # Biome format
 | `playwright.config.ts` | Playwright configuration |
 | `src/modules/` | Domain modules (git, auth, repositories, pull-requests) |
 | `src/modules/pull-requests/` | PR module: `schemas.ts`, `pull-request.store.ts`, `pull-request.service.ts`, `server/pull-request.functions.ts`, `components/`, `pages/` |
-| `src/modules/pull-requests/` | PR module: `schemas.ts`, `pull-request.store.ts`, `pull-request.service.ts`, `server/pull-request.functions.ts`, `components/`, `pages/` |
+| `src/routes/repositories.$name.tree.$branch.commits.$sha.tsx` | Route for commit diff viewing |
+| `src/modules/repositories/pages/CommitDiffPage.tsx` | Commit diff detail page |
+| `src/modules/repositories/components/SplitDiffView.tsx` | Side-by-side diff viewer component |
 | `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
 | `src/platform/config/` | AppConfig: `storagePath`, `pullRequestsPath`, `gitBinPath` — sourced from env (`REPOSITORIES_PATH`, `PULL_REQUESTS_PATH`, `GIT_BIN_PATH`) |
 | `src/routes/api/` | Server routes for REST API and Git HTTP — delegates to module services |

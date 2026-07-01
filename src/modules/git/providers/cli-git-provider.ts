@@ -6,7 +6,10 @@ import { type ExecaError, execa } from "execa";
 import { getConfig } from "#/platform/config";
 import type {
 	BranchInfo,
+	CommitDetail,
 	CommitInfo,
+	DiffFile,
+	GetCommitDiffResult,
 	GitProvider,
 	GitService,
 	ListCommitsOptions,
@@ -27,15 +30,19 @@ import {
 import {
 	DEFAULT_LOG_LIMIT,
 	DEFAULT_REF,
+	EXTENDED_LOG_FORMAT,
 	LOG_FORMAT,
 	parseLogOutput,
 	parseLsTree,
+	parseNameStatus,
+	parseUnifiedDiff,
 } from "./cli-git-parsers";
 import {
 	DEFAULT_DESC,
 	normalizePath,
 	resolvePath,
 	validateName,
+	validateSha,
 } from "./cli-git-validators";
 
 export class CliGitProvider implements GitProvider {
@@ -268,6 +275,114 @@ export class CliGitProvider implements GitProvider {
 		} catch {
 			return 0;
 		}
+	}
+
+	async getCommit(name: string, sha: string): Promise<CommitDetail> {
+		validateName(name);
+		validateSha(sha);
+		const repoPath = resolvePath(this.storagePath, name);
+
+		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
+			throw new Error(`Repository "${name}" not found`);
+		}
+
+		const fullSha = await revParse(this.gitBin, repoPath, sha);
+
+		const { stdout } = await execa(this.gitBin, [
+			"--git-dir",
+			repoPath,
+			"show",
+			"--no-patch",
+			`--format=${EXTENDED_LOG_FORMAT}`,
+			fullSha,
+		]);
+
+		const line = stdout.trim();
+		if (!line) throw new Error(`Commit "${sha}" not found`);
+
+		const parts = line.split("\0");
+		const [
+			shaOut,
+			shortSha,
+			authorName,
+			authorEmail,
+			authoredAt,
+			committedAt,
+			subject,
+			parentStr,
+		] = parts;
+
+		const parentSha =
+			parentStr && parentStr.length > 0
+				? (parentStr.split(" ")[0] ?? null)
+				: null;
+
+		return {
+			sha: shaOut,
+			shortSha,
+			authorName,
+			authorEmail,
+			authoredAt: new Date(authoredAt),
+			committedAt: new Date(committedAt),
+			subject,
+			parentSha,
+		};
+	}
+
+	async getCommitDiff(name: string, sha: string): Promise<GetCommitDiffResult> {
+		const commit = await this.getCommit(name, sha);
+		const repoPath = resolvePath(this.storagePath, name);
+
+		const { stdout: nameStatusStdout } = await execa(this.gitBin, [
+			"--git-dir",
+			repoPath,
+			"diff-tree",
+			"-r",
+			"--name-status",
+			"--root",
+			"--no-commit-id",
+			sha,
+		]);
+		const entries = parseNameStatus(nameStatusStdout);
+
+		const files: DiffFile[] = entries.map((e) => ({
+			oldPath: e.status === "added" ? null : e.oldPath,
+			newPath: e.status === "deleted" ? null : e.newPath,
+			status: e.status,
+			hunks: [],
+			isBinary: false,
+		}));
+
+		const { stdout: patchStdout } = await execa(this.gitBin, [
+			"--git-dir",
+			repoPath,
+			"diff-tree",
+			"-r",
+			"-p",
+			"--root",
+			"--no-commit-id",
+			sha,
+		]);
+
+		if (patchStdout) {
+			const patchFiles = parseUnifiedDiff(patchStdout);
+			for (const patchFile of patchFiles) {
+				const matched = files.find(
+					(f) =>
+						(f.oldPath != null && f.oldPath === patchFile.oldPath) ||
+						(f.newPath != null && f.newPath === patchFile.newPath),
+				);
+				if (matched) {
+					matched.hunks = patchFile.hunks;
+					matched.isBinary = patchFile.isBinary;
+					if (patchFile.isBinary) {
+						matched.hunks = [];
+					}
+				}
+			}
+		}
+
+		return { commit, files };
 	}
 
 	async canMerge(

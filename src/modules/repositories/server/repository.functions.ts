@@ -4,6 +4,8 @@ import {
 	countRepositoryCommits,
 	createRepository,
 	createRepositoryBranch,
+	getRepositoryCommit,
+	getRepositoryCommitDiff,
 	listRepositories,
 	listRepositoryBranches,
 	listRepositoryCommits,
@@ -13,6 +15,7 @@ import {
 	countCommitsSchema,
 	createBranchSchema,
 	createRepositorySchema,
+	getCommitDiffSchema,
 	listBranchesSchema,
 	listCommitsSchema,
 	listFilesSchema,
@@ -63,4 +66,16 @@ export const countCommitsFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => countCommitsSchema.parse(data))
 	.handler(async ({ data }) => {
 		return countRepositoryCommits(gitProvider, data.name, data.ref);
+	});
+
+export const getCommitFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => getCommitDiffSchema.parse(data))
+	.handler(async ({ data }) => {
+		return getRepositoryCommit(gitProvider, data.name, data.sha);
+	});
+
+export const getCommitDiffFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => getCommitDiffSchema.parse(data))
+	.handler(async ({ data }) => {
+		return getRepositoryCommitDiff(gitProvider, data.name, data.sha);
 	});

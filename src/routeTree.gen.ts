@@ -21,6 +21,8 @@ import { Route as RepositoriesNamePullsPullIdRouteImport } from './routes/reposi
 import { Route as RepositoriesNameTreeBranchIndexRouteImport } from './routes/repositories.$name.tree.$branch.index'
 import { Route as RepositoriesNameTreeBranchCommitsRouteImport } from './routes/repositories.$name.tree.$branch.commits'
 import { Route as RepositoriesNameTreeBranchSplatRouteImport } from './routes/repositories.$name.tree.$branch.$'
+import { Route as RepositoriesNameTreeBranchCommitsIndexRouteImport } from './routes/repositories.$name.tree.$branch.commits.index'
+import { Route as RepositoriesNameTreeBranchCommitsShaRouteImport } from './routes/repositories.$name.tree.$branch.commits.$sha'
 
 const RepositoriesRoute = RepositoriesRouteImport.update({
   id: '/repositories',
@@ -88,6 +90,18 @@ const RepositoriesNameTreeBranchSplatRoute =
     path: '/tree/$branch/$',
     getParentRoute: () => RepositoriesNameRoute,
   } as any)
+const RepositoriesNameTreeBranchCommitsIndexRoute =
+  RepositoriesNameTreeBranchCommitsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => RepositoriesNameTreeBranchCommitsRoute,
+  } as any)
+const RepositoriesNameTreeBranchCommitsShaRoute =
+  RepositoriesNameTreeBranchCommitsShaRouteImport.update({
+    id: '/$sha',
+    path: '/$sha',
+    getParentRoute: () => RepositoriesNameTreeBranchCommitsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -100,8 +114,10 @@ export interface FileRoutesByFullPath {
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls/': typeof RepositoriesNamePullsIndexRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
-  '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRoute
+  '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRouteWithChildren
   '/repositories/$name/tree/$branch/': typeof RepositoriesNameTreeBranchIndexRoute
+  '/repositories/$name/tree/$branch/commits/$sha': typeof RepositoriesNameTreeBranchCommitsShaRoute
+  '/repositories/$name/tree/$branch/commits/': typeof RepositoriesNameTreeBranchCommitsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,8 +128,9 @@ export interface FileRoutesByTo {
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls': typeof RepositoriesNamePullsIndexRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
-  '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRoute
   '/repositories/$name/tree/$branch': typeof RepositoriesNameTreeBranchIndexRoute
+  '/repositories/$name/tree/$branch/commits/$sha': typeof RepositoriesNameTreeBranchCommitsShaRoute
+  '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -127,8 +144,10 @@ export interface FileRoutesById {
   '/repositories/$name/pulls/new': typeof RepositoriesNamePullsNewRoute
   '/repositories/$name/pulls/': typeof RepositoriesNamePullsIndexRoute
   '/repositories/$name/tree/$branch/$': typeof RepositoriesNameTreeBranchSplatRoute
-  '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRoute
+  '/repositories/$name/tree/$branch/commits': typeof RepositoriesNameTreeBranchCommitsRouteWithChildren
   '/repositories/$name/tree/$branch/': typeof RepositoriesNameTreeBranchIndexRoute
+  '/repositories/$name/tree/$branch/commits/$sha': typeof RepositoriesNameTreeBranchCommitsShaRoute
+  '/repositories/$name/tree/$branch/commits/': typeof RepositoriesNameTreeBranchCommitsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -145,6 +164,8 @@ export interface FileRouteTypes {
     | '/repositories/$name/tree/$branch/$'
     | '/repositories/$name/tree/$branch/commits'
     | '/repositories/$name/tree/$branch/'
+    | '/repositories/$name/tree/$branch/commits/$sha'
+    | '/repositories/$name/tree/$branch/commits/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,8 +176,9 @@ export interface FileRouteTypes {
     | '/repositories/$name/pulls/new'
     | '/repositories/$name/pulls'
     | '/repositories/$name/tree/$branch/$'
-    | '/repositories/$name/tree/$branch/commits'
     | '/repositories/$name/tree/$branch'
+    | '/repositories/$name/tree/$branch/commits/$sha'
+    | '/repositories/$name/tree/$branch/commits'
   id:
     | '__root__'
     | '/'
@@ -171,6 +193,8 @@ export interface FileRouteTypes {
     | '/repositories/$name/tree/$branch/$'
     | '/repositories/$name/tree/$branch/commits'
     | '/repositories/$name/tree/$branch/'
+    | '/repositories/$name/tree/$branch/commits/$sha'
+    | '/repositories/$name/tree/$branch/commits/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -265,8 +289,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RepositoriesNameTreeBranchSplatRouteImport
       parentRoute: typeof RepositoriesNameRoute
     }
+    '/repositories/$name/tree/$branch/commits/': {
+      id: '/repositories/$name/tree/$branch/commits/'
+      path: '/'
+      fullPath: '/repositories/$name/tree/$branch/commits/'
+      preLoaderRoute: typeof RepositoriesNameTreeBranchCommitsIndexRouteImport
+      parentRoute: typeof RepositoriesNameTreeBranchCommitsRoute
+    }
+    '/repositories/$name/tree/$branch/commits/$sha': {
+      id: '/repositories/$name/tree/$branch/commits/$sha'
+      path: '/$sha'
+      fullPath: '/repositories/$name/tree/$branch/commits/$sha'
+      preLoaderRoute: typeof RepositoriesNameTreeBranchCommitsShaRouteImport
+      parentRoute: typeof RepositoriesNameTreeBranchCommitsRoute
+    }
   }
 }
+
+interface RepositoriesNameTreeBranchCommitsRouteChildren {
+  RepositoriesNameTreeBranchCommitsShaRoute: typeof RepositoriesNameTreeBranchCommitsShaRoute
+  RepositoriesNameTreeBranchCommitsIndexRoute: typeof RepositoriesNameTreeBranchCommitsIndexRoute
+}
+
+const RepositoriesNameTreeBranchCommitsRouteChildren: RepositoriesNameTreeBranchCommitsRouteChildren =
+  {
+    RepositoriesNameTreeBranchCommitsShaRoute:
+      RepositoriesNameTreeBranchCommitsShaRoute,
+    RepositoriesNameTreeBranchCommitsIndexRoute:
+      RepositoriesNameTreeBranchCommitsIndexRoute,
+  }
+
+const RepositoriesNameTreeBranchCommitsRouteWithChildren =
+  RepositoriesNameTreeBranchCommitsRoute._addFileChildren(
+    RepositoriesNameTreeBranchCommitsRouteChildren,
+  )
 
 interface RepositoriesNameRouteChildren {
   RepositoriesNameIndexRoute: typeof RepositoriesNameIndexRoute
@@ -274,7 +330,7 @@ interface RepositoriesNameRouteChildren {
   RepositoriesNamePullsNewRoute: typeof RepositoriesNamePullsNewRoute
   RepositoriesNamePullsIndexRoute: typeof RepositoriesNamePullsIndexRoute
   RepositoriesNameTreeBranchSplatRoute: typeof RepositoriesNameTreeBranchSplatRoute
-  RepositoriesNameTreeBranchCommitsRoute: typeof RepositoriesNameTreeBranchCommitsRoute
+  RepositoriesNameTreeBranchCommitsRoute: typeof RepositoriesNameTreeBranchCommitsRouteWithChildren
   RepositoriesNameTreeBranchIndexRoute: typeof RepositoriesNameTreeBranchIndexRoute
 }
 
@@ -285,7 +341,7 @@ const RepositoriesNameRouteChildren: RepositoriesNameRouteChildren = {
   RepositoriesNamePullsIndexRoute: RepositoriesNamePullsIndexRoute,
   RepositoriesNameTreeBranchSplatRoute: RepositoriesNameTreeBranchSplatRoute,
   RepositoriesNameTreeBranchCommitsRoute:
-    RepositoriesNameTreeBranchCommitsRoute,
+    RepositoriesNameTreeBranchCommitsRouteWithChildren,
   RepositoriesNameTreeBranchIndexRoute: RepositoriesNameTreeBranchIndexRoute,
 }
 

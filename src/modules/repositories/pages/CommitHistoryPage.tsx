@@ -8,7 +8,7 @@ import {
 	Text,
 	Title,
 } from "@mantine/core";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, GitCommitHorizontal } from "lucide-react";
 import type { BranchInfo, CommitInfo } from "#/modules/git";
 import BranchSwitcher from "../components/BranchSwitcher";
@@ -36,6 +36,7 @@ export default function CommitHistoryPage({
 	branches,
 	selectedBranch,
 }: CommitHistoryPageProps) {
+	const navigate = useNavigate();
 	const encodedBranch = encodeURIComponent(selectedBranch);
 
 	return (
@@ -99,7 +100,20 @@ export default function CommitHistoryPage({
 					</Table.Thead>
 					<Table.Tbody>
 						{commits.map((commit) => (
-							<Table.Tr key={commit.sha}>
+							<Table.Tr
+								key={commit.sha}
+								style={{ cursor: "pointer" }}
+								onClick={() =>
+									navigate({
+										to: "/repositories/$name/tree/$branch/commits/$sha",
+										params: {
+											name,
+											branch: encodedBranch,
+											sha: commit.sha,
+										},
+									})
+								}
+							>
 								<Table.Td>
 									<Group gap={4}>
 										<GitCommitHorizontal size={14} />

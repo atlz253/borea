@@ -113,6 +113,15 @@ export const createBranchSchema = z.object({
 	from: refSchema.optional(),
 });
 
+export const commitShaSchema = z
+	.string()
+	.regex(/^[0-9a-f]{7,40}$/, "Invalid commit SHA");
+
+export const getCommitDiffSchema = z.object({
+	name: repoNameSchema,
+	sha: commitShaSchema,
+});
+
 export type CreateRepositoryInput = z.infer<typeof createRepositorySchema>;
 export type Repository = z.infer<typeof repositorySchema>;
 export type TreeEntryType = z.infer<typeof treeEntryTypeSchema>;
