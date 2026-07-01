@@ -1,4 +1,4 @@
-import { Stack, Title } from "@mantine/core";
+import { Container, Stack, Title } from "@mantine/core";
 import type { BranchInfo } from "#/modules/git";
 import CreatePullRequestForm from "../components/CreatePullRequestForm";
 
@@ -18,13 +18,15 @@ export default function CreatePullRequestPage({
 	submitting,
 }: CreatePullRequestPageProps) {
 	return (
-		<Stack gap="md">
-			<Title order={2}>New pull request</Title>
-			<CreatePullRequestForm
-				branches={branches}
-				onSubmit={onSubmit}
-				submitting={submitting}
-			/>
-		</Stack>
+		<Container size="lg" py="xl">
+			<Stack gap="md">
+				<Title order={2}>New pull request</Title>
+				<CreatePullRequestForm
+					branches={branches}
+					onSubmit={onSubmit}
+					submitting={submitting}
+				/>
+			</Stack>
+		</Container>
 	);
 }

@@ -2,14 +2,27 @@ import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
 const STORAGE_PATH = "./data/repositories";
 const BASE_URL = "http://localhost:3000";
 
+async function getContainerBounds(locator: Locator) {
+	return locator.evaluate((element) => {
+		const container = element.closest(".mantine-Container-root");
+		if (!(container instanceof HTMLElement)) {
+			throw new Error("Element is not inside a Mantine Container");
+		}
+		const bounds = container.getBoundingClientRect();
+		return { left: bounds.left, right: bounds.right };
+	});
+}
+
 test("create pull request via web UI and merge it", async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 });
+
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-pr-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
@@ -73,6 +86,22 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
 
+		const tabsContainer = await getContainerBounds(page.getByRole("tablist"));
+		const headingContainer = await getContainerBounds(
+			page.getByRole("heading", { name: "New pull request", exact: true }),
+		);
+		const formContainer = await getContainerBounds(page.getByLabel("Title"));
+
+		expect(headingContainer).toEqual(tabsContainer);
+		expect(formContainer).toEqual(tabsContainer);
+		expect(
+			await page.evaluate(
+				() =>
+					document.documentElement.scrollWidth <=
+					document.documentElement.clientWidth,
+			),
+		).toBe(true);
+
 		await page.getByLabel("Title").fill("E2E test pull request");
 
 		await page.getByRole("combobox", { name: "Source branch" }).click();
@@ -116,6 +145,8 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 });
 
 test("pull request tab is visible on repository page", async ({ page }) => {
+	await page.setViewportSize({ width: 1600, height: 900 });
+
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-pr-tab-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
@@ -134,7 +165,24 @@ test("pull request tab is visible on repository page", async ({ page }) => {
 		await page.getByRole("tab", { name: /Pull requests/i }).click();
 
 		await page.waitForURL(`/repositories/${repoName}/pulls`);
-		await expect(page.getByText(/No pull requests/i)).toBeVisible();
+		const emptyState = page.getByText("No pull requests yet.", { exact: true });
+		await expect(emptyState).toBeVisible();
+
+		const tabsContainer = await getContainerBounds(page.getByRole("tablist"));
+		const headingContainer = await getContainerBounds(
+			page.getByRole("heading", { name: "Pull requests", exact: true }),
+		);
+		const emptyStateContainer = await getContainerBounds(emptyState);
+
+		expect(headingContainer).toEqual(tabsContainer);
+		expect(emptyStateContainer).toEqual(tabsContainer);
+		expect(
+			await page.evaluate(
+				() =>
+					document.documentElement.scrollWidth <=
+					document.documentElement.clientWidth,
+			),
+		).toBe(true);
 	} finally {
 		rmSync(barePath, { recursive: true, force: true });
 	}

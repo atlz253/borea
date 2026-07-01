@@ -1,4 +1,4 @@
-import { Button, Group, Stack, Text, Title } from "@mantine/core";
+import { Button, Container, Group, Stack, Text, Title } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { GitPullRequest, Plus } from "lucide-react";
 import PullRequestList from "../components/PullRequestList";
@@ -16,7 +16,7 @@ export default function PullRequestsListPage({
 	const openCount = pullRequests.filter((pr) => pr.status === "open").length;
 
 	return (
-		<>
+		<Container size="lg" py="xl">
 			<Group justify="space-between" mb="md">
 				<Stack gap={0}>
 					<Title order={2}>Pull requests</Title>
@@ -50,6 +50,6 @@ export default function PullRequestsListPage({
 			) : (
 				<PullRequestList repoName={repoName} pullRequests={pullRequests} />
 			)}
-		</>
+		</Container>
 	);
 }
