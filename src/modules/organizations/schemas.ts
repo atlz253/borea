@@ -1,5 +1,6 @@
 import "#/platform/http/openapi-zod";
 import { z } from "zod";
+import { emailSchema } from "#/modules/auth";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 500;
@@ -35,7 +36,15 @@ export const organizationStorageSchema = z.object({
 	name: organizationNameSchema,
 	description: z.string().optional(),
 	createdAt: z.iso.datetime(),
-	ownerId: z.uuid().optional(),
+});
+
+export const organizationMemberStorageSchema = z.object({
+	userId: z.uuid(),
+	createdAt: z.iso.datetime(),
+});
+
+export const inviteOrganizationMemberSchema = z.object({
+	email: emailSchema,
 });
 
 export const organizationResponseSchema = z.object({
@@ -47,3 +56,9 @@ export const organizationResponseSchema = z.object({
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
 export type Organization = z.infer<typeof organizationSchema>;
 export type StoredOrganization = z.infer<typeof organizationStorageSchema>;
+export type StoredOrganizationMember = z.infer<
+	typeof organizationMemberStorageSchema
+>;
+export type InviteOrganizationMemberInput = z.infer<
+	typeof inviteOrganizationMemberSchema
+>;

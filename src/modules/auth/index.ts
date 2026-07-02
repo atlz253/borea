@@ -8,6 +8,7 @@ export type {
 	User,
 } from "./schemas";
 export {
+	emailSchema,
 	loginSchema,
 	passwordSchema,
 	registerSchema,
@@ -21,3 +22,4 @@ export {
 	registerFn,
 	requireCurrentUserFn,
 } from "./server/auth.functions";
+export { authUserDirectory } from "./user-directory";

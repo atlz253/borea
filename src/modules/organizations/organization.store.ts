@@ -1,21 +1,35 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
+import {
+	mkdir,
+	readdir,
+	readFile,
+	rename,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import path from "node:path";
+import { z } from "zod";
 import { ConflictError } from "#/platform/errors";
 import {
 	type Organization,
+	organizationMemberStorageSchema,
 	organizationNameSchema,
 	organizationStorageSchema,
 } from "./schemas";
 
+interface CreateOrganizationStoreInput {
+	name: string;
+	description?: string;
+	initialMemberId?: string;
+}
+
 export interface OrganizationStore {
-	create(input: {
-		name: string;
-		description?: string;
-		ownerId?: string;
-	}): Promise<Organization & { ownerId?: string }>;
-	list(): Promise<Array<Organization & { ownerId?: string }>>;
-	get(name: string): Promise<(Organization & { ownerId?: string }) | undefined>;
+	create(input: CreateOrganizationStoreInput): Promise<Organization>;
+	list(): Promise<Organization[]>;
+	get(name: string): Promise<Organization | undefined>;
+	addMember(name: string, userId: string): Promise<void>;
+	hasMember(name: string, userId: string): Promise<boolean>;
+	listMemberIds(name: string): Promise<string[]>;
 }
 
 function resolveOrganizationPath(basePath: string, name: string): string {
@@ -28,6 +42,23 @@ function resolveOrganizationPath(basePath: string, name: string): string {
 	return resolved;
 }
 
+function resolveMemberPath(
+	basePath: string,
+	organizationName: string,
+	userId: string,
+): string {
+	const parsedUserId = z.uuid().parse(userId);
+	return path.join(
+		resolveOrganizationPath(basePath, organizationName),
+		"members",
+		`${parsedUserId}.json`,
+	);
+}
+
+function serialize(value: object): string {
+	return JSON.stringify(value, null, "\t");
+}
+
 export class FileSystemOrganizationStore implements OrganizationStore {
 	private readonly basePath: string;
 
@@ -35,19 +66,10 @@ export class FileSystemOrganizationStore implements OrganizationStore {
 		this.basePath = path.resolve(basePath);
 	}
 
-	async create(input: {
-		name: string;
-		description?: string;
-		ownerId?: string;
-	}): Promise<Organization & { ownerId?: string }> {
+	async create(input: CreateOrganizationStoreInput): Promise<Organization> {
+		await mkdir(this.basePath, { recursive: true });
 		const organizationPath = resolveOrganizationPath(this.basePath, input.name);
-		const metadataPath = path.join(organizationPath, "organization.json");
-		if (existsSync(metadataPath)) {
-			throw new ConflictError(`Organization "${input.name}" already exists`);
-		}
-
-		await mkdir(organizationPath, { recursive: true });
-		if (existsSync(metadataPath)) {
+		if (existsSync(organizationPath)) {
 			throw new ConflictError(`Organization "${input.name}" already exists`);
 		}
 
@@ -56,35 +78,53 @@ export class FileSystemOrganizationStore implements OrganizationStore {
 			description: input.description || undefined,
 			createdAt: new Date(),
 		};
-		const storedOrganization = {
-			...organization,
-			...(input.ownerId ? { ownerId: input.ownerId } : {}),
-		};
-		const temporaryPath = path.join(organizationPath, "organization.tmp");
-		await writeFile(
-			temporaryPath,
-			JSON.stringify(
-				{
-					...storedOrganization,
-					createdAt: organization.createdAt.toISOString(),
-				},
-				null,
-				"\t",
-			),
-			"utf-8",
-		);
+		let createdDirectory = false;
+
 		try {
-			await rename(temporaryPath, metadataPath);
+			await mkdir(organizationPath);
+			createdDirectory = true;
+			if (input.initialMemberId) {
+				const userId = z.uuid().parse(input.initialMemberId);
+				const membersPath = path.join(organizationPath, "members");
+				await mkdir(membersPath);
+				await writeFile(
+					path.join(membersPath, `${userId}.json`),
+					serialize({
+						userId,
+						createdAt: organization.createdAt.toISOString(),
+					}),
+					"utf-8",
+				);
+			}
+			const temporaryMetadataPath = path.join(
+				organizationPath,
+				"organization.tmp",
+			);
+			await writeFile(
+				temporaryMetadataPath,
+				serialize({
+					...organization,
+					createdAt: organization.createdAt.toISOString(),
+				}),
+				"utf-8",
+			);
+			await rename(
+				temporaryMetadataPath,
+				path.join(organizationPath, "organization.json"),
+			);
 		} catch (error) {
-			if (existsSync(metadataPath)) {
+			if (createdDirectory) {
+				await rm(organizationPath, { recursive: true, force: true });
+			} else if (existsSync(organizationPath)) {
 				throw new ConflictError(`Organization "${input.name}" already exists`);
 			}
 			throw error;
 		}
-		return storedOrganization;
+
+		return organization;
 	}
 
-	async list(): Promise<Array<Organization & { ownerId?: string }>> {
+	async list(): Promise<Organization[]> {
 		await mkdir(this.basePath, { recursive: true });
 		const entries = await readdir(this.basePath, { withFileTypes: true });
 		const organizations = await Promise.all(
@@ -115,5 +155,79 @@ export class FileSystemOrganizationStore implements OrganizationStore {
 		} catch {
 			return undefined;
 		}
+	}
+
+	async addMember(name: string, userId: string): Promise<void> {
+		const memberPath = resolveMemberPath(this.basePath, name, userId);
+		await mkdir(path.dirname(memberPath), { recursive: true });
+		try {
+			await writeFile(
+				memberPath,
+				serialize({ userId, createdAt: new Date().toISOString() }),
+				{ encoding: "utf-8", flag: "wx" },
+			);
+		} catch (error) {
+			if (
+				error instanceof Error &&
+				"code" in error &&
+				error.code === "EEXIST"
+			) {
+				throw new ConflictError("User is already an organization member");
+			}
+			throw error;
+		}
+	}
+
+	async hasMember(name: string, userId: string): Promise<boolean> {
+		try {
+			organizationMemberStorageSchema.parse(
+				JSON.parse(
+					await readFile(
+						resolveMemberPath(this.basePath, name, userId),
+						"utf-8",
+					),
+				),
+			);
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	async listMemberIds(name: string): Promise<string[]> {
+		const membersPath = path.join(
+			resolveOrganizationPath(this.basePath, name),
+			"members",
+		);
+		if (!existsSync(membersPath)) {
+			return [];
+		}
+		const entries = await readdir(membersPath, { withFileTypes: true });
+		const members = await Promise.all(
+			entries
+				.filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+				.map(async (entry) => {
+					try {
+						return organizationMemberStorageSchema.parse(
+							JSON.parse(
+								await readFile(path.join(membersPath, entry.name), "utf-8"),
+							),
+						);
+					} catch {
+						return undefined;
+					}
+				}),
+		);
+		return members
+			.filter(
+				(
+					member,
+				): member is {
+					userId: string;
+					createdAt: string;
+				} => Boolean(member),
+			)
+			.sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+			.map((member) => member.userId);
 	}
 }

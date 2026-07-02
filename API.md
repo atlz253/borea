@@ -57,17 +57,37 @@ Returns the current user or `401`.
 
 #### `GET /api/v1/organizations`
 
-Lists organizations owned by the current user. NoAuth returns all
+Lists organizations where the current user is a member. NoAuth returns all
 organizations.
 
 #### `POST /api/v1/organizations`
 
-Creates an organization owned by the current user. Returns `409` in NoAuth
-single mode.
+Creates an organization with the current user as its first member. Returns
+`409` in NoAuth single mode.
 
 #### `GET /api/v1/organizations/{organization}`
 
 Returns one organization.
+
+#### `GET /api/v1/organizations/{organization}/members`
+
+Returns the public profiles of all organization members. Only members can use
+this endpoint; other authenticated users receive `404`. Membership management
+is unavailable in NoAuth mode and returns `409`.
+
+#### `POST /api/v1/organizations/{organization}/members`
+
+Adds an already registered user as an equal organization member. Any existing
+member can call this endpoint.
+
+```json
+{
+  "email": "bob@example.com"
+}
+```
+
+Returns the added public user with status `201`. An unknown email returns
+`404`; adding an existing member returns `409`.
 
 #### `GET /api/v1/organizations/{organization}/repositories`
 

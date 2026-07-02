@@ -4,6 +4,9 @@
 **Date:** 2026-07-02
 **Author:** Architecture Team
 
+Organization ownership in this decision is superseded by equal membership in
+ADR 0020. The authentication and session decisions remain active.
+
 ## Context
 
 Nirvana currently exposes an empty `AuthProvider` contract and treats every

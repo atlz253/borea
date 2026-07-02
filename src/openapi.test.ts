@@ -11,6 +11,7 @@ describe("generateOpenApiDocument", () => {
 			expect.arrayContaining([
 				"/api/v1/organizations",
 				"/api/v1/organizations/{organization}",
+				"/api/v1/organizations/{organization}/members",
 				"/api/v1/organizations/{organization}/repositories",
 				"/api/v1/organizations/{organization}/repositories/{repository}",
 				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests",
@@ -18,6 +19,12 @@ describe("generateOpenApiDocument", () => {
 				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}/merge",
 			]),
 		);
+		expect(
+			paths["/api/v1/organizations/{organization}/members"]?.get,
+		).toBeDefined();
+		expect(
+			paths["/api/v1/organizations/{organization}/members"]?.post,
+		).toBeDefined();
 		expect(
 			paths[
 				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}/merge"

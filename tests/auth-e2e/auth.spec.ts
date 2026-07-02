@@ -19,7 +19,7 @@ async function register(
 	await expect(page).toHaveURL(redirectTo);
 }
 
-test("registers, signs in, protects REST, and isolates organizations", async ({
+test("authenticates users and shares organizations through membership", async ({
 	browser,
 	page,
 }) => {
@@ -30,6 +30,7 @@ test("registers, signs in, protects REST, and isolates organizations", async ({
 		password: "password123",
 	};
 	const organizationName = `alice-${suffix}`;
+	const repositoryName = `shared-${suffix}`;
 
 	await page.goto(`/organizations?source=${suffix}`);
 	await expect(page).toHaveURL(/\/auth\?redirect=/);
@@ -65,11 +66,12 @@ test("registers, signs in, protects REST, and isolates organizations", async ({
 
 	const bobContext = await browser.newContext();
 	const bobPage = await bobContext.newPage();
-	await register(bobPage, {
+	const bob = {
 		name: "Bob",
 		email: `bob-${suffix}@example.com`,
 		password: "password123",
-	});
+	};
+	await register(bobPage, bob);
 	await expect(
 		bobPage.getByRole("link", { name: organizationName }),
 	).toHaveCount(0);
@@ -77,5 +79,83 @@ test("registers, signs in, protects REST, and isolates organizations", async ({
 		`/api/v1/organizations/${organizationName}`,
 	);
 	expect(hidden.status()).toBe(404);
+
+	const charlieContext = await browser.newContext();
+	const charliePage = await charlieContext.newPage();
+	const charlie = {
+		name: "Charlie",
+		email: `charlie-${suffix}@example.com`,
+		password: "password123",
+	};
+	await register(charliePage, charlie);
+	const hiddenMembers = await charliePage.request.get(
+		`/api/v1/organizations/${organizationName}/members`,
+	);
+	expect(hiddenMembers.status()).toBe(404);
+	const forbiddenInvite = await charliePage.request.post(
+		`/api/v1/organizations/${organizationName}/members`,
+		{ data: { email: charlie.email } },
+	);
+	expect(forbiddenInvite.status()).toBe(404);
+
+	await page.goto(`/organizations/${organizationName}`);
+	await waitForHydration(page);
+	await page.getByLabel("Invite member by email").fill(bob.email);
+	await page.getByRole("button", { name: "Invite member" }).click();
+	await expect(page.getByText(bob.email, { exact: true })).toBeVisible();
+
+	const duplicateInvite = await page.request.post(
+		`/api/v1/organizations/${organizationName}/members`,
+		{ data: { email: bob.email } },
+	);
+	expect(duplicateInvite.status()).toBe(409);
+	const missingInvite = await page.request.post(
+		`/api/v1/organizations/${organizationName}/members`,
+		{ data: { email: `missing-${suffix}@example.com` } },
+	);
+	expect(missingInvite.status()).toBe(404);
+
+	await bobPage.goto("/organizations");
+	await expect(
+		bobPage.getByRole("link", { name: organizationName }),
+	).toBeVisible();
+	await bobPage.goto(`/organizations/${organizationName}`);
+	await expect(bobPage.getByText(alice.email, { exact: true })).toBeVisible();
+	await expect(
+		bobPage.getByRole("main").getByText(bob.email, { exact: true }),
+	).toBeVisible();
+
+	await waitForHydration(bobPage);
+	await bobPage.getByRole("button", { name: "New repository" }).click();
+	await bobPage.getByLabel("Repository name").fill(repositoryName);
+	await bobPage.getByRole("button", { name: "Create repository" }).click();
+	await expect(
+		bobPage.getByRole("link", { name: repositoryName }),
+	).toBeVisible();
+
+	await waitForHydration(bobPage);
+	await bobPage.getByLabel("Invite member by email").fill(charlie.email);
+	await bobPage.getByRole("button", { name: "Invite member" }).click();
+	await expect(bobPage.getByText(charlie.email, { exact: true })).toBeVisible();
+
+	await charliePage.goto("/organizations");
+	await expect(
+		charliePage.getByRole("link", { name: organizationName }),
+	).toBeVisible();
+	const membersResponse = await charliePage.request.get(
+		`/api/v1/organizations/${organizationName}/members`,
+	);
+	expect(membersResponse.ok()).toBe(true);
+	await expect(membersResponse.json()).resolves.toHaveLength(3);
+
+	const openApiResponse = await page.request.get("/api/v1/openapi.json");
+	const openApi = (await openApiResponse.json()) as {
+		paths: Record<string, unknown>;
+	};
+	expect(openApi.paths).toHaveProperty(
+		"/api/v1/organizations/{organization}/members",
+	);
+
+	await charlieContext.close();
 	await bobContext.close();
 });

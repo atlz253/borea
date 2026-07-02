@@ -71,6 +71,12 @@ describe("file authentication", () => {
 
 		const registered = await provider.register(input);
 		expect(registered).not.toHaveProperty("credential");
+		await expect(provider.getUserByEmail(input.email)).resolves.toEqual(
+			registered,
+		);
+		await expect(provider.getUserById(registered.id)).resolves.toEqual(
+			registered,
+		);
 		await provider.logout();
 		await expect(provider.getCurrentUser()).resolves.toBeNull();
 

@@ -33,6 +33,24 @@ export class FileAuthProvider implements AuthProvider {
 		return user;
 	}
 
+	async getUserByEmail(email: string): Promise<User | undefined> {
+		const stored = await this.users.getByEmail(email);
+		if (!stored) {
+			return undefined;
+		}
+		const { credential: _credential, ...user } = stored;
+		return user;
+	}
+
+	async getUserById(id: string): Promise<User | undefined> {
+		const stored = await this.users.getById(id);
+		if (!stored) {
+			return undefined;
+		}
+		const { credential: _credential, ...user } = stored;
+		return user;
+	}
+
 	async register(input: RegisterInput): Promise<User> {
 		const user = await this.users.create(input);
 		await this.session.setUserId(user.id);
@@ -72,6 +90,14 @@ export class NoAuthProvider implements AuthProvider {
 
 	async requireCurrentUser(): Promise<User> {
 		return this.user;
+	}
+
+	async getUserByEmail(email: string): Promise<User | undefined> {
+		return email === this.user.email ? this.user : undefined;
+	}
+
+	async getUserById(id: string): Promise<User | undefined> {
+		return id === this.user.id ? this.user : undefined;
 	}
 
 	async register(_input: RegisterInput): Promise<User> {

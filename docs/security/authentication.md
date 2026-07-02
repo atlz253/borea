@@ -30,12 +30,15 @@ Signing out clears it.
 
 ## Organization Access
 
-An organization belongs to the user who created it. Organization lists and
-repository, pull-request, and REST operations only resolve organizations owned
-by the current user. Requests for another user's organization return `404`.
+The user creating an organization becomes its first member. Every member has
+full access to the organization, its repositories, and its pull requests.
+Members can list other members and add an already registered account by email.
+Requests from non-members return `404`.
 
-Ownerless organizations created by older versions or in NoAuth mode are hidden
-in full mode. Ownership migration and transfer are not implemented.
+Membership records are stored below each organization in
+`members/<userId>.json`. Existing organization data using `ownerId` is not
+migrated automatically. NoAuth bypasses access checks but does not expose
+membership management.
 
 ## Current Limitations
 

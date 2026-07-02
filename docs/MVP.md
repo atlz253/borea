@@ -80,7 +80,8 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 - Authentication through a swappable `AuthProvider`
 - File-backed user registration and login with cookie sessions
 - Explicit `NoAuthProvider` mode for development and testing
-- Users can access only organizations they own in full mode
+- Users can access organizations where they are members in full mode
+- Any organization member can add an existing user as an equal member
 
 **4.4. Web Interface**
 
@@ -210,7 +211,9 @@ Unified interface for authentication:
 ```typescript
 interface AuthProvider {
   getCurrentUser(): Promise<User | null>;
-  isAuthenticated(): Promise<boolean>;
+  requireCurrentUser(): Promise<User>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;
   // ... other methods
 }
 
@@ -221,9 +224,6 @@ class NoAuthProvider implements AuthProvider {
       id: "anonymous",
       name: process.env.DEFAULT_USER_NAME || "anonymous",
     };
-  }
-  async isAuthenticated(): Promise<boolean> {
-    return true; // in NoAuth mode, everyone is considered authenticated
   }
 }
 ```
@@ -367,6 +367,7 @@ ORGANIZATIONS_PATH=./data/organizations
 **14.1. Functional**
 
 - [X] User can create and open an organization
+- [X] Organization member can invite an existing user
 - [X] User can create a repository via the web interface
 - [X] User can clone a repository over HTTP without authentication
 - [X] User can push to a repository without authentication

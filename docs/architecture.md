@@ -43,6 +43,7 @@ All architectural decisions are recorded as ADRs in `docs/ADR/`.
 | 0009 | Commit history: GitProvider extension with branches and commits |
 | 0018 | Organizations, repository namespaces, and single-organization mode |
 | 0019 | File authentication, cookie sessions, and organization ownership |
+| 0020 | Equal organization membership and invitations |
 
 ## Architecture Principles
 
@@ -66,15 +67,16 @@ Nirvana serves the Git smart-HTTP protocol through the `/api/git/<organization>/
 ### Organization Modes
 
 In full authentication mode, `ORGANIZATION_MODE=multi` exposes only
-organizations owned by the current user. `ORGANIZATION_MODE=single` is
-available only with NoAuth and exposes the automatically created `default`
-organization.
+organizations where the current user is a member. Membership grants full access
+to the organization and all contained repositories and pull requests.
+`ORGANIZATION_MODE=single` is available only with NoAuth and exposes the
+automatically created `default` organization.
 
 ### Authentication Modes
 
 `AUTH_MODE=full` is the default and uses file-backed users plus encrypted
 cookie sessions. `AUTH_MODE=noauth` performs operations as a fixed user,
-bypasses organization ownership, and is blocked in production unless
+bypasses organization membership, and is blocked in production unless
 explicitly overridden.
 
 Git smart-HTTP remains public in both modes until repository visibility and Git

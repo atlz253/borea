@@ -1,3 +1,4 @@
+import { authUserDirectory } from "#/modules/auth";
 import { getConfig } from "#/platform/config";
 import { createOrganizationService } from "../organization.service";
 import { FileSystemOrganizationStore } from "../organization.store";
@@ -12,6 +13,7 @@ export const organizationService = createOrganizationService(
 	organizationStore,
 	organizationMode,
 	config.authMode === "noauth",
+	authUserDirectory,
 );
 export const publicOrganizationService = createOrganizationService(
 	organizationStore,
