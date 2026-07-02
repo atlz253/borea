@@ -1,26 +1,40 @@
 import { AppShell, Box, NavLink, ScrollArea } from "@mantine/core";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { Building2, ChevronDown, ChevronUp } from "lucide-react";
+import { Building2, ChevronDown, ChevronUp, GitBranch } from "lucide-react";
 import { useState } from "react";
+import SidebarRecentOrganizations from "./SidebarRecentOrganizations";
 import SidebarRecentRepositories from "./SidebarRecentRepositories";
 
 export default function Sidebar() {
 	const location = useLocation();
 	const navigate = useNavigate();
 	const [opened, setOpened] = useState(true);
-	const isActive =
-		location.pathname === "/organizations" ||
-		location.pathname.startsWith("/organizations/");
+	const organizationName = /^\/organizations\/([^/]+)(?:\/|$)/.exec(
+		location.pathname,
+	)?.[1];
+	const label = organizationName ? "Repositories" : "Organizations";
+
+	const handleNavigate = () => {
+		if (organizationName) {
+			return navigate({
+				to: "/organizations/$organization",
+				params: { organization: organizationName },
+			});
+		}
+		return navigate({ to: "/organizations" });
+	};
 
 	return (
 		<AppShell.Section grow component={ScrollArea}>
 			<NavLink
 				component="button"
-				label="Organizations"
-				leftSection={<Building2 size={16} />}
-				active={isActive}
+				label={label}
+				leftSection={
+					organizationName ? <GitBranch size={16} /> : <Building2 size={16} />
+				}
+				active
 				variant="light"
-				onClick={() => navigate({ to: "/organizations" })}
+				onClick={handleNavigate}
 				rightSection={
 					// biome-ignore lint/a11y: span inside <button>, keyboard handled by parent
 					<span
@@ -36,7 +50,15 @@ export default function Sidebar() {
 			/>
 			{opened && (
 				<Box pl="1.75rem">
-					<SidebarRecentRepositories opened={opened} />
+					{organizationName ? (
+						<SidebarRecentRepositories
+							key={organizationName}
+							opened={opened}
+							organizationName={organizationName}
+						/>
+					) : (
+						<SidebarRecentOrganizations opened={opened} />
+					)}
 				</Box>
 			)}
 		</AppShell.Section>

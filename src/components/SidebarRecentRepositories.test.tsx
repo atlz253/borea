@@ -2,7 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Repository } from "#/modules/repositories";
 
 const navigateFn = vi.fn();
@@ -15,9 +15,6 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("#/modules/repositories", () => ({
 	listRepositoriesFn: vi.fn(),
-}));
-vi.mock("#/modules/organizations", () => ({
-	listOrganizationsFn: vi.fn().mockResolvedValue([{ name: "default" }]),
 }));
 
 import { listRepositoriesFn } from "#/modules/repositories";
@@ -42,16 +39,27 @@ function makeRepos(count: number): Repository[] {
 	);
 }
 
-async function renderSidebar(props: { opened: boolean }) {
+async function renderSidebar(props: {
+	opened: boolean;
+	organizationName?: string;
+}) {
 	const result = render(
 		<MantineProvider>
-			<SidebarRecentRepositories opened={props.opened} />
+			<SidebarRecentRepositories
+				opened={props.opened}
+				organizationName={props.organizationName ?? "default"}
+			/>
 		</MantineProvider>,
 	);
 	return result;
 }
 
 describe("SidebarRecentRepositories", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		locationRef.pathname = "/";
+	});
+
 	it("does not call listRepositoriesFn when opened is false", async () => {
 		await renderSidebar({ opened: false });
 		expect(listRepositoriesFn).not.toHaveBeenCalled();
@@ -64,22 +72,49 @@ describe("SidebarRecentRepositories", () => {
 
 		rerender(
 			<MantineProvider>
-				<SidebarRecentRepositories opened={true} />
+				<SidebarRecentRepositories opened={true} organizationName="default" />
 			</MantineProvider>,
 		);
 		await waitFor(() => expect(listRepositoriesFn).toHaveBeenCalledTimes(1));
+		expect(listRepositoriesFn).toHaveBeenCalledWith({
+			data: { organizationName: "default" },
+		});
 
 		rerender(
 			<MantineProvider>
-				<SidebarRecentRepositories opened={false} />
+				<SidebarRecentRepositories opened={false} organizationName="default" />
 			</MantineProvider>,
 		);
 		rerender(
 			<MantineProvider>
-				<SidebarRecentRepositories opened={true} />
+				<SidebarRecentRepositories opened={true} organizationName="default" />
 			</MantineProvider>,
 		);
 		expect(listRepositoriesFn).toHaveBeenCalledTimes(1);
+	});
+
+	it("reloads repositories when organization changes", async () => {
+		vi.mocked(listRepositoriesFn)
+			.mockResolvedValueOnce([makeRepo({ name: "alpha" })])
+			.mockResolvedValueOnce([
+				makeRepo({ organizationName: "other", name: "beta" }),
+			]);
+		const { rerender } = await renderSidebar({
+			opened: true,
+			organizationName: "default",
+		});
+		await screen.findByRole("button", { name: "alpha" });
+
+		rerender(
+			<MantineProvider>
+				<SidebarRecentRepositories opened={true} organizationName="other" />
+			</MantineProvider>,
+		);
+
+		await screen.findByRole("button", { name: "beta" });
+		expect(listRepositoriesFn).toHaveBeenLastCalledWith({
+			data: { organizationName: "other" },
+		});
 	});
 
 	it("renders nothing when list returns empty", async () => {
@@ -97,8 +132,8 @@ describe("SidebarRecentRepositories", () => {
 
 		const items = await screen.findAllByRole("button", { name: /repo-/i });
 		expect(items).toHaveLength(5);
-		expect(screen.getByText("default/repo-6")).toBeInTheDocument();
-		expect(screen.queryByText("default/repo-1")).not.toBeInTheDocument();
+		expect(screen.getByText("repo-6")).toBeInTheDocument();
+		expect(screen.queryByText("repo-1")).not.toBeInTheDocument();
 		expect(screen.getByText(/show more/i)).toBeInTheDocument();
 	});
 
@@ -157,6 +192,18 @@ describe("SidebarRecentRepositories", () => {
 			makeRepo({ name: "alpha" }),
 		]);
 		locationRef.pathname = "/organizations/default/repositories/alpha";
+		await renderSidebar({ opened: true });
+
+		const item = await screen.findByRole("button", { name: /alpha/i });
+		expect(item.getAttribute("data-active")).toBe("true");
+	});
+
+	it("marks NavLink as active on a nested repository path", async () => {
+		vi.mocked(listRepositoriesFn).mockResolvedValue([
+			makeRepo({ name: "alpha" }),
+		]);
+		locationRef.pathname =
+			"/organizations/default/repositories/alpha/pulls/1/files";
 		await renderSidebar({ opened: true });
 
 		const item = await screen.findByRole("button", { name: /alpha/i });
