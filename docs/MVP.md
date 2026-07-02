@@ -358,15 +358,15 @@ ORGANIZATIONS_PATH=./data/organizations
 
 **14.1. Functional**
 
-- [ ] User can create and open an organization
-- [ ] User can create a repository via the web interface
-- [ ] User can clone a repository over HTTP without authentication
-- [ ] User can push to a repository without authentication
-- [ ] User can browse files and commit history
-- [ ] User can create a Pull Request
+- [X] User can create and open an organization
+- [X] User can create a repository via the web interface
+- [X] User can clone a repository over HTTP without authentication
+- [X] User can push to a repository without authentication
+- [X] User can browse files and commit history
+- [X] User can create a Pull Request
 - [ ] User can leave a comment on a code line in a PR
-- [ ] User can merge a PR
-- [ ] All actions are performed on behalf of a fixed user (configurable)
+- [X] User can merge a PR
+- [X] All actions are performed on behalf of a fixed user (configurable)
 
 **14.2. Technical**
 
@@ -375,7 +375,7 @@ ORGANIZATIONS_PATH=./data/organizations
 - [ ] Unit tests cover business logic
 - [ ] Integration tests pass
 - [ ] E2E tests for key scenarios pass
-- [ ] REST API is documented via OpenAPI
+- [X] REST API is documented via OpenAPI
 - [ ] Project deploys with a single `docker compose up` command
 - [ ] All documentation is in place
 - [ ] NoAuth mode cannot be accidentally enabled in production (`NODE_ENV` check)
