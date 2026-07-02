@@ -78,7 +78,9 @@ describe("GitCloneInfo", () => {
 	it("initial value uses window origin plus repository name", () => {
 		renderInfo({ name: "my-repo" });
 		const input = screen.getByLabelText(/Git pull URL/i) as HTMLInputElement;
-		expect(input.value).toBe(`${window.location.origin}/api/git/my-repo.git`);
+		expect(input.value).toBe(
+			`${window.location.origin}/api/git/default/my-repo.git`,
+		);
 	});
 
 	it("updates the URL when the name prop changes", () => {
@@ -101,7 +103,7 @@ describe("GitCloneInfo", () => {
 		renderInfo({ name: "my-repo" });
 		const copyButton = screen.getByTestId("copy-button");
 		expect(copyButton.getAttribute("data-value")).toBe(
-			`${window.location.origin}/api/git/my-repo.git`,
+			`${window.location.origin}/api/git/default/my-repo.git`,
 		);
 		expect(copyButton.getAttribute("data-timeout")).toBe("2000");
 	});

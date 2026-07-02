@@ -17,7 +17,7 @@ vi.mock("@tanstack/react-router", () => ({
 		<a
 			href="/test"
 			data-to={to}
-			data-name={params.name}
+			data-name={params.repository}
 			data-pull-id={params.pullId}
 		>
 			{children}
@@ -28,6 +28,7 @@ vi.mock("@tanstack/react-router", () => ({
 function makePR(overrides: Partial<PullRequest> = {}): PullRequest {
 	return {
 		id: 1,
+		organizationName: "default",
 		repoName: "my-repo",
 		title: "PR title",
 		sourceBranch: "feature",
@@ -74,7 +75,7 @@ describe("PullRequestList", () => {
 		});
 		const link = screen.getByText("Fix bug").closest("a");
 		expect(link?.getAttribute("data-to")).toBe(
-			"/repositories/$name/pulls/$pullId",
+			"/organizations/$organization/repositories/$repository/pulls/$pullId",
 		);
 		expect(link?.getAttribute("data-name")).toBe("my-repo");
 		expect(link?.getAttribute("data-pull-id")).toBe("7");

@@ -109,8 +109,12 @@ describe("BranchSwitcher", () => {
 		await user.click(screen.getByText("develop"));
 
 		expect(navigateFn).toHaveBeenCalledWith({
-			to: "/repositories/$name/tree/$branch",
-			params: { name: "my-repo", branch: "develop" },
+			to: "/organizations/$organization/repositories/$repository/tree/$branch",
+			params: {
+				organization: "default",
+				repository: "my-repo",
+				branch: "develop",
+			},
 		});
 	});
 
@@ -121,9 +125,10 @@ describe("BranchSwitcher", () => {
 		await user.click(screen.getByText("develop"));
 
 		expect(navigateFn).toHaveBeenCalledWith({
-			to: "/repositories/$name/tree/$branch/$",
+			to: "/organizations/$organization/repositories/$repository/tree/$branch/$",
 			params: {
-				name: "my-repo",
+				organization: "default",
+				repository: "my-repo",
 				branch: "develop",
 				_splat: "src/components",
 			},
@@ -137,9 +142,10 @@ describe("BranchSwitcher", () => {
 		await user.click(screen.getByText("develop"));
 
 		expect(navigateFn).toHaveBeenCalledWith({
-			to: "/repositories/$name/blob/$branch/$",
+			to: "/organizations/$organization/repositories/$repository/blob/$branch/$",
 			params: {
-				name: "my-repo",
+				organization: "default",
+				repository: "my-repo",
 				branch: "develop",
 				_splat: "src/index.ts",
 			},
@@ -153,8 +159,12 @@ describe("BranchSwitcher", () => {
 		await user.click(screen.getByText("develop"));
 
 		expect(navigateFn).toHaveBeenCalledWith({
-			to: "/repositories/$name/tree/$branch/commits",
-			params: { name: "my-repo", branch: "develop" },
+			to: "/organizations/$organization/repositories/$repository/tree/$branch/commits",
+			params: {
+				organization: "default",
+				repository: "my-repo",
+				branch: "develop",
+			},
 		});
 	});
 
@@ -165,8 +175,12 @@ describe("BranchSwitcher", () => {
 		await user.click(screen.getByText("feature/login"));
 
 		expect(navigateFn).toHaveBeenCalledWith({
-			to: "/repositories/$name/tree/$branch",
-			params: { name: "my-repo", branch: "feature%2Flogin" },
+			to: "/organizations/$organization/repositories/$repository/tree/$branch",
+			params: {
+				organization: "default",
+				repository: "my-repo",
+				branch: "feature%2Flogin",
+			},
 		});
 	});
 
@@ -200,11 +214,20 @@ describe("BranchSwitcher", () => {
 		await user.click(screen.getByText("Create"));
 
 		expect(createBranchFn).toHaveBeenCalledWith({
-			data: { name: "my-repo", branch: "new-branch", from: "main" },
+			data: {
+				organizationName: "default",
+				name: "my-repo",
+				branch: "new-branch",
+				from: "main",
+			},
 		});
 		expect(navigateFn).toHaveBeenCalledWith({
-			to: "/repositories/$name/tree/$branch",
-			params: { name: "my-repo", branch: "new-branch" },
+			to: "/organizations/$organization/repositories/$repository/tree/$branch",
+			params: {
+				organization: "default",
+				repository: "my-repo",
+				branch: "new-branch",
+			},
 		});
 	});
 

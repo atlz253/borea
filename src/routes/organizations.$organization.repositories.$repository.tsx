@@ -7,7 +7,9 @@ import {
 	useRouterState,
 } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/repositories/$name")({
+export const Route = createFileRoute(
+	"/organizations/$organization/repositories/$repository",
+)({
 	component: RepositoryLayout,
 });
 
@@ -17,27 +19,32 @@ const LINK_STYLE = {
 } as const;
 
 function RepositoryLayout() {
-	const { name } = Route.useParams();
+	const { organization, repository } = Route.useParams();
 	const navigate = useNavigate();
 	const location = useRouterState({ select: (s) => s.location });
 
 	const pathname = location.pathname;
-	const isPulls = pathname.startsWith(`/repositories/${name}/pulls`);
-	const isSettings = pathname.startsWith(`/repositories/${name}/settings`);
+	const basePath = `/organizations/${organization}/repositories/${repository}`;
+	const isPulls = pathname.startsWith(`${basePath}/pulls`);
+	const isSettings = pathname.startsWith(`${basePath}/settings`);
 	const activeTab = isSettings ? "settings" : isPulls ? "pulls" : "code";
 
 	return (
 		<>
 			<Container size="lg" pt="xl" pb={0}>
 				<Group mb="xs">
-					<Link to="/repositories" style={LINK_STYLE}>
-						<Text size="sm">Repositories</Text>
+					<Link
+						to="/organizations/$organization"
+						params={{ organization }}
+						style={LINK_STYLE}
+					>
+						<Text size="sm">{organization}</Text>
 					</Link>
 					<Text size="sm" c="dimmed">
 						/
 					</Text>
 					<Text size="sm" fw={600}>
-						{name}
+						{repository}
 					</Text>
 				</Group>
 
@@ -46,7 +53,10 @@ function RepositoryLayout() {
 						<Tabs.Tab
 							value="code"
 							onClick={() =>
-								navigate({ to: "/repositories/$name", params: { name } })
+								navigate({
+									to: "/organizations/$organization/repositories/$repository",
+									params: { organization, repository },
+								})
 							}
 						>
 							Code
@@ -55,8 +65,8 @@ function RepositoryLayout() {
 							value="pulls"
 							onClick={() =>
 								navigate({
-									to: "/repositories/$name/pulls",
-									params: { name },
+									to: "/organizations/$organization/repositories/$repository/pulls",
+									params: { organization, repository },
 								})
 							}
 						>
@@ -66,8 +76,8 @@ function RepositoryLayout() {
 							value="settings"
 							onClick={() =>
 								navigate({
-									to: "/repositories/$name/settings",
-									params: { name },
+									to: "/organizations/$organization/repositories/$repository/settings",
+									params: { organization, repository },
 								})
 							}
 						>

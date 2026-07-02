@@ -86,7 +86,7 @@ npm run format      # Biome format
 | `src/routeTree.gen.ts` | ⚠ Generated route tree — do not edit |
 | `tests/e2e/` | Playwright E2E test files |
 | `playwright.config.ts` | Playwright configuration |
-| `src/modules/` | Domain modules (git, auth, repositories, pull-requests) |
+| `src/modules/` | Domain modules (git, auth, organizations, repositories, pull-requests) |
 | `src/modules/pull-requests/` | PR module: `schemas.ts`, `pull-request.store.ts`, `pull-request.service.ts`, `server/pull-request.functions.ts`, `components/`, `pages/` |
 | `src/routes/repositories.$name.tree.$branch.commits.$sha.tsx` | Route for commit diff viewing |
 | `src/modules/repositories/pages/CommitDiffPage.tsx` | Commit diff detail page |

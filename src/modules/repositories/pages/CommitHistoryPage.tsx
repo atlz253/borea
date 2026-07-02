@@ -14,6 +14,7 @@ import type { BranchInfo, CommitInfo } from "#/modules/git";
 import BranchSwitcher from "../components/BranchSwitcher";
 
 interface CommitHistoryPageProps {
+	organizationName?: string;
 	name: string;
 	commits: CommitInfo[];
 	branches: BranchInfo[];
@@ -31,6 +32,7 @@ function formatDate(date: Date): string {
 }
 
 export default function CommitHistoryPage({
+	organizationName = "default",
 	name,
 	commits,
 	branches,
@@ -43,8 +45,12 @@ export default function CommitHistoryPage({
 		<Container size="lg" py="xl">
 			<Group mb="md">
 				<Link
-					to="/repositories/$name/tree/$branch"
-					params={{ name, branch: encodedBranch }}
+					to="/organizations/$organization/repositories/$repository/tree/$branch"
+					params={{
+						organization: organizationName,
+						repository: name,
+						branch: encodedBranch,
+					}}
 					style={{
 						color: "var(--mantine-color-anchor-color)",
 						textDecoration: "none",
@@ -61,6 +67,7 @@ export default function CommitHistoryPage({
 				<Group justify="space-between" align="flex-end">
 					<Title order={1}>Commits</Title>
 					<BranchSwitcher
+						organizationName={organizationName}
 						repoName={name}
 						branches={branches}
 						selectedBranch={selectedBranch}
@@ -105,9 +112,10 @@ export default function CommitHistoryPage({
 								style={{ cursor: "pointer" }}
 								onClick={() =>
 									navigate({
-										to: "/repositories/$name/tree/$branch/commits/$sha",
+										to: "/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha",
 										params: {
-											name,
+											organization: organizationName,
+											repository: name,
 											branch: encodedBranch,
 											sha: commit.sha,
 										},

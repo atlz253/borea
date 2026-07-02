@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("Files changed tab shows PR diff", async ({ page }) => {
@@ -41,7 +41,7 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 			},
 		});
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
 			cwd: workDir,
@@ -70,7 +70,9 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		const errors: string[] = [];
 		page.on("pageerror", (err) => errors.push(err.message));
 
-		await page.goto(`/repositories/${repoName}/pulls/new`);
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/pulls/new`,
+		);
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
 
@@ -82,7 +84,9 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 
 		await page.getByRole("button", { name: /Create pull request/i }).click();
 
-		await page.waitForURL(new RegExp(`/repositories/${repoName}/pulls/\\d+`));
+		await page.waitForURL(
+			new RegExp(`/organizations/default/repositories/${repoName}/pulls/\\d+`),
+		);
 		await page.waitForLoadState("load");
 
 		expect(errors).toEqual([]);
@@ -90,7 +94,9 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 
 		await page.getByRole("tab", { name: /Files changed/i }).click();
 		await page.waitForURL(
-			new RegExp(`/repositories/${repoName}/pulls/\\d+/files`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/pulls/\\d+/files`,
+			),
 		);
 		await waitForHydration(page);
 
@@ -126,7 +132,9 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		await expect(page.getByText("feature content")).toBeVisible();
 
 		await page.getByRole("tab", { name: /Conversation/i }).click();
-		await page.waitForURL(new RegExp(`/repositories/${repoName}/pulls/\\d+$`));
+		await page.waitForURL(
+			new RegExp(`/organizations/default/repositories/${repoName}/pulls/\\d+$`),
+		);
 		await waitForHydration(page);
 
 		await expect(page.getByText("E2E test pull request")).toBeVisible();

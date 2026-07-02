@@ -17,6 +17,7 @@ import GitCloneInfo from "../components/GitCloneInfo";
 import type { TreeEntry } from "../schemas";
 
 interface RepositoryPageProps {
+	organizationName?: string;
 	name: string;
 	path: string;
 	entries: TreeEntry[];
@@ -39,6 +40,7 @@ function accumulatePath(segments: string[], index: number): string {
 }
 
 export default function RepositoryPage({
+	organizationName = "default",
 	name,
 	path,
 	entries,
@@ -54,8 +56,12 @@ export default function RepositoryPage({
 	const breadcrumbItems = [
 		<Link
 			key="root"
-			to="/repositories/$name/tree/$branch"
-			params={{ name, branch: encodedBranch }}
+			to="/organizations/$organization/repositories/$repository/tree/$branch"
+			params={{
+				organization: organizationName,
+				repository: name,
+				branch: encodedBranch,
+			}}
 			style={LINK_STYLE}
 		>
 			{name}
@@ -63,9 +69,10 @@ export default function RepositoryPage({
 		...segments.map((seg, i) => (
 			<Link
 				key={accumulatePath(segments, i)}
-				to="/repositories/$name/tree/$branch/$"
+				to="/organizations/$organization/repositories/$repository/tree/$branch/$"
 				params={{
-					name,
+					organization: organizationName,
+					repository: name,
 					branch: encodedBranch,
 					_splat: accumulatePath(segments, i),
 				}}
@@ -84,10 +91,11 @@ export default function RepositoryPage({
 
 			<Stack mb="lg">
 				<Group justify="space-between" align="center">
-					<GitCloneInfo name={name} />
+					<GitCloneInfo organizationName={organizationName} name={name} />
 					<Group gap="xs">
 						{branches.length > 0 && (
 							<BranchSwitcher
+								organizationName={organizationName}
 								repoName={name}
 								branches={branches}
 								selectedBranch={selectedBranch}
@@ -96,6 +104,7 @@ export default function RepositoryPage({
 						)}
 						{commitCount > 0 && (
 							<CommitCountLink
+								organizationName={organizationName}
 								repoName={name}
 								count={commitCount}
 								branchName={selectedBranch}
@@ -129,6 +138,7 @@ export default function RepositoryPage({
 				</Box>
 			) : (
 				<FileList
+					organizationName={organizationName}
 					entries={entries}
 					repoName={name}
 					currentPath={path}

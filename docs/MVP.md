@@ -60,6 +60,7 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 
 **4.1. Git Hosting**
 
+- Organization creation and repository isolation by organization
 - Repository creation and management (available to all users)
 - Repository file browsing (tree view, file contents)
 - Commit history browsing
@@ -82,7 +83,8 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 
 **4.4. Web Interface**
 
-- Dashboard with repository list
+- Dashboard with organization list
+- Organization page with repository list
 - Repository page with files and history
 - Pull/Merge request page
 - Repository settings
@@ -312,6 +314,8 @@ ALLOW_NOAUTH_IN_PRODUCTION=false  # explicit permission for NoAuth in production
 # Other settings
 DATABASE_URL=...
 STORAGE_TYPE=local  # or "s3"
+ORGANIZATION_MODE=multi  # or "single" for the fixed default organization
+ORGANIZATIONS_PATH=./data/organizations
 ```
 
 **12.3. Extension Points**
@@ -354,6 +358,7 @@ STORAGE_TYPE=local  # or "s3"
 
 **14.1. Functional**
 
+- [ ] User can create and open an organization
 - [ ] User can create a repository via the web interface
 - [ ] User can clone a repository over HTTP without authentication
 - [ ] User can push to a repository without authentication

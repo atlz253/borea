@@ -1,5 +1,6 @@
 import type { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
+import { organizationNameSchema } from "#/modules/organizations";
 import { apiErrorSchema } from "#/platform/http";
 import { repoNameSchema, repositoryResponseSchema } from "./schemas";
 
@@ -14,13 +15,19 @@ export function registerRepositoryOpenApi(registry: OpenAPIRegistry): void {
 		z.array(repositoryResponseSchema),
 	);
 	const error = registry.register("ApiError", apiErrorSchema);
-	const params = z.object({ name: repoNameSchema });
+	const organizationParams = z.object({
+		organization: organizationNameSchema,
+	});
+	const params = organizationParams.extend({
+		repository: repoNameSchema,
+	});
 
 	registry.registerPath({
 		method: "get",
-		path: "/api/v1/repositories",
+		path: "/api/v1/organizations/{organization}/repositories",
 		tags: ["Repositories"],
 		summary: "List repositories",
+		request: { params: organizationParams },
 		responses: {
 			200: {
 				description: "Repository list",
@@ -35,7 +42,7 @@ export function registerRepositoryOpenApi(registry: OpenAPIRegistry): void {
 
 	registry.registerPath({
 		method: "get",
-		path: "/api/v1/repositories/{name}",
+		path: "/api/v1/organizations/{organization}/repositories/{repository}",
 		tags: ["Repositories"],
 		summary: "Get repository",
 		request: { params },
@@ -61,7 +68,7 @@ export function registerRepositoryOpenApi(registry: OpenAPIRegistry): void {
 
 	registry.registerPath({
 		method: "delete",
-		path: "/api/v1/repositories/{name}",
+		path: "/api/v1/organizations/{organization}/repositories/{repository}",
 		tags: ["Repositories"],
 		summary: "Delete repository",
 		request: { params },

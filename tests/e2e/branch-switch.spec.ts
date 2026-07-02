@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("create branch from branch switcher", async ({ page }) => {
@@ -41,7 +41,7 @@ test("create branch from branch switcher", async ({ page }) => {
 			},
 		});
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], {
 			cwd: workDir,
 		});
@@ -56,12 +56,16 @@ test("create branch from branch switcher", async ({ page }) => {
 		);
 
 		// Navigate to the repo
-		await page.goto(`/repositories/${repoName}`, { waitUntil: "load" });
+		await page.goto(`/organizations/default/repositories/${repoName}`, {
+			waitUntil: "load",
+		});
 		await waitForHydration(page);
 
 		// Should be on the tree URL
 		await expect(page).toHaveURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}`,
+			),
 		);
 
 		// Open branch switcher and click "New branch"
@@ -75,7 +79,9 @@ test("create branch from branch switcher", async ({ page }) => {
 
 		// Should navigate to the new branch
 		await expect(page).toHaveURL(
-			new RegExp(`/repositories/${repoName}/tree/feature-from-e2e`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/feature-from-e2e`,
+			),
 		);
 	} finally {
 		rmSync(workDir, { recursive: true, force: true });
@@ -133,7 +139,7 @@ test("branch switcher lets user switch between branches", async ({ page }) => {
 
 		// Switch back to default branch and push both
 		await execa("git", ["checkout", defaultBranch], { cwd: workDir });
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa(
 			"git",
@@ -151,12 +157,16 @@ test("branch switcher lets user switch between branches", async ({ page }) => {
 		});
 
 		// Navigate to the repo — redirects to /tree/<defaultBranch>
-		await page.goto(`/repositories/${repoName}`, { waitUntil: "load" });
+		await page.goto(`/organizations/default/repositories/${repoName}`, {
+			waitUntil: "load",
+		});
 		await waitForHydration(page);
 
 		// Should be on the tree URL
 		await expect(page).toHaveURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}`,
+			),
 		);
 		await expect(page.getByText("file.txt")).toBeVisible();
 
@@ -164,7 +174,9 @@ test("branch switcher lets user switch between branches", async ({ page }) => {
 		await page.getByRole("button", { name: defaultBranch }).click();
 		await page.getByRole("menuitem", { name: /feature-x/ }).click();
 		await page.waitForURL(
-			new RegExp(`/repositories/${repoName}/tree/feature-x`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/feature-x`,
+			),
 		);
 
 		// Feature branch should show feature.txt, not file.txt (in this structure)

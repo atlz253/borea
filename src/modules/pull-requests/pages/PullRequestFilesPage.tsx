@@ -58,6 +58,7 @@ export default function PullRequestFilesPage({
 		try {
 			await setPullRequestFileViewedFn({
 				data: {
+					organizationName: pullRequest.organizationName,
 					repoName: pullRequest.repoName,
 					id: pullRequest.id,
 					filePath,

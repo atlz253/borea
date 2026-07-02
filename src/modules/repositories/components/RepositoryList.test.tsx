@@ -14,7 +14,7 @@ vi.mock("@tanstack/react-router", () => ({
 		to: string;
 		params: Record<string, string>;
 	}) => (
-		<a href="/test" data-to={to} data-name={params.name}>
+		<a href="/test" data-to={to} data-name={params.repository}>
 			{children}
 		</a>
 	),
@@ -22,6 +22,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 function makeRepo(overrides: Partial<Repository> = {}): Repository {
 	return {
+		organizationName: "default",
 		name: "repo-1",
 		description: undefined,
 		createdAt: new Date("2024-01-01"),
@@ -55,11 +56,11 @@ describe("RepositoryList", () => {
 		expect(betaLink.closest("a")?.getAttribute("data-name")).toBe("beta");
 	});
 
-	it("links to /repositories/$name route", () => {
+	it("links to the namespaced repository route", () => {
 		renderList({ repositories: [makeRepo({ name: "alpha" })] });
 		expect(
 			screen.getByText("alpha").closest("a")?.getAttribute("data-to"),
-		).toBe("/repositories/$name");
+		).toBe("/organizations/$organization/repositories/$repository");
 	});
 
 	it("renders description when present", () => {

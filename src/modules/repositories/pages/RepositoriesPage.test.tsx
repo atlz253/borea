@@ -13,9 +13,7 @@ it("renders the repositories heading", () => {
 		</MantineProvider>,
 	);
 
-	expect(
-		screen.getByRole("heading", { name: /repositories/i }),
-	).toBeInTheDocument();
+	expect(screen.getByRole("heading", { name: "default" })).toBeInTheDocument();
 });
 
 it("shows the new repository button", () => {

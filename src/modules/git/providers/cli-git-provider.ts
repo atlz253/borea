@@ -1,7 +1,6 @@
 import { existsSync } from "node:fs";
 import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { Readable } from "node:stream";
 import { type ExecaError, execa } from "execa";
 import { getConfig } from "#/platform/config";
 import { NotFoundError } from "#/platform/errors";
@@ -20,13 +19,14 @@ import type {
 	MergeResult,
 	MergeStatus,
 	RepositoryInfo,
+	RepositoryLocator,
 	TreeEntry,
 } from "../git-provider";
+import { readCommitDiff } from "./cli-git-commit-diff";
 import { readFileContent } from "./cli-git-file";
 import {
 	computeDiff,
 	computeMergeTree,
-	gitCommandName,
 	isAncestor,
 	refExists,
 	revParse,
@@ -38,16 +38,20 @@ import {
 	LOG_FORMAT,
 	parseLogOutput,
 	parseLsTree,
-	parseNameStatus,
-	parseUnifiedDiff,
 } from "./cli-git-parsers";
 import { readRepositoryInfo } from "./cli-git-repository";
+import {
+	advertiseRefs as advertiseRepositoryRefs,
+	invokeService as invokeRepositoryService,
+} from "./cli-git-transport";
 import {
 	normalizePath,
 	resolvePath,
 	validateName,
 	validateSha,
 } from "./cli-git-validators";
+
+type RepositoryTarget = RepositoryLocator | string;
 
 export class CliGitProvider implements GitProvider {
 	private readonly storagePath: string;
@@ -58,14 +62,19 @@ export class CliGitProvider implements GitProvider {
 		this.gitBin = gitBin ?? cfg.gitBinPath;
 	}
 
-	async init(name: string, description?: string): Promise<RepositoryInfo> {
+	async init(
+		locator: RepositoryTarget,
+		description?: string,
+	): Promise<RepositoryInfo> {
+		const { organizationName, repositoryName: name } =
+			this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (existsSync(repoPath)) {
 			throw new Error(`Repository "${name}" already exists`);
 		}
-		await mkdir(this.storagePath, { recursive: true });
+		await mkdir(path.dirname(repoPath), { recursive: true });
 		try {
 			await execa(this.gitBin, ["init", "--bare", repoPath]);
 		} catch (error) {
@@ -82,12 +91,13 @@ export class CliGitProvider implements GitProvider {
 			await writeFile(path.join(repoPath, "description"), description, "utf-8");
 		}
 
-		return readRepositoryInfo(name, repoPath);
+		return readRepositoryInfo(organizationName, name, repoPath);
 	}
 
-	async delete(name: string): Promise<void> {
+	async delete(locator: RepositoryTarget): Promise<void> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new NotFoundError(`Repository "${name}" not found`);
@@ -96,19 +106,28 @@ export class CliGitProvider implements GitProvider {
 		await rm(repoPath, { recursive: true });
 	}
 
-	async list(): Promise<RepositoryInfo[]> {
+	async list(organizationName?: string): Promise<RepositoryInfo[]> {
 		try {
-			await mkdir(this.storagePath, { recursive: true });
-			const entries = await readdir(this.storagePath, { withFileTypes: true });
+			const organizationPath = organizationName
+				? path.join(this.storagePath, organizationName)
+				: this.storagePath;
+			await mkdir(organizationPath, { recursive: true });
+			const entries = await readdir(organizationPath, { withFileTypes: true });
 			const repos: RepositoryInfo[] = [];
 
 			for (const entry of entries) {
 				if (!entry.isDirectory()) {
 					continue;
 				}
-				const repoPath = path.join(this.storagePath, entry.name);
+				const repoPath = path.join(organizationPath, entry.name);
 				if (existsSync(path.join(repoPath, "HEAD"))) {
-					repos.push(await readRepositoryInfo(entry.name, repoPath));
+					repos.push(
+						await readRepositoryInfo(
+							organizationName ?? "default",
+							entry.name,
+							repoPath,
+						),
+					);
 				}
 			}
 
@@ -119,26 +138,29 @@ export class CliGitProvider implements GitProvider {
 		}
 	}
 
-	async get(name: string): Promise<RepositoryInfo | undefined> {
+	async get(locator: RepositoryTarget): Promise<RepositoryInfo | undefined> {
+		const { organizationName, repositoryName: name } =
+			this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			return undefined;
 		}
-		return readRepositoryInfo(name, repoPath);
+		return readRepositoryInfo(organizationName, name, repoPath);
 	}
 
-	async exists(name: string): Promise<boolean> {
-		const repoPath = resolvePath(this.storagePath, name);
+	async exists(locator: RepositoryTarget): Promise<boolean> {
+		const repoPath = this.resolveTargetPath(locator);
 		return existsSync(repoPath) && existsSync(path.join(repoPath, "HEAD"));
 	}
 
 	async listFiles(
-		name: string,
+		locator: RepositoryTarget,
 		options?: ListFilesOptions,
 	): Promise<TreeEntry[]> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -170,17 +192,24 @@ export class CliGitProvider implements GitProvider {
 		return parseLsTree(output);
 	}
 
-	async getFile(name: string, options: GetFileOptions) {
-		return readFileContent(this.gitBin, this.storagePath, name, options);
+	async getFile(locator: RepositoryTarget, options: GetFileOptions) {
+		return readFileContent(
+			this.gitBin,
+			this.storagePath,
+			this.normalizeTarget(locator),
+			options,
+			typeof locator === "string",
+		);
 	}
 
 	async createBranch(
-		name: string,
+		locator: RepositoryTarget,
 		branch: string,
 		fromRef?: string,
 	): Promise<BranchInfo> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -208,9 +237,10 @@ export class CliGitProvider implements GitProvider {
 		return { name: branch, isHead: false };
 	}
 
-	async listBranches(name: string): Promise<BranchInfo[]> {
+	async listBranches(locator: RepositoryTarget): Promise<BranchInfo[]> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -240,11 +270,12 @@ export class CliGitProvider implements GitProvider {
 	}
 
 	async listCommits(
-		name: string,
+		locator: RepositoryTarget,
 		options?: ListCommitsOptions,
 	): Promise<CommitInfo[]> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -274,9 +305,10 @@ export class CliGitProvider implements GitProvider {
 		}
 	}
 
-	async countCommits(name: string, ref?: string): Promise<number> {
+	async countCommits(locator: RepositoryTarget, ref?: string): Promise<number> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -302,10 +334,14 @@ export class CliGitProvider implements GitProvider {
 		}
 	}
 
-	async getCommit(name: string, sha: string): Promise<CommitDetail> {
+	async getCommit(
+		locator: RepositoryTarget,
+		sha: string,
+	): Promise<CommitDetail> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
 		validateSha(sha);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -354,73 +390,38 @@ export class CliGitProvider implements GitProvider {
 		};
 	}
 
-	async getCommitDiff(name: string, sha: string): Promise<GetCommitDiffResult> {
-		const commit = await this.getCommit(name, sha);
-		const repoPath = resolvePath(this.storagePath, name);
-
-		const { stdout: nameStatusStdout } = await execa(this.gitBin, [
-			"--git-dir",
-			repoPath,
-			"diff-tree",
-			"-r",
-			"--name-status",
-			"--root",
-			"--no-commit-id",
-			sha,
-		]);
-		const entries = parseNameStatus(nameStatusStdout);
-
-		const files: DiffFile[] = entries.map((e) => ({
-			oldPath: e.status === "added" ? null : e.oldPath,
-			newPath: e.status === "deleted" ? null : e.newPath,
-			status: e.status,
-			hunks: [],
-			isBinary: false,
-		}));
-
-		const { stdout: patchStdout } = await execa(this.gitBin, [
-			"--git-dir",
-			repoPath,
-			"diff-tree",
-			"-r",
-			"-p",
-			"--root",
-			"--no-commit-id",
-			sha,
-		]);
-
-		if (patchStdout) {
-			const patchFiles = parseUnifiedDiff(patchStdout);
-			for (const patchFile of patchFiles) {
-				const matched = files.find(
-					(f) =>
-						(f.oldPath != null && f.oldPath === patchFile.oldPath) ||
-						(f.newPath != null && f.newPath === patchFile.newPath),
-				);
-				if (matched) {
-					matched.hunks = patchFile.hunks;
-					matched.isBinary = patchFile.isBinary;
-					if (patchFile.isBinary) {
-						matched.hunks = [];
-					}
-				}
-			}
-		}
-
-		return { commit, files };
+	async getCommitDiff(
+		locator: RepositoryTarget,
+		sha: string,
+	): Promise<GetCommitDiffResult> {
+		const commit = await this.getCommit(locator, sha);
+		const repoPath = this.resolveTargetPath(locator);
+		return readCommitDiff(this.gitBin, repoPath, sha, commit);
 	}
 
-	async getDiff(name: string, base: string, head: string): Promise<DiffFile[]> {
-		return computeDiff(this.gitBin, this.storagePath, name, base, head);
+	async getDiff(
+		locator: RepositoryTarget,
+		base: string,
+		head: string,
+	): Promise<DiffFile[]> {
+		return computeDiff(
+			this.gitBin,
+			this.storagePath,
+			this.normalizeTarget(locator),
+			base,
+			head,
+			typeof locator === "string",
+		);
 	}
 
 	async canMerge(
-		name: string,
+		locator: RepositoryTarget,
 		head: string,
 		base: string,
 	): Promise<MergeStatus> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -473,13 +474,14 @@ export class CliGitProvider implements GitProvider {
 	}
 
 	async mergeBranch(
-		name: string,
+		locator: RepositoryTarget,
 		head: string,
 		base: string,
 		options?: MergeOptions,
 	): Promise<MergeResult> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
@@ -546,55 +548,53 @@ export class CliGitProvider implements GitProvider {
 	}
 
 	async advertiseRefs(
-		name: string,
+		locator: RepositoryTarget,
 		service: GitService,
 	): Promise<ReadableStream<Uint8Array>> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
 		}
 
-		const cmdName = gitCommandName(service);
-		const subprocess = execa(this.gitBin, [
-			"--git-dir",
-			repoPath,
-			cmdName,
-			"--stateless-rpc",
-			"--advertise-refs",
-			repoPath,
-		]);
-
-		return Readable.toWeb(subprocess.stdout) as ReadableStream<Uint8Array>;
+		return advertiseRepositoryRefs(this.gitBin, repoPath, service);
 	}
 
 	async invokeService(
-		name: string,
+		locator: RepositoryTarget,
 		service: GitService,
 		input: ReadableStream<Uint8Array>,
 	): Promise<ReadableStream<Uint8Array>> {
+		const { repositoryName: name } = this.normalizeTarget(locator);
 		validateName(name);
-		const repoPath = resolvePath(this.storagePath, name);
+		const repoPath = this.resolveTargetPath(locator);
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			throw new Error(`Repository "${name}" not found`);
 		}
 
-		const cmdName = gitCommandName(service);
-		const subprocess = execa(this.gitBin, [
-			"--git-dir",
-			repoPath,
-			cmdName,
-			"--stateless-rpc",
-			repoPath,
-		]);
+		return invokeRepositoryService(this.gitBin, repoPath, service, input);
+	}
 
-		const inputNode = Readable.fromWeb(input as never);
-		inputNode.pipe(subprocess.stdin);
+	private normalizeTarget(target: RepositoryTarget): RepositoryLocator {
+		if (typeof target === "string") {
+			return {
+				organizationName: "default",
+				repositoryName: target,
+			};
+		}
+		return target;
+	}
 
-		subprocess.catch(() => {});
-
-		return Readable.toWeb(subprocess.stdout) as ReadableStream<Uint8Array>;
+	private resolveTargetPath(target: RepositoryTarget): string {
+		if (typeof target === "string") {
+			return path.resolve(this.storagePath, target);
+		}
+		return resolvePath(
+			this.storagePath,
+			target.organizationName,
+			target.repositoryName,
+		);
 	}
 }
-
 export const gitProvider: GitProvider = new CliGitProvider();

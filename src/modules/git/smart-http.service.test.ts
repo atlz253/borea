@@ -8,17 +8,18 @@ import {
 describe("parseSmartHttpPath", () => {
 	it("parses repo.git/info/refs with upload-pack service", () => {
 		const result = parseSmartHttpPath(
-			"myrepo.git/info/refs",
+			"default/myrepo.git/info/refs",
 			new URLSearchParams("service=git-upload-pack"),
 		);
 		expect(result.repoName).toBe("myrepo");
+		expect(result.organizationName).toBe("default");
 		expect(result.endpoint).toBe("info/refs");
 		expect(result.service).toBe("git-upload-pack");
 	});
 
 	it("parses repo without .git suffix", () => {
 		const result = parseSmartHttpPath(
-			"myrepo/info/refs",
+			"default/myrepo/info/refs",
 			new URLSearchParams("service=git-upload-pack"),
 		);
 		expect(result.repoName).toBe("myrepo");
@@ -27,7 +28,7 @@ describe("parseSmartHttpPath", () => {
 
 	it("parses git-upload-pack endpoint", () => {
 		const result = parseSmartHttpPath(
-			"myrepo.git/git-upload-pack",
+			"default/myrepo.git/git-upload-pack",
 			new URLSearchParams(),
 		);
 		expect(result.repoName).toBe("myrepo");
@@ -37,7 +38,7 @@ describe("parseSmartHttpPath", () => {
 
 	it("parses git-receive-pack endpoint", () => {
 		const result = parseSmartHttpPath(
-			"myrepo.git/git-receive-pack",
+			"default/myrepo.git/git-receive-pack",
 			new URLSearchParams(),
 		);
 		expect(result.repoName).toBe("myrepo");
@@ -47,7 +48,7 @@ describe("parseSmartHttpPath", () => {
 
 	it("defaults to git-upload-pack for info/refs without service param", () => {
 		const result = parseSmartHttpPath(
-			"repo.git/info/refs",
+			"default/repo.git/info/refs",
 			new URLSearchParams(),
 		);
 		expect(result.service).toBe("git-upload-pack");
@@ -55,7 +56,7 @@ describe("parseSmartHttpPath", () => {
 
 	it("recognizes git-receive-pack from query param", () => {
 		const result = parseSmartHttpPath(
-			"repo.git/info/refs",
+			"default/repo.git/info/refs",
 			new URLSearchParams("service=git-receive-pack"),
 		);
 		expect(result.service).toBe("git-receive-pack");
@@ -63,7 +64,7 @@ describe("parseSmartHttpPath", () => {
 
 	it("returns unknown for unrecognized endpoint", () => {
 		const result = parseSmartHttpPath(
-			"repo.git/unknown/path",
+			"default/repo.git/unknown/path",
 			new URLSearchParams(),
 		);
 		expect(result.endpoint).toBe("unknown");

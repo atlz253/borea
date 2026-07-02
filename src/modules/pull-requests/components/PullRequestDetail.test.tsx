@@ -9,6 +9,7 @@ import PullRequestDetail from "./PullRequestDetail";
 function makePR(overrides: Partial<PullRequest> = {}): PullRequest {
 	return {
 		id: 1,
+		organizationName: "default",
 		repoName: "my-repo",
 		title: "My PR",
 		sourceBranch: "feature",

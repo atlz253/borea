@@ -15,10 +15,12 @@ import type { Repository } from "../schemas";
 import { createRepositoryFn } from "../server/repository.functions";
 
 interface RepositoriesPageProps {
+	organizationName?: string;
 	repositories: Repository[];
 }
 
 export default function RepositoriesPage({
+	organizationName = "default",
 	repositories,
 }: RepositoriesPageProps) {
 	const [showForm, setShowForm] = useState(false);
@@ -33,7 +35,9 @@ export default function RepositoriesPage({
 		setLoading(true);
 
 		try {
-			await createRepositoryFn({ data: { name, description } });
+			await createRepositoryFn({
+				data: { organizationName, name, description },
+			});
 			setName("");
 			setDescription("");
 			setShowForm(false);
@@ -52,9 +56,9 @@ export default function RepositoriesPage({
 			<Group justify="space-between" mb="md">
 				<div>
 					<Text size="xs" tt="uppercase" fw={700} c="dimmed" mb="xs">
-						Nirvana
+						Organization
 					</Text>
-					<Title order={1}>Repositories</Title>
+					<Title order={1}>{organizationName}</Title>
 				</div>
 				<Button
 					leftSection={<Plus size={16} />}

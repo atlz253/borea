@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("PR with conflicting branches shows conflict alert", async ({ page }) => {
@@ -37,7 +37,7 @@ test("PR with conflicting branches shows conflict alert", async ({ page }) => {
 			env: COMMIT_ENV,
 		});
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
 			cwd: workDir,
@@ -74,7 +74,9 @@ test("PR with conflicting branches shows conflict alert", async ({ page }) => {
 		const errors: string[] = [];
 		page.on("pageerror", (err) => errors.push(err.message));
 
-		await page.goto(`/repositories/${repoName}/pulls/new`);
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/pulls/new`,
+		);
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
 
@@ -85,7 +87,9 @@ test("PR with conflicting branches shows conflict alert", async ({ page }) => {
 
 		await page.getByRole("button", { name: /Create pull request/i }).click();
 
-		await page.waitForURL(new RegExp(`/repositories/${repoName}/pulls/\\d+`));
+		await page.waitForURL(
+			new RegExp(`/organizations/default/repositories/${repoName}/pulls/\\d+`),
+		);
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
 

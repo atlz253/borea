@@ -6,6 +6,7 @@ import type { BranchInfo } from "#/modules/git";
 import { createBranchFn } from "#/modules/repositories";
 
 interface BranchSwitcherProps {
+	organizationName?: string;
 	repoName: string;
 	branches: BranchInfo[];
 	selectedBranch: string;
@@ -15,6 +16,7 @@ interface BranchSwitcherProps {
 }
 
 export default function BranchSwitcher({
+	organizationName = "default",
 	repoName,
 	branches,
 	selectedBranch,
@@ -36,31 +38,41 @@ export default function BranchSwitcher({
 		const encodedBranch = encodeURIComponent(branch);
 		if (toCommits) {
 			void navigate({
-				to: "/repositories/$name/tree/$branch/commits" as const,
-				params: { name: repoName, branch: encodedBranch },
+				to: "/organizations/$organization/repositories/$repository/tree/$branch/commits",
+				params: {
+					organization: organizationName,
+					repository: repoName,
+					branch: encodedBranch,
+				},
 			});
 		} else if (currentBlobPath) {
 			void navigate({
-				to: "/repositories/$name/blob/$branch/$" as const,
+				to: "/organizations/$organization/repositories/$repository/blob/$branch/$",
 				params: {
-					name: repoName,
+					organization: organizationName,
+					repository: repoName,
 					branch: encodedBranch,
 					_splat: currentBlobPath,
 				},
 			});
 		} else if (currentTreePath) {
 			void navigate({
-				to: "/repositories/$name/tree/$branch/$" as const,
+				to: "/organizations/$organization/repositories/$repository/tree/$branch/$",
 				params: {
-					name: repoName,
+					organization: organizationName,
+					repository: repoName,
 					branch: encodedBranch,
 					_splat: currentTreePath,
 				},
 			});
 		} else {
 			void navigate({
-				to: "/repositories/$name/tree/$branch" as const,
-				params: { name: repoName, branch: encodedBranch },
+				to: "/organizations/$organization/repositories/$repository/tree/$branch",
+				params: {
+					organization: organizationName,
+					repository: repoName,
+					branch: encodedBranch,
+				},
 			});
 		}
 	};
@@ -71,6 +83,7 @@ export default function BranchSwitcher({
 		try {
 			await createBranchFn({
 				data: {
+					organizationName,
 					name: repoName,
 					branch: newBranchName,
 					from: selectedBranch,
@@ -80,8 +93,12 @@ export default function BranchSwitcher({
 			setNewBranchName("");
 			const encoded = encodeURIComponent(newBranchName);
 			void navigate({
-				to: "/repositories/$name/tree/$branch" as const,
-				params: { name: repoName, branch: encoded },
+				to: "/organizations/$organization/repositories/$repository/tree/$branch",
+				params: {
+					organization: organizationName,
+					repository: repoName,
+					branch: encoded,
+				},
 			});
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Failed to create branch");

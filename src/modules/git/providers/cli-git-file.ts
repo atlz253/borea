@@ -1,7 +1,11 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { execa } from "execa";
-import type { FileContent, GetFileOptions } from "../git-provider";
+import type {
+	FileContent,
+	GetFileOptions,
+	RepositoryLocator,
+} from "../git-provider";
 import { refExists } from "./cli-git-helpers";
 import { DEFAULT_REF } from "./cli-git-parsers";
 import { normalizePath, resolvePath, validateName } from "./cli-git-validators";
@@ -9,11 +13,15 @@ import { normalizePath, resolvePath, validateName } from "./cli-git-validators";
 export async function readFileContent(
 	gitBin: string,
 	storagePath: string,
-	name: string,
+	locator: RepositoryLocator,
 	options: GetFileOptions,
+	legacy = false,
 ): Promise<FileContent> {
+	const name = locator.repositoryName;
 	validateName(name);
-	const repoPath = resolvePath(storagePath, name);
+	const repoPath = legacy
+		? path.resolve(storagePath, name)
+		: resolvePath(storagePath, locator.organizationName, name);
 
 	if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 		throw new Error(`Repository "${name}" not found`);

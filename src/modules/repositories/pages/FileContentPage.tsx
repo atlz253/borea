@@ -21,6 +21,7 @@ import { FILE_OPEN_MAX_BYTES, FILE_PREVIEW_MAX_BYTES } from "../file-limits";
 import { getRepositoryFileFn } from "../server/repository.functions";
 
 interface FileContentPageProps {
+	organizationName?: string;
 	name: string;
 	path: string;
 	file: FileContent;
@@ -49,6 +50,7 @@ function formatSize(bytes: number): string {
 }
 
 export default function FileContentPage({
+	organizationName = "default",
 	name,
 	path,
 	file,
@@ -70,6 +72,7 @@ export default function FileContentPage({
 		try {
 			const result = await getRepositoryFileFn({
 				data: {
+					organizationName,
 					name,
 					path,
 					ref: selectedBranch,
@@ -89,8 +92,12 @@ export default function FileContentPage({
 	const breadcrumbItems = [
 		<Link
 			key="root"
-			to="/repositories/$name/tree/$branch"
-			params={{ name, branch: encodedBranch }}
+			to="/organizations/$organization/repositories/$repository/tree/$branch"
+			params={{
+				organization: organizationName,
+				repository: name,
+				branch: encodedBranch,
+			}}
 			style={LINK_STYLE}
 		>
 			{name}
@@ -100,9 +107,10 @@ export default function FileContentPage({
 			return (
 				<Link
 					key={directoryPath}
-					to="/repositories/$name/tree/$branch/$"
+					to="/organizations/$organization/repositories/$repository/tree/$branch/$"
 					params={{
-						name,
+						organization: organizationName,
+						repository: name,
 						branch: encodedBranch,
 						_splat: directoryPath,
 					}}
@@ -125,9 +133,10 @@ export default function FileContentPage({
 
 			<Stack mb="lg">
 				<Group justify="space-between" align="center">
-					<GitCloneInfo name={name} />
+					<GitCloneInfo organizationName={organizationName} name={name} />
 					<Group gap="xs">
 						<BranchSwitcher
+							organizationName={organizationName}
 							repoName={name}
 							branches={branches}
 							selectedBranch={selectedBranch}
@@ -135,6 +144,7 @@ export default function FileContentPage({
 						/>
 						{commitCount > 0 && (
 							<CommitCountLink
+								organizationName={organizationName}
 								repoName={name}
 								count={commitCount}
 								branchName={selectedBranch}

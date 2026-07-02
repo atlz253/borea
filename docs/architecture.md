@@ -10,6 +10,7 @@ src/
   modules/                Domain modules — each is a self-contained slice of business logic
     git/                  Git provider, smart-HTTP service, commit/branch operations
     auth/                 AuthProvider interface + NoAuthProvider (MVP)
+    organizations/        Organization model, mode policy, persistence, UI and API
     repositories/         Repository listing, file tree, server functions for the UI
     pull-requests/        Pull/merge requests (scaffold, not yet implemented)
   platform/               Cross-domain infrastructure
@@ -20,7 +21,7 @@ src/
     errors/               Shared error types
   routes/                 File-based routing (TanStack Router)
     api/git/$.tsx         Git smart-HTTP endpoints (clone, push)
-    repositories/...      Repository UI pages
+    organizations/...     Organization and namespaced repository UI pages
   router.tsx              Router factory + type registration
   theme.ts                Mantine theme (neutral dev-tool palette)
 ```
@@ -40,6 +41,7 @@ All architectural decisions are recorded as ADRs in `docs/ADR/`.
 | 0007 | Git smart-HTTP pull/ clone implementation |
 | 0008 | Git smart-HTTP push implementation |
 | 0009 | Commit history: GitProvider extension with branches and commits |
+| 0018 | Organizations, repository namespaces, and single-organization mode |
 
 ## Architecture Principles
 
@@ -58,7 +60,13 @@ Route files in `src/routes/` are minimal: they define `createFileRoute`, load da
 
 ### Git Smart-HTTP
 
-Nirvana serves the Git smart-HTTP protocol through the `/api/git/<name>.git/` endpoint (see `API.md` for details). Both read (clone/fetch) and write (push) operations are supported. The implementation uses the system Git CLI (`git-upload-pack --stateless-rpc` and `git-receive-pack --stateless-rpc`) via execa, not the CGI-based `git http-backend`.
+Nirvana serves the Git smart-HTTP protocol through the `/api/git/<organization>/<repository>.git/` endpoint (see `API.md` for details). Both read (clone/fetch) and write (push) operations are supported. The implementation uses the system Git CLI (`git-upload-pack --stateless-rpc` and `git-receive-pack --stateless-rpc`) via execa, not the CGI-based `git http-backend`.
+
+### Organization Modes
+
+`ORGANIZATION_MODE=multi` exposes all organizations and allows creation.
+`ORGANIZATION_MODE=single` exposes only the automatically created `default`
+organization. Both modes use the same namespaced routes and storage layout.
 
 ### NoAuth Mode
 

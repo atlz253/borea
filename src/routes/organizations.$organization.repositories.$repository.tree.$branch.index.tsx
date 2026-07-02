@@ -7,14 +7,31 @@ import {
 	RepositoryPage,
 } from "#/modules/repositories";
 
-export const Route = createFileRoute("/repositories/$name/tree/$branch/")({
+export const Route = createFileRoute(
+	"/organizations/$organization/repositories/$repository/tree/$branch/",
+)({
 	loader: ({ params }) =>
 		Promise.all([
 			listRepositoryFilesFn({
-				data: { name: params.name, ref: params.branch },
+				data: {
+					organizationName: params.organization,
+					name: params.repository,
+					ref: params.branch,
+				},
 			}),
-			countCommitsFn({ data: { name: params.name, ref: params.branch } }),
-			listBranchesFn({ data: { name: params.name } }),
+			countCommitsFn({
+				data: {
+					organizationName: params.organization,
+					name: params.repository,
+					ref: params.branch,
+				},
+			}),
+			listBranchesFn({
+				data: {
+					organizationName: params.organization,
+					name: params.repository,
+				},
+			}),
 		]).then(([entries, commitCount, branches]) => {
 			const selectedBranch = branches.find(
 				(b: { name: string }) => b.name === params.branch,
@@ -30,12 +47,13 @@ export const Route = createFileRoute("/repositories/$name/tree/$branch/")({
 			};
 		}),
 	component: () => {
-		const { name } = Route.useParams();
+		const { organization, repository } = Route.useParams();
 		const { entries, commitCount, branches, selectedBranch } =
 			Route.useLoaderData();
 		return (
 			<RepositoryPage
-				name={name}
+				organizationName={organization}
+				name={repository}
 				path=""
 				entries={entries}
 				commitCount={commitCount}

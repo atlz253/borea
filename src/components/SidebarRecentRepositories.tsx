@@ -2,6 +2,7 @@ import { NavLink, Text } from "@mantine/core";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { listOrganizationsFn } from "#/modules/organizations";
 import type { Repository } from "#/modules/repositories";
 import { listRepositoriesFn } from "#/modules/repositories";
 
@@ -24,12 +25,23 @@ export default function SidebarRecentRepositories({ opened }: Props) {
 		if (!opened || loadedRef.current) return;
 		loadedRef.current = true;
 		setLoading(true);
-		listRepositoriesFn()
+		listOrganizationsFn()
+			.then((organizations) =>
+				Promise.all(
+					organizations.map((organization) =>
+						listRepositoriesFn({
+							data: { organizationName: organization.name },
+						}),
+					),
+				),
+			)
 			.then((result) => {
-				const sorted = [...result].sort(
-					(a, b) =>
-						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-				);
+				const sorted = result
+					.flat()
+					.sort(
+						(a, b) =>
+							new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+					);
 				setRepos(sorted);
 				setLoading(false);
 			})
@@ -65,15 +77,21 @@ export default function SidebarRecentRepositories({ opened }: Props) {
 		<>
 			{visible.map((repo) => (
 				<NavLink
-					key={repo.name}
+					key={`${repo.organizationName}:${repo.name}`}
 					component="button"
-					label={repo.name}
-					active={location.pathname === `/repositories/${repo.name}`}
+					label={`${repo.organizationName}/${repo.name}`}
+					active={
+						location.pathname ===
+						`/organizations/${repo.organizationName}/repositories/${repo.name}`
+					}
 					variant="light"
 					onClick={() =>
 						navigate({
-							to: "/repositories/$name",
-							params: { name: repo.name },
+							to: "/organizations/$organization/repositories/$repository",
+							params: {
+								organization: repo.organizationName,
+								repository: repo.name,
+							},
 						})
 					}
 				/>

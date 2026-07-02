@@ -3,15 +3,23 @@ import { Check, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface GitCloneInfoProps {
+	organizationName?: string;
 	name: string;
 }
 
-export default function GitCloneInfo({ name }: GitCloneInfoProps) {
-	const [cloneUrl, setCloneUrl] = useState(`/api/git/${name}.git`);
+export default function GitCloneInfo({
+	organizationName = "default",
+	name,
+}: GitCloneInfoProps) {
+	const [cloneUrl, setCloneUrl] = useState(
+		`/api/git/${organizationName}/${name}.git`,
+	);
 
 	useEffect(() => {
-		setCloneUrl(`${window.location.origin}/api/git/${name}.git`);
-	}, [name]);
+		setCloneUrl(
+			`${window.location.origin}/api/git/${organizationName}/${name}.git`,
+		);
+	}, [organizationName, name]);
 
 	return (
 		<TextInput

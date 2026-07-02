@@ -77,7 +77,11 @@ describe("RepositorySettingsPage", () => {
 		);
 
 		expect(deleteRepositoryFn).toHaveBeenCalledWith({
-			data: { name: "my-repo", confirmation: "my-repo" },
+			data: {
+				organizationName: "default",
+				name: "my-repo",
+				confirmation: "my-repo",
+			},
 		});
 		expect(onDeleted).toHaveBeenCalledOnce();
 	});

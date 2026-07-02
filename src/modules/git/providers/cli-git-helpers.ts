@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { execa } from "execa";
-import type { DiffFile, GitService } from "../git-provider";
+import type { DiffFile, GitService, RepositoryLocator } from "../git-provider";
 import { parseNameStatus, parseUnifiedDiff } from "./cli-git-parsers";
 import { resolvePath, validateName } from "./cli-git-validators";
 
@@ -125,12 +125,16 @@ export function gitCommandName(service: GitService): string {
 export async function computeDiff(
 	gitBin: string,
 	storagePath: string,
-	name: string,
+	locator: RepositoryLocator,
 	base: string,
 	head: string,
+	legacy = false,
 ): Promise<DiffFile[]> {
+	const name = locator.repositoryName;
 	validateName(name);
-	const repoPath = resolvePath(storagePath, name);
+	const repoPath = legacy
+		? path.resolve(storagePath, name)
+		: resolvePath(storagePath, locator.organizationName, name);
 
 	if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 		throw new Error(`Repository "${name}" not found`);

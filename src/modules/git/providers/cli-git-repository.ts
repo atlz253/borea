@@ -4,6 +4,7 @@ import type { RepositoryInfo } from "../git-provider";
 import { DEFAULT_DESC } from "./cli-git-validators";
 
 export async function readRepositoryInfo(
+	organizationName: string,
 	name: string,
 	repoPath: string,
 ): Promise<RepositoryInfo> {
@@ -19,6 +20,7 @@ export async function readRepositoryInfo(
 
 	const stats = await stat(repoPath);
 	return {
+		organizationName,
 		name,
 		description,
 		createdAt: stats.birthtime ?? stats.mtime,

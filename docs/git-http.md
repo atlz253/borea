@@ -4,7 +4,7 @@ Nirvana supports standard Git operations over HTTP — you can clone repositorie
 
 ## Cloning a Repository
 
-1. Open the repository page in Nirvana (e.g., `http://localhost:3000/repositories/my-project`).
+1. Open the repository page in Nirvana (e.g., `http://localhost:3000/organizations/default/repositories/my-project`).
 2. Copy the URL from the **"Git pull URL"** field using the copy button on the right.
 3. In your terminal, run:
    ```bash
@@ -12,7 +12,7 @@ Nirvana supports standard Git operations over HTTP — you can clone repositorie
    ```
    For example:
    ```bash
-   git clone http://localhost:3000/api/git/my-project.git
+   git clone http://localhost:3000/api/git/default/my-project.git
    ```
 4. You now have a local copy of the repository in the `my-project` folder.
 
@@ -26,7 +26,7 @@ Nirvana supports standard Git operations over HTTP — you can clone repositorie
    ```
 2. If you haven't already set a remote, add one using the URL from the repository page:
    ```bash
-   git remote add origin http://localhost:3000/api/git/my-project.git
+   git remote add origin http://localhost:3000/api/git/default/my-project.git
    ```
 3. Push your changes:
    ```bash
@@ -38,7 +38,7 @@ Nirvana supports standard Git operations over HTTP — you can clone repositorie
 
 - Git must be installed on your computer ([download](https://git-scm.com/downloads)).
 - The Nirvana server must be running and accessible (default: `http://localhost:3000`).
-- The repository must already exist in Nirvana (create one with the **"New repository"** button on the repositories page).
+- The organization and repository must already exist in Nirvana.
 
 ## Authentication
 

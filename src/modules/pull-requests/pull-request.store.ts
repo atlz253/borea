@@ -8,6 +8,7 @@ import {
 	writeFile,
 } from "node:fs/promises";
 import path from "node:path";
+import type { RepositoryLocator } from "#/modules/git";
 import { getConfig } from "#/platform/config";
 import { type PullRequest, pullRequestSchema } from "./schemas";
 
@@ -15,28 +16,31 @@ interface RepoMeta {
 	nextId: number;
 }
 
+type RepositoryTarget = RepositoryLocator | string;
+
 export interface PullRequestStore {
 	create(input: {
+		organizationName: string;
 		repoName: string;
 		title: string;
 		sourceBranch: string;
 		targetBranch: string;
 		authorName: string;
 	}): Promise<PullRequest>;
-	list(repoName: string): Promise<PullRequest[]>;
-	get(repoName: string, id: number): Promise<PullRequest | undefined>;
+	list(locator: RepositoryLocator): Promise<PullRequest[]>;
+	get(locator: RepositoryLocator, id: number): Promise<PullRequest | undefined>;
 	update(
-		repoName: string,
+		locator: RepositoryLocator,
 		id: number,
 		data: Partial<PullRequest>,
 	): Promise<PullRequest>;
 	setFileViewed(
-		repoName: string,
+		locator: RepositoryLocator,
 		id: number,
 		filePath: string,
 		viewed: boolean,
 	): Promise<PullRequest>;
-	deleteAll(repoName: string): Promise<void>;
+	deleteAll(locator: RepositoryLocator): Promise<void>;
 }
 
 export class FileSystemPullRequestStore implements PullRequestStore {
@@ -49,13 +53,16 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 	}
 
 	async create(input: {
+		organizationName?: string;
 		repoName: string;
 		title: string;
 		sourceBranch: string;
 		targetBranch: string;
 		authorName: string;
 	}): Promise<PullRequest> {
-		const repoDir = path.join(this.basePath, input.repoName);
+		const repoDir = input.organizationName
+			? path.join(this.basePath, input.organizationName, input.repoName)
+			: path.join(this.basePath, input.repoName);
 		await mkdir(repoDir, { recursive: true });
 
 		const id = await this.nextId(repoDir);
@@ -63,6 +70,7 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 
 		const pr: PullRequest = {
 			id,
+			organizationName: input.organizationName ?? "default",
 			repoName: input.repoName,
 			title: input.title,
 			sourceBranch: input.sourceBranch,
@@ -78,8 +86,8 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 		return pr;
 	}
 
-	async list(repoName: string): Promise<PullRequest[]> {
-		const repoDir = path.join(this.basePath, repoName);
+	async list(locator: RepositoryTarget): Promise<PullRequest[]> {
+		const repoDir = this.repoDir(locator);
 		if (!existsSync(repoDir)) {
 			return [];
 		}
@@ -108,8 +116,11 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 		return prs;
 	}
 
-	async get(repoName: string, id: number): Promise<PullRequest | undefined> {
-		const filePath = this.prFilePath(repoName, id);
+	async get(
+		locator: RepositoryTarget,
+		id: number,
+	): Promise<PullRequest | undefined> {
+		const filePath = this.prFilePath(locator, id);
 		if (!existsSync(filePath)) {
 			return undefined;
 		}
@@ -122,40 +133,45 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 	}
 
 	async update(
-		repoName: string,
+		locator: RepositoryTarget,
 		id: number,
 		data: Partial<PullRequest>,
 	): Promise<PullRequest> {
-		return this.withWriteLock(repoName, id, async () => {
-			const existing = await this.get(repoName, id);
+		return this.withWriteLock(locator, id, async () => {
+			const existing = await this.get(locator, id);
 			if (!existing) {
-				throw new Error(`Pull request #${id} not found in "${repoName}"`);
+				throw new Error(
+					`Pull request #${id} not found in "${this.repositoryName(locator)}"`,
+				);
 			}
 
 			const updated: PullRequest = {
 				...existing,
 				...data,
 				id: existing.id,
+				organizationName: existing.organizationName,
 				repoName: existing.repoName,
 				updatedAt: new Date().toISOString(),
 			};
 
-			const repoDir = path.join(this.basePath, repoName);
+			const repoDir = this.repoDir(locator);
 			await this.writePrFile(repoDir, updated);
 			return updated;
 		});
 	}
 
 	async setFileViewed(
-		repoName: string,
+		locator: RepositoryTarget,
 		id: number,
 		filePath: string,
 		viewed: boolean,
 	): Promise<PullRequest> {
-		return this.withWriteLock(repoName, id, async () => {
-			const existing = await this.get(repoName, id);
+		return this.withWriteLock(locator, id, async () => {
+			const existing = await this.get(locator, id);
 			if (!existing) {
-				throw new Error(`Pull request #${id} not found in "${repoName}"`);
+				throw new Error(
+					`Pull request #${id} not found in "${this.repositoryName(locator)}"`,
+				);
 			}
 
 			const viewedFiles = new Set(existing.viewedFiles);
@@ -170,21 +186,32 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 				viewedFiles: [...viewedFiles],
 				updatedAt: new Date().toISOString(),
 			};
-			const repoDir = path.join(this.basePath, repoName);
+			const repoDir = this.repoDir(locator);
 			await this.writePrFile(repoDir, updated);
 			return updated;
 		});
 	}
 
-	async deleteAll(repoName: string): Promise<void> {
-		await rm(path.join(this.basePath, repoName), {
+	async deleteAll(locator: RepositoryTarget): Promise<void> {
+		await rm(this.repoDir(locator), {
 			recursive: true,
 			force: true,
 		});
 	}
 
-	private prFilePath(repoName: string, id: number): string {
-		return path.resolve(this.basePath, repoName, `${id}.json`);
+	private repoDir(locator: RepositoryTarget): string {
+		if (typeof locator === "string") {
+			return path.resolve(this.basePath, locator);
+		}
+		return path.resolve(
+			this.basePath,
+			locator.organizationName,
+			locator.repositoryName,
+		);
+	}
+
+	private prFilePath(locator: RepositoryTarget, id: number): string {
+		return path.resolve(this.repoDir(locator), `${id}.json`);
 	}
 
 	private async writePrFile(repoDir: string, pr: PullRequest): Promise<void> {
@@ -195,11 +222,14 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 	}
 
 	private async withWriteLock<T>(
-		repoName: string,
+		locator: RepositoryTarget,
 		id: number,
 		operation: () => Promise<T>,
 	): Promise<T> {
-		const key = `${repoName}:${id}`;
+		const key =
+			typeof locator === "string"
+				? `${locator}:${id}`
+				: `${locator.organizationName}:${locator.repositoryName}:${id}`;
 		const previous = this.writeLocks.get(key) ?? Promise.resolve();
 		let release: (() => void) | undefined;
 		const current = new Promise<void>((resolve) => {
@@ -217,6 +247,10 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 				this.writeLocks.delete(key);
 			}
 		}
+	}
+
+	private repositoryName(locator: RepositoryTarget): string {
+		return typeof locator === "string" ? locator : locator.repositoryName;
 	}
 
 	private async nextId(repoDir: string): Promise<number> {

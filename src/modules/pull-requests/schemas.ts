@@ -1,5 +1,6 @@
 import "#/platform/http/openapi-zod";
 import { z } from "zod";
+import { organizationNameSchema } from "#/modules/organizations";
 
 const MAX_REPO_NAME_LENGTH = 100;
 const MAX_BRANCH_NAME_LENGTH = 200;
@@ -46,6 +47,7 @@ export const prTitleSchema = z
 	.max(MAX_TITLE_LENGTH, "Title is too long");
 
 export const createPullRequestSchema = z.object({
+	organizationName: organizationNameSchema,
 	repoName: repoNameSchema,
 	title: prTitleSchema,
 	sourceBranch: branchRefSchema,
@@ -54,11 +56,11 @@ export const createPullRequestSchema = z.object({
 });
 
 export const listPullRequestsSchema = z.object({
+	organizationName: organizationNameSchema,
 	repoName: repoNameSchema,
 });
 
-export const getPullRequestSchema = z.object({
-	repoName: repoNameSchema,
+export const getPullRequestSchema = listPullRequestsSchema.extend({
 	id: z
 		.number()
 		.int()
@@ -88,6 +90,7 @@ export const pullRequestStatusSchema = z.enum(["open", "merged", "closed"]);
 
 export const pullRequestSchema = z.object({
 	id: z.number().int().positive(),
+	organizationName: organizationNameSchema,
 	repoName: z.string(),
 	title: z.string(),
 	sourceBranch: z.string(),

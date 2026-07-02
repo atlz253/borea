@@ -6,7 +6,7 @@ import { expect, type Locator, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 async function getContainerBounds(locator: Locator) {
@@ -53,7 +53,7 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 			},
 		});
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
 			cwd: workDir,
@@ -82,7 +82,9 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 		const errors: string[] = [];
 		page.on("pageerror", (err) => errors.push(err.message));
 
-		await page.goto(`/repositories/${repoName}/pulls/new`);
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/pulls/new`,
+		);
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
 
@@ -112,7 +114,9 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 
 		await page.getByRole("button", { name: /Create pull request/i }).click();
 
-		await page.waitForURL(new RegExp(`/repositories/${repoName}/pulls/\\d+`));
+		await page.waitForURL(
+			new RegExp(`/organizations/default/repositories/${repoName}/pulls/\\d+`),
+		);
 		await page.waitForLoadState("load");
 
 		expect(errors).toEqual([]);
@@ -154,7 +158,7 @@ test("pull request tab is visible on repository page", async ({ page }) => {
 	try {
 		await execa("git", ["init", "--bare", barePath]);
 
-		await page.goto(`/repositories/${repoName}`);
+		await page.goto(`/organizations/default/repositories/${repoName}`);
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
 
@@ -164,7 +168,9 @@ test("pull request tab is visible on repository page", async ({ page }) => {
 
 		await page.getByRole("tab", { name: /Pull requests/i }).click();
 
-		await page.waitForURL(`/repositories/${repoName}/pulls`);
+		await page.waitForURL(
+			`/organizations/default/repositories/${repoName}/pulls`,
+		);
 		const emptyState = page.getByText("No pull requests yet.", { exact: true });
 		await expect(emptyState).toBeVisible();
 

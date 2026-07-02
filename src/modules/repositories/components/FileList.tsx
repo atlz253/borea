@@ -4,6 +4,7 @@ import { File, Folder } from "lucide-react";
 import type { TreeEntry } from "../schemas";
 
 interface FileListProps {
+	organizationName?: string;
 	entries: TreeEntry[];
 	repoName: string;
 	currentPath: string;
@@ -41,7 +42,12 @@ function sortEntries(entries: TreeEntry[]): TreeEntry[] {
 	});
 }
 
-function parentDirLink(repoName: string, currentPath: string, branch: string) {
+function parentDirLink(
+	organizationName: string,
+	repoName: string,
+	currentPath: string,
+	branch: string,
+) {
 	if (currentPath.length === 0) return null;
 
 	const slashIndex = currentPath.lastIndexOf("/");
@@ -50,8 +56,12 @@ function parentDirLink(repoName: string, currentPath: string, branch: string) {
 	if (slashIndex === -1) {
 		return (
 			<Link
-				to="/repositories/$name/tree/$branch"
-				params={{ name: repoName, branch: encodedBranch }}
+				to="/organizations/$organization/repositories/$repository/tree/$branch"
+				params={{
+					organization: organizationName,
+					repository: repoName,
+					branch: encodedBranch,
+				}}
 				style={LINK_STYLE}
 			>
 				<Group gap="xs">
@@ -64,9 +74,10 @@ function parentDirLink(repoName: string, currentPath: string, branch: string) {
 
 	return (
 		<Link
-			to="/repositories/$name/tree/$branch/$"
+			to="/organizations/$organization/repositories/$repository/tree/$branch/$"
 			params={{
-				name: repoName,
+				organization: organizationName,
+				repository: repoName,
 				branch: encodedBranch,
 				_splat: currentPath.slice(0, slashIndex),
 			}}
@@ -81,6 +92,7 @@ function parentDirLink(repoName: string, currentPath: string, branch: string) {
 }
 
 export default function FileList({
+	organizationName = "default",
 	entries,
 	repoName,
 	currentPath,
@@ -91,7 +103,12 @@ export default function FileList({
 
 	const rows = [];
 
-	const parentLink = parentDirLink(repoName, currentPath, branch);
+	const parentLink = parentDirLink(
+		organizationName,
+		repoName,
+		currentPath,
+		branch,
+	);
 	if (parentLink) {
 		rows.push(
 			<Table.Tr key="..">
@@ -109,9 +126,10 @@ export default function FileList({
 
 		const nameCell = isTree ? (
 			<Link
-				to="/repositories/$name/tree/$branch/$"
+				to="/organizations/$organization/repositories/$repository/tree/$branch/$"
 				params={{
-					name: repoName,
+					organization: organizationName,
+					repository: repoName,
 					branch: encodedBranch,
 					_splat: childPath(currentPath, entry.name),
 				}}
@@ -124,9 +142,10 @@ export default function FileList({
 			</Link>
 		) : (
 			<Link
-				to="/repositories/$name/blob/$branch/$"
+				to="/organizations/$organization/repositories/$repository/blob/$branch/$"
 				params={{
-					name: repoName,
+					organization: organizationName,
+					repository: repoName,
 					branch: encodedBranch,
 					_splat: childPath(currentPath, entry.name),
 				}}

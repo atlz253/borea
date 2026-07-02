@@ -7,6 +7,7 @@ import {
 	gitProvider,
 	parseSmartHttpPath,
 } from "#/modules/git";
+import { getOrganizationFn } from "#/modules/organizations";
 
 export const Route = createFileRoute("/api/git/$")({
 	server: {
@@ -19,6 +20,10 @@ export const Route = createFileRoute("/api/git/$")({
 
 				const url = new URL(request.url);
 				const parsed = parseSmartHttpPath(_splat, url.searchParams);
+				const locator = {
+					organizationName: parsed.organizationName,
+					repositoryName: parsed.repoName,
+				};
 
 				if (
 					parsed.endpoint !== "info/refs" ||
@@ -28,12 +33,19 @@ export const Route = createFileRoute("/api/git/$")({
 					return new Response("Not Found", { status: 404 });
 				}
 
-				if (!(await gitProvider.exists(parsed.repoName))) {
+				try {
+					await getOrganizationFn({
+						data: { organizationName: parsed.organizationName },
+					});
+				} catch {
+					return new Response("Repository Not Found", { status: 404 });
+				}
+				if (!(await gitProvider.exists(locator))) {
 					return new Response("Repository Not Found", { status: 404 });
 				}
 
 				const rawStream = await gitProvider.advertiseRefs(
-					parsed.repoName,
+					locator,
 					parsed.service,
 				);
 				const formatted = formatAdvertisement(parsed.service, rawStream);
@@ -54,6 +66,10 @@ export const Route = createFileRoute("/api/git/$")({
 					_splat,
 					new URL(request.url).searchParams,
 				);
+				const locator = {
+					organizationName: parsed.organizationName,
+					repositoryName: parsed.repoName,
+				};
 
 				if (
 					parsed.endpoint !== "git-upload-pack" &&
@@ -62,7 +78,14 @@ export const Route = createFileRoute("/api/git/$")({
 					return new Response("Not Found", { status: 404 });
 				}
 
-				if (!(await gitProvider.exists(parsed.repoName))) {
+				try {
+					await getOrganizationFn({
+						data: { organizationName: parsed.organizationName },
+					});
+				} catch {
+					return new Response("Repository Not Found", { status: 404 });
+				}
+				if (!(await gitProvider.exists(locator))) {
 					return new Response("Repository Not Found", { status: 404 });
 				}
 
@@ -79,7 +102,7 @@ export const Route = createFileRoute("/api/git/$")({
 				}
 
 				const resultStream = await gitProvider.invokeService(
-					parsed.repoName,
+					locator,
 					parsed.service,
 					body,
 				);

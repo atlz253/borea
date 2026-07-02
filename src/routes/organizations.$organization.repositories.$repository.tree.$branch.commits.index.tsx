@@ -6,14 +6,23 @@ import {
 } from "#/modules/repositories";
 
 export const Route = createFileRoute(
-	"/repositories/$name/tree/$branch/commits/",
+	"/organizations/$organization/repositories/$repository/tree/$branch/commits/",
 )({
 	loader: ({ params }) =>
 		Promise.all([
 			listCommitsFn({
-				data: { name: params.name, ref: params.branch },
+				data: {
+					organizationName: params.organization,
+					name: params.repository,
+					ref: params.branch,
+				},
 			}),
-			listBranchesFn({ data: { name: params.name } }),
+			listBranchesFn({
+				data: {
+					organizationName: params.organization,
+					name: params.repository,
+				},
+			}),
 		]).then(([commits, branches]) => {
 			const selectedBranch = branches.find(
 				(b: { name: string }) => b.name === params.branch,
@@ -28,11 +37,12 @@ export const Route = createFileRoute(
 			};
 		}),
 	component: () => {
-		const { name } = Route.useParams();
+		const { organization, repository } = Route.useParams();
 		const { commits, branches, selectedBranch } = Route.useLoaderData();
 		return (
 			<CommitHistoryPage
-				name={name}
+				organizationName={organization}
+				name={repository}
 				commits={commits}
 				branches={branches}
 				selectedBranch={selectedBranch}

@@ -2,9 +2,10 @@
 
 Nirvana provides a web interface for browsing and managing Git repositories. This guide covers the main pages you'll use.
 
-## Repositories List
+## Organizations and Repositories
 
-The main page at `/repositories` shows all repositories on the server.
+The main page at `/organizations` shows available organizations. Opening
+`/organizations/<organization>` shows repositories in that organization.
 
 - Each repository is shown with its name and optional description.
 - Click a repository name to open its page.
@@ -22,7 +23,9 @@ After creation, the new repository appears in the list.
 
 ## Repository Page
 
-Opening a repository (`/repositories/<name>`) brings you to its main page. If the repository has commits, you are redirected to `/repositories/<name>/tree/<defaultBranch>`.
+Opening a repository (`/organizations/<organization>/repositories/<name>`)
+brings you to its main page. If it has commits, the page redirects to its
+namespaced tree route.
 
 ### Branch Switcher
 
@@ -48,7 +51,7 @@ After creation, the page navigates to the new branch's tree view. If creation fa
 You'll find the **"Git pull URL"** field with the address for cloning the repository over HTTP. Click the copy button to copy it, then use it in your terminal:
 
 ```bash
-git clone http://localhost:3000/api/git/my-project.git
+git clone http://localhost:3000/api/git/default/my-project.git
 ```
 
 See [Working with Repositories via HTTP](git-http.md) for detailed instructions.
@@ -63,7 +66,7 @@ Below the clone URL is the file browser — a table with two columns: **Name** a
 
 - **Directories** are listed first (with a folder icon), followed by **files** (with a file icon), sorted alphabetically.
 - Click a directory name to navigate inside it.
-- Click a file name to open its contents at `/repositories/<name>/blob/<branch>/<path>`.
+- Click a file name to open its contents at `/organizations/<organization>/repositories/<name>/blob/<branch>/<path>`.
 - Use the **`..`** entry at the top to go up one level.
 - **Breadcrumbs** above the table show your current path inside the repository. Click any part of the breadcrumb to jump directly to that folder.
 

@@ -1,7 +1,13 @@
 export interface RepositoryInfo {
+	organizationName?: string;
 	name: string;
 	description?: string;
 	createdAt: Date;
+}
+
+export interface RepositoryLocator {
+	organizationName: string;
+	repositoryName: string;
 }
 
 export type TreeEntryType = "blob" | "tree";
@@ -129,41 +135,61 @@ export interface GetCommitDiffResult {
 }
 
 export interface GitProvider {
-	init(name: string, description?: string): Promise<RepositoryInfo>;
-	delete(name: string): Promise<void>;
-	list(): Promise<RepositoryInfo[]>;
-	get(name: string): Promise<RepositoryInfo | undefined>;
-	exists(name: string): Promise<boolean>;
-	listFiles(name: string, options?: ListFilesOptions): Promise<TreeEntry[]>;
-	getFile(name: string, options: GetFileOptions): Promise<FileContent>;
+	init(
+		locator: RepositoryLocator,
+		description?: string,
+	): Promise<RepositoryInfo>;
+	delete(locator: RepositoryLocator): Promise<void>;
+	list(organizationName: string): Promise<RepositoryInfo[]>;
+	get(locator: RepositoryLocator): Promise<RepositoryInfo | undefined>;
+	exists(locator: RepositoryLocator): Promise<boolean>;
+	listFiles(
+		locator: RepositoryLocator,
+		options?: ListFilesOptions,
+	): Promise<TreeEntry[]>;
+	getFile(
+		locator: RepositoryLocator,
+		options: GetFileOptions,
+	): Promise<FileContent>;
 	advertiseRefs(
-		name: string,
+		locator: RepositoryLocator,
 		service: GitService,
 	): Promise<ReadableStream<Uint8Array>>;
 	invokeService(
-		name: string,
+		locator: RepositoryLocator,
 		service: GitService,
 		input: ReadableStream<Uint8Array>,
 	): Promise<ReadableStream<Uint8Array>>;
-	listBranches(name: string): Promise<BranchInfo[]>;
+	listBranches(locator: RepositoryLocator): Promise<BranchInfo[]>;
 	createBranch(
-		name: string,
+		locator: RepositoryLocator,
 		branch: string,
 		fromRef?: string,
 	): Promise<BranchInfo>;
 	listCommits(
-		name: string,
+		locator: RepositoryLocator,
 		options?: ListCommitsOptions,
 	): Promise<CommitInfo[]>;
-	countCommits(name: string, ref?: string): Promise<number>;
-	canMerge(name: string, head: string, base: string): Promise<MergeStatus>;
+	countCommits(locator: RepositoryLocator, ref?: string): Promise<number>;
+	canMerge(
+		locator: RepositoryLocator,
+		head: string,
+		base: string,
+	): Promise<MergeStatus>;
 	mergeBranch(
-		name: string,
+		locator: RepositoryLocator,
 		head: string,
 		base: string,
 		options?: MergeOptions,
 	): Promise<MergeResult>;
-	getCommit(name: string, sha: string): Promise<CommitDetail>;
-	getCommitDiff(name: string, sha: string): Promise<GetCommitDiffResult>;
-	getDiff(name: string, base: string, head: string): Promise<DiffFile[]>;
+	getCommit(locator: RepositoryLocator, sha: string): Promise<CommitDetail>;
+	getCommitDiff(
+		locator: RepositoryLocator,
+		sha: string,
+	): Promise<GetCommitDiffResult>;
+	getDiff(
+		locator: RepositoryLocator,
+		base: string,
+		head: string,
+	): Promise<DiffFile[]>;
 }

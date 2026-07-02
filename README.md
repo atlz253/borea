@@ -2,7 +2,7 @@
 
 > Open-source software development workspace that unifies development tools in a single space — an analogue of JetBrains Space and Yandex SourceCraft.
 
-Nirvana is a platform project, built as a modular monolith with provider-based abstractions. The MVP delivers a Git hosting service with repositories, pull/merge requests, code review, and a REST API — deployable as a single Docker container.
+Nirvana is a platform project, built as a modular monolith with provider-based abstractions. The MVP delivers organizations with isolated Git repositories, pull/merge requests, code review, and a REST API — deployable as a single Docker container.
 
 **Status:** Pre-MVP (active scaffolding). Not production-ready.
 

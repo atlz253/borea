@@ -1,5 +1,6 @@
 import "#/platform/http/openapi-zod";
 import { z } from "zod";
+import { organizationNameSchema } from "#/modules/organizations";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESC_LENGTH = 500;
@@ -22,6 +23,7 @@ export const repoNameSchema = z
 	.refine((name) => name !== "." && name !== "..", "Invalid name");
 
 export const createRepositorySchema = z.object({
+	organizationName: organizationNameSchema.default("default"),
 	name: repoNameSchema,
 	description: z
 		.string()
@@ -33,6 +35,7 @@ export const createRepositorySchema = z.object({
 
 export const deleteRepositorySchema = z
 	.object({
+		organizationName: organizationNameSchema.default("default"),
 		name: repoNameSchema,
 		confirmation: z.string(),
 	})
@@ -42,6 +45,7 @@ export const deleteRepositorySchema = z
 	});
 
 export const repositorySchema = z.object({
+	organizationName: organizationNameSchema,
 	name: z.string(),
 	description: z.string().optional(),
 	createdAt: z.date(),
@@ -78,14 +82,17 @@ export const refSchema = z
 	.max(MAX_PATH_LENGTH)
 	.refine((p) => !p.includes("\0"), "Ref cannot contain null bytes");
 
-export const listFilesSchema = z.object({
+export const repositoryLocatorSchema = z.object({
+	organizationName: organizationNameSchema.default("default"),
 	name: repoNameSchema,
+});
+
+export const listFilesSchema = repositoryLocatorSchema.extend({
 	path: repoPathSchema.optional(),
 	ref: refSchema.optional(),
 });
 
-export const getFileSchema = z.object({
-	name: repoNameSchema,
+export const getFileSchema = repositoryLocatorSchema.extend({
 	path: repoPathSchema.refine(
 		(path) => path.length > 0,
 		"File path is required",
@@ -96,8 +103,7 @@ export const getFileSchema = z.object({
 
 const MAX_COMMIT_LIMIT = 500;
 
-export const listCommitsSchema = z.object({
-	name: repoNameSchema,
+export const listCommitsSchema = repositoryLocatorSchema.extend({
 	ref: refSchema.optional(),
 	limit: z
 		.number()
@@ -107,14 +113,11 @@ export const listCommitsSchema = z.object({
 		.optional(),
 });
 
-export const countCommitsSchema = z.object({
-	name: repoNameSchema,
+export const countCommitsSchema = repositoryLocatorSchema.extend({
 	ref: refSchema.optional(),
 });
 
-export const listBranchesSchema = z.object({
-	name: repoNameSchema,
-});
+export const listBranchesSchema = repositoryLocatorSchema;
 
 export const branchNameSchema = z
 	.string()
@@ -132,8 +135,7 @@ export const branchNameSchema = z
 	)
 	.refine((name) => !name.includes("@{"), "Branch name cannot contain '@{'");
 
-export const createBranchSchema = z.object({
-	name: repoNameSchema,
+export const createBranchSchema = repositoryLocatorSchema.extend({
 	branch: branchNameSchema,
 	from: refSchema.optional(),
 });
@@ -142,8 +144,7 @@ export const commitShaSchema = z
 	.string()
 	.regex(/^[0-9a-f]{7,40}$/, "Invalid commit SHA");
 
-export const getCommitDiffSchema = z.object({
-	name: repoNameSchema,
+export const getCommitDiffSchema = repositoryLocatorSchema.extend({
 	sha: commitShaSchema,
 });
 

@@ -14,13 +14,16 @@ import { useState } from "react";
 import { deleteRepositoryFn } from "../server/repository.functions";
 
 interface RepositorySettingsPageProps {
+	organizationName?: string;
 	name: string;
 	onDeleted?: () => void;
 }
 
 export default function RepositorySettingsPage({
+	organizationName = "default",
 	name,
-	onDeleted = () => window.location.assign("/repositories"),
+	onDeleted = () =>
+		window.location.assign(`/organizations/${organizationName}`),
 }: RepositorySettingsPageProps) {
 	const [opened, setOpened] = useState(false);
 	const [confirmation, setConfirmation] = useState("");
@@ -42,7 +45,9 @@ export default function RepositorySettingsPage({
 		setLoading(true);
 
 		try {
-			await deleteRepositoryFn({ data: { name, confirmation } });
+			await deleteRepositoryFn({
+				data: { organizationName, name, confirmation },
+			});
 			onDeleted();
 		} catch (err) {
 			setError(

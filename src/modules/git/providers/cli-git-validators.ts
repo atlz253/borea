@@ -8,13 +8,31 @@ const MAX_PATH_LENGTH = 1024;
 export const DEFAULT_DESC =
 	"Unnamed repository; edit this file to 'name' the repository.";
 
-export function resolvePath(storagePath: string, name: string): string {
-	const resolved = path.resolve(storagePath, name);
+export function resolvePath(
+	storagePath: string,
+	organizationName: string,
+	repositoryName: string,
+): string {
+	validateOrganizationName(organizationName);
+	validateName(repositoryName);
+	const resolved = path.resolve(storagePath, organizationName, repositoryName);
 	const root = path.resolve(storagePath);
-	if (!resolved.startsWith(root)) {
+	if (!resolved.startsWith(`${root}${path.sep}`)) {
 		throw new Error("Invalid repository name");
 	}
 	return resolved;
+}
+
+export function validateOrganizationName(name: string): void {
+	if (!name || !/^[a-z0-9._-]+$/.test(name)) {
+		throw new Error("Invalid organization name");
+	}
+	if (name === "." || name === ".." || name.startsWith(".")) {
+		throw new Error("Organization name cannot start with a dot");
+	}
+	if (name.length > MAX_NAME_LENGTH) {
+		throw new Error("Organization name is too long (max 100 characters)");
+	}
 }
 
 export function validateName(name: string): void {

@@ -7,14 +7,20 @@ import {
 	PullRequestDetailPage,
 } from "#/modules/pull-requests";
 
-export const Route = createFileRoute("/repositories/$name/pulls/$pullId/")({
+export const Route = createFileRoute(
+	"/organizations/$organization/repositories/$repository/pulls/$pullId/",
+)({
 	loader: async ({ params }) => {
 		const id = Number(params.pullId);
 		if (Number.isNaN(id) || id < 1) {
 			throw new Error("Invalid pull request id");
 		}
 		const pullRequest = await getPullRequestFn({
-			data: { repoName: params.name, id },
+			data: {
+				organizationName: params.organization,
+				repoName: params.repository,
+				id,
+			},
 		});
 		if (!pullRequest) {
 			throw new Error(`Pull request #${id} not found`);
@@ -24,7 +30,11 @@ export const Route = createFileRoute("/repositories/$name/pulls/$pullId/")({
 		if (pullRequest.status === "open") {
 			try {
 				mergeStatus = await checkMergeStatusFn({
-					data: { repoName: params.name, id },
+					data: {
+						organizationName: params.organization,
+						repoName: params.repository,
+						id,
+					},
 				});
 			} catch {
 				// merge check failed, just show without status
@@ -37,7 +47,7 @@ export const Route = createFileRoute("/repositories/$name/pulls/$pullId/")({
 });
 
 function PullRequestConversation() {
-	const { name } = Route.useParams();
+	const { organization, repository } = Route.useParams();
 	const { pullRequest, mergeStatus } = Route.useLoaderData();
 	const [merging, setMerging] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -50,7 +60,8 @@ function PullRequestConversation() {
 		try {
 			const result = await mergePullRequestFn({
 				data: {
-					repoName: name,
+					organizationName: organization,
+					repoName: repository,
 					id: pr.id,
 					fastForward,
 				},

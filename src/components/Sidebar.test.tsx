@@ -14,10 +14,14 @@ import Sidebar from "./Sidebar";
 vi.mock("#/modules/repositories", () => ({
 	listRepositoriesFn: vi.fn(),
 }));
+vi.mock("#/modules/organizations", () => ({
+	listOrganizationsFn: vi.fn().mockResolvedValue([{ name: "default" }]),
+}));
 
 import { listRepositoriesFn } from "#/modules/repositories";
 
 const REPOS = Array.from({ length: 6 }, (_, i) => ({
+	organizationName: "default",
 	name: `repo-${i + 1}`,
 	description: `Description ${i + 1}`,
 	createdAt: new Date(2024, 0, 6 - i),
@@ -33,16 +37,16 @@ async function renderSidebar() {
 			</AppShell>
 		),
 	});
-	const repositoriesRoute = createRoute({
+	const organizationsRoute = createRoute({
 		getParentRoute: () => rootRoute,
-		path: "/repositories",
+		path: "/organizations",
 	});
 	const route = createRoute({
 		getParentRoute: () => rootRoute,
 		path: "/",
 	});
 	const router = createRouter({
-		routeTree: rootRoute.addChildren([route, repositoriesRoute]),
+		routeTree: rootRoute.addChildren([route, organizationsRoute]),
 		history: createMemoryHistory({ initialEntries: ["/"] }),
 	});
 	await router.load();
@@ -53,12 +57,12 @@ async function renderSidebar() {
 	);
 }
 
-it("renders the repositories button", async () => {
+it("renders the organizations button", async () => {
 	vi.mocked(listRepositoriesFn).mockResolvedValueOnce([]);
 
 	await renderSidebar();
 
-	const button = screen.getByRole("button", { name: /repositories/i });
+	const button = screen.getByRole("button", { name: /organizations/i });
 	expect(button).toBeInTheDocument();
 });
 
@@ -111,7 +115,7 @@ describe("recent repositories list", () => {
 		expect(screen.queryByText(/show less/i)).not.toBeInTheDocument();
 	});
 
-	it("does not collapse when clicking the repositories button", async () => {
+	it("does not collapse when clicking the organizations button", async () => {
 		vi.mocked(listRepositoriesFn).mockResolvedValueOnce(REPOS);
 		const user = userEvent.setup();
 
@@ -120,7 +124,7 @@ describe("recent repositories list", () => {
 		const items = await screen.findAllByRole("button", { name: /repo-/i });
 		expect(items).toHaveLength(5);
 
-		await user.click(screen.getByRole("button", { name: /repositories/i }));
+		await user.click(screen.getByRole("button", { name: /organizations/i }));
 
 		expect(screen.getAllByRole("button", { name: /repo-/i })).toHaveLength(5);
 	});

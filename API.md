@@ -24,7 +24,19 @@ The OpenAPI 3.1 document is available from `GET /api/v1/openapi.json`.
 
 ### Repositories
 
-#### `GET /api/v1/repositories`
+#### `GET /api/v1/organizations`
+
+Lists organizations visible in the active organization mode.
+
+#### `POST /api/v1/organizations`
+
+Creates an organization in multi mode. Returns `409` in single mode.
+
+#### `GET /api/v1/organizations/{organization}`
+
+Returns one organization.
+
+#### `GET /api/v1/organizations/{organization}/repositories`
 
 Returns all repositories ordered by creation time, newest first.
 
@@ -38,29 +50,29 @@ Returns all repositories ordered by creation time, newest first.
 ]
 ```
 
-#### `GET /api/v1/repositories/{name}`
+#### `GET /api/v1/organizations/{organization}/repositories/{repository}`
 
 Returns one repository or `404` when it does not exist.
 
-#### `DELETE /api/v1/repositories/{name}`
+#### `DELETE /api/v1/organizations/{organization}/repositories/{repository}`
 
 Deletes the Git repository and its stored pull requests. Returns `204 No Content`.
 
 ```bash
-curl -X DELETE http://localhost:3000/api/v1/repositories/example
+curl -X DELETE http://localhost:3000/api/v1/organizations/default/repositories/example
 ```
 
 ### Pull requests
 
-#### `GET /api/v1/repositories/{name}/pull-requests`
+#### `GET /api/v1/organizations/{organization}/repositories/{repository}/pull-requests`
 
 Returns all pull requests for the repository. A missing repository returns `404`; a repository without pull requests returns an empty array.
 
-#### `GET /api/v1/repositories/{name}/pull-requests/{pullId}`
+#### `GET /api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}`
 
 Returns one pull request or `404`.
 
-#### `POST /api/v1/repositories/{name}/pull-requests/{pullId}/merge`
+#### `POST /api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}/merge`
 
 Merges an open pull request. The optional JSON body selects fast-forward when the histories allow it:
 
@@ -68,7 +80,7 @@ Merges an open pull request. The optional JSON body selects fast-forward when th
 curl -X POST \
   -H "Content-Type: application/json" \
   -d '{"fastForward":true}' \
-  http://localhost:3000/api/v1/repositories/example/pull-requests/1/merge
+  http://localhost:3000/api/v1/organizations/default/repositories/example/pull-requests/1/merge
 ```
 
 An omitted body uses the default merge-commit strategy. The response contains the updated pull request and merge result:
@@ -77,6 +89,7 @@ An omitted body uses the default merge-commit strategy. The response contains th
 {
   "pullRequest": {
     "id": 1,
+    "organizationName": "default",
     "repoName": "example",
     "title": "Add feature",
     "sourceBranch": "feature",
@@ -99,25 +112,25 @@ Merge conflicts and attempts to merge a closed or already merged pull request re
 
 ## Git Smart-HTTP
 
-Git operations use `/api/git/<name>.git/`, where `<name>` is the repository name without the `.git` suffix.
+Git operations use `/api/git/<organization>/<repository>.git/`.
 
-### `GET /api/git/<name>.git/info/refs?service=<service>`
+### `GET /api/git/<organization>/<repository>.git/info/refs?service=<service>`
 
 Advertises references for `git-upload-pack` or `git-receive-pack`.
 
-### `POST /api/git/<name>.git/git-upload-pack`
+### `POST /api/git/<organization>/<repository>.git/git-upload-pack`
 
 Performs clone and fetch negotiation.
 
-### `POST /api/git/<name>.git/git-receive-pack`
+### `POST /api/git/<organization>/<repository>.git/git-receive-pack`
 
 Performs push negotiation.
 
 Clone and push examples:
 
 ```bash
-git clone http://localhost:3000/api/git/example.git
-git remote add origin http://localhost:3000/api/git/example.git
+git clone http://localhost:3000/api/git/default/example.git
+git remote add origin http://localhost:3000/api/git/default/example.git
 git push -u origin main
 ```
 

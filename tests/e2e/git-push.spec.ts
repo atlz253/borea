@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("git push over HTTP stores repository contents", async () => {
@@ -47,7 +47,7 @@ test("git push over HTTP stores repository contents", async () => {
 		});
 
 		// Step 3: Push to the Nirvana HTTP endpoint
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "-v", "origin", `HEAD:${branch}`], {
 			cwd: workDir,

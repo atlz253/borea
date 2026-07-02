@@ -8,7 +8,9 @@ import {
 } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
-export const Route = createFileRoute("/repositories/$name/pulls/$pullId")({
+export const Route = createFileRoute(
+	"/organizations/$organization/repositories/$repository/pulls/$pullId",
+)({
 	component: PullRequestDetailLayout,
 });
 
@@ -18,7 +20,7 @@ const LINK_STYLE = {
 } as const;
 
 function PullRequestDetailLayout() {
-	const { name, pullId } = Route.useParams();
+	const { organization, repository, pullId } = Route.useParams();
 	const navigate = useNavigate();
 	const location = useRouterState({ select: (s) => s.location });
 
@@ -29,8 +31,8 @@ function PullRequestDetailLayout() {
 		<Container size="lg" py="xl">
 			<Group mb="md">
 				<Link
-					to="/repositories/$name/pulls"
-					params={{ name }}
+					to="/organizations/$organization/repositories/$repository/pulls"
+					params={{ organization, repository }}
 					style={LINK_STYLE}
 				>
 					<Group gap={4}>
@@ -46,8 +48,8 @@ function PullRequestDetailLayout() {
 						value="conversation"
 						onClick={() =>
 							navigate({
-								to: "/repositories/$name/pulls/$pullId",
-								params: { name, pullId },
+								to: "/organizations/$organization/repositories/$repository/pulls/$pullId",
+								params: { organization, repository, pullId },
 							})
 						}
 					>
@@ -57,8 +59,8 @@ function PullRequestDetailLayout() {
 						value="files"
 						onClick={() =>
 							navigate({
-								to: "/repositories/$name/pulls/$pullId/files",
-								params: { name, pullId },
+								to: "/organizations/$organization/repositories/$repository/pulls/$pullId/files",
+								params: { organization, repository, pullId },
 							})
 						}
 					>

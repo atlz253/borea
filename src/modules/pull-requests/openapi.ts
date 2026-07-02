@@ -1,5 +1,6 @@
 import type { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
+import { organizationNameSchema } from "#/modules/organizations";
 import { apiErrorSchema } from "#/platform/http";
 import {
 	mergePullRequestBodySchema,
@@ -23,14 +24,17 @@ export function registerPullRequestOpenApi(registry: OpenAPIRegistry): void {
 		mergePullRequestResponseSchema,
 	);
 	const error = registry.register("PullRequestApiError", apiErrorSchema);
-	const repositoryParams = z.object({ name: repoNameSchema });
+	const repositoryParams = z.object({
+		organization: organizationNameSchema,
+		repository: repoNameSchema,
+	});
 	const pullRequestParams = repositoryParams.extend({
 		pullId: z.coerce.number().int().positive(),
 	});
 
 	registry.registerPath({
 		method: "get",
-		path: "/api/v1/repositories/{name}/pull-requests",
+		path: "/api/v1/organizations/{organization}/repositories/{repository}/pull-requests",
 		tags: ["Pull requests"],
 		summary: "List pull requests",
 		request: { params: repositoryParams },
@@ -56,7 +60,7 @@ export function registerPullRequestOpenApi(registry: OpenAPIRegistry): void {
 
 	registry.registerPath({
 		method: "get",
-		path: "/api/v1/repositories/{name}/pull-requests/{pullId}",
+		path: "/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}",
 		tags: ["Pull requests"],
 		summary: "Get pull request",
 		request: { params: pullRequestParams },
@@ -82,7 +86,7 @@ export function registerPullRequestOpenApi(registry: OpenAPIRegistry): void {
 
 	registry.registerPath({
 		method: "post",
-		path: "/api/v1/repositories/{name}/pull-requests/{pullId}/merge",
+		path: "/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}/merge",
 		tags: ["Pull requests"],
 		summary: "Merge pull request",
 		request: {

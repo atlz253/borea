@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("git clone over HTTP downloads repository contents", async () => {
@@ -66,7 +66,7 @@ test("git clone over HTTP downloads repository contents", async () => {
 		});
 
 		// Step 2: Clone over HTTP from the Nirvana API
-		const cloneUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const cloneUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 
 		await execa("git", ["clone", cloneUrl, cloneDir], {
 			env: { GIT_TERMINAL_PROMPT: "0" },

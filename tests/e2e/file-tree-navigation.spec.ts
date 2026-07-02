@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("navigate into subdirectory and back via parent link", async ({
@@ -47,7 +47,7 @@ test("navigate into subdirectory and back via parent link", async ({
 			env: COMMIT_ENV,
 		});
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
 			cwd: workDir,
@@ -55,11 +55,15 @@ test("navigate into subdirectory and back via parent link", async ({
 			timeout: 30_000,
 		});
 
-		await page.goto(`/repositories/${repoName}`, { waitUntil: "load" });
+		await page.goto(`/organizations/default/repositories/${repoName}`, {
+			waitUntil: "load",
+		});
 		await waitForHydration(page);
 
 		await expect(page).toHaveURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}$`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}$`,
+			),
 		);
 
 		await expect(page.getByText("README.md")).toBeVisible();
@@ -68,7 +72,9 @@ test("navigate into subdirectory and back via parent link", async ({
 
 		await page.getByRole("link", { name: "src" }).click();
 		await page.waitForURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}/src$`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}/src$`,
+			),
 		);
 		await waitForHydration(page);
 
@@ -77,16 +83,20 @@ test("navigate into subdirectory and back via parent link", async ({
 
 		await page.getByRole("link", { name: "utils" }).click();
 		await page.waitForURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}/src/utils$`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}/src/utils$`,
+			),
 		);
 		await waitForHydration(page);
 
-		await expect(page.getByText("helper.js")).toBeVisible();
+		await expect(page.getByRole("link", { name: "helper.js" })).toBeVisible();
 		await expect(page.getByRole("link", { name: ".." })).toBeVisible();
 
 		await page.getByRole("link", { name: ".." }).click();
 		await page.waitForURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}/src$`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}/src$`,
+			),
 		);
 	} finally {
 		rmSync(workDir, { recursive: true, force: true });

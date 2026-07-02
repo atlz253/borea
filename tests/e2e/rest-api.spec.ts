@@ -6,7 +6,8 @@ import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 import { FileSystemPullRequestStore } from "../../src/modules/pull-requests/pull-request.store";
 
-const REPOSITORIES_PATH = "./data/repositories";
+const ORGANIZATION_NAME = "default";
+const REPOSITORIES_PATH = "./data/repositories/default";
 const PULL_REQUESTS_PATH = "./data/pull-requests";
 const COMMIT_ENV = {
 	GIT_AUTHOR_NAME: "e2e",
@@ -68,6 +69,7 @@ async function seedRepository(repoName: string, conflict: boolean) {
 
 	const store = new FileSystemPullRequestStore(PULL_REQUESTS_PATH);
 	const pullRequest = await store.create({
+		organizationName: ORGANIZATION_NAME,
 		repoName,
 		title: conflict ? "Conflicting change" : "Feature change",
 		sourceBranch: "feature",
@@ -86,14 +88,27 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 	const seeded = await seedRepository(repoName, false);
 
 	try {
-		const listResponse = await request.get("/api/v1/repositories");
+		const organizationsResponse = await request.get("/api/v1/organizations");
+		expect(organizationsResponse.ok()).toBe(true);
+		await expect(organizationsResponse.json()).resolves.toMatchObject([
+			{ name: ORGANIZATION_NAME },
+		]);
+		const createOrganizationResponse = await request.post(
+			"/api/v1/organizations",
+			{ data: { name: "not-allowed-in-single-mode" } },
+		);
+		expect(createOrganizationResponse.status()).toBe(409);
+
+		const listResponse = await request.get(
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories`,
+		);
 		expect(listResponse.ok()).toBe(true);
 		expect(
 			(await listResponse.json()) as Array<{ name: string }>,
 		).toContainEqual(expect.objectContaining({ name: repoName }));
 
 		const repositoryResponse = await request.get(
-			`/api/v1/repositories/${repoName}`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}`,
 		);
 		expect(repositoryResponse.ok()).toBe(true);
 		await expect(repositoryResponse.json()).resolves.toMatchObject({
@@ -102,13 +117,13 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 		});
 
 		const pullRequestsResponse = await request.get(
-			`/api/v1/repositories/${repoName}/pull-requests`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests`,
 		);
 		expect(pullRequestsResponse.ok()).toBe(true);
 		await expect(pullRequestsResponse.json()).resolves.toHaveLength(1);
 
 		const pullRequestResponse = await request.get(
-			`/api/v1/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}`,
 		);
 		expect(pullRequestResponse.ok()).toBe(true);
 		await expect(pullRequestResponse.json()).resolves.toMatchObject({
@@ -117,7 +132,7 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 		});
 
 		const mergeResponse = await request.post(
-			`/api/v1/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
 			{ data: { fastForward: true } },
 		);
 		expect(mergeResponse.ok()).toBe(true);
@@ -127,7 +142,7 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 		});
 
 		const repeatedMerge = await request.post(
-			`/api/v1/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
 		);
 		expect(repeatedMerge.status()).toBe(409);
 		await expect(repeatedMerge.json()).resolves.toMatchObject({
@@ -135,20 +150,22 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 		});
 
 		const deleteResponse = await request.delete(
-			`/api/v1/repositories/${repoName}`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}`,
 		);
 		expect(deleteResponse.status()).toBe(204);
 		expect(existsSync(seeded.barePath)).toBe(false);
-		expect(existsSync(join(PULL_REQUESTS_PATH, repoName))).toBe(false);
+		expect(
+			existsSync(join(PULL_REQUESTS_PATH, ORGANIZATION_NAME, repoName)),
+		).toBe(false);
 
 		const missingResponse = await request.get(
-			`/api/v1/repositories/${repoName}`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}`,
 		);
 		expect(missingResponse.status()).toBe(404);
 	} finally {
 		rmSync(seeded.workDir, { recursive: true, force: true });
 		rmSync(seeded.barePath, { recursive: true, force: true });
-		rmSync(join(PULL_REQUESTS_PATH, repoName), {
+		rmSync(join(PULL_REQUESTS_PATH, ORGANIZATION_NAME, repoName), {
 			recursive: true,
 			force: true,
 		});
@@ -163,16 +180,18 @@ test("REST API validates parameters and reports merge conflicts", async ({
 	const seeded = await seedRepository(repoName, true);
 
 	try {
-		const invalidResponse = await request.get("/api/v1/repositories/.invalid");
+		const invalidResponse = await request.get(
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/.invalid`,
+		);
 		expect(invalidResponse.status()).toBe(400);
 
 		const missingResponse = await request.get(
-			"/api/v1/repositories/missing-rest-repository",
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/missing-rest-repository`,
 		);
 		expect(missingResponse.status()).toBe(404);
 
 		const conflictResponse = await request.post(
-			`/api/v1/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
 		);
 		expect(conflictResponse.status()).toBe(409);
 		await expect(conflictResponse.json()).resolves.toMatchObject({
@@ -185,10 +204,18 @@ test("REST API validates parameters and reports merge conflicts", async ({
 		await expect(openApiResponse.json()).resolves.toMatchObject({
 			openapi: "3.1.0",
 		});
+		expect((await request.get("/api/v1/repositories")).status()).toBe(404);
+		expect(
+			(
+				await request.get(
+					"/api/git/legacy.git/info/refs?service=git-upload-pack",
+				)
+			).status(),
+		).toBe(404);
 	} finally {
 		rmSync(seeded.workDir, { recursive: true, force: true });
 		rmSync(seeded.barePath, { recursive: true, force: true });
-		rmSync(join(PULL_REQUESTS_PATH, repoName), {
+		rmSync(join(PULL_REQUESTS_PATH, ORGANIZATION_NAME, repoName), {
 			recursive: true,
 			force: true,
 		});

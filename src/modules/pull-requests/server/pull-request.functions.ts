@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { gitProvider } from "#/modules/git";
+import { requireOrganizationFn } from "#/modules/organizations";
 import { createPullRequestService } from "../pull-request.service";
 import { pullRequestStore } from "../pull-request.store";
 import {
@@ -11,17 +12,25 @@ import {
 } from "../schemas";
 
 const service = createPullRequestService(gitProvider, pullRequestStore);
+const locator = (data: { organizationName: string; repoName: string }) => ({
+	organizationName: data.organizationName,
+	repositoryName: data.repoName,
+});
+const requireOrganization = (organizationName: string) =>
+	requireOrganizationFn({ data: { organizationName } });
 
 export const createPullRequestFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => createPullRequestSchema.parse(data))
 	.handler(async ({ data }) => {
+		await requireOrganization(data.organizationName);
 		return service.createPullRequest(data);
 	});
 
 export const listPullRequestsFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => listPullRequestsSchema.parse(data))
 	.handler(async ({ data }) => {
-		return service.listPullRequests(data.repoName);
+		await requireOrganization(data.organizationName);
+		return service.listPullRequests(locator(data));
 	});
 
 export const deletePullRequestsForRepositoryFn = createServerFn({
@@ -29,19 +38,21 @@ export const deletePullRequestsForRepositoryFn = createServerFn({
 })
 	.validator((data: unknown) => listPullRequestsSchema.parse(data))
 	.handler(async ({ data }) => {
-		await pullRequestStore.deleteAll(data.repoName);
+		await pullRequestStore.deleteAll(locator(data));
 	});
 
 export const getPullRequestFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => getPullRequestSchema.parse(data))
 	.handler(async ({ data }) => {
-		return service.getPullRequest(data.repoName, data.id);
+		await requireOrganization(data.organizationName);
+		return service.getPullRequest(locator(data), data.id);
 	});
 
 export const mergePullRequestFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => mergePullRequestSchema.parse(data))
 	.handler(async ({ data }) => {
-		return service.mergePullRequest(data.repoName, data.id, {
+		await requireOrganization(data.organizationName);
+		return service.mergePullRequest(locator(data), data.id, {
 			fastForward: data.fastForward,
 		});
 	});
@@ -49,20 +60,23 @@ export const mergePullRequestFn = createServerFn({ method: "POST" })
 export const checkMergeStatusFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => getPullRequestSchema.parse(data))
 	.handler(async ({ data }) => {
-		return service.checkMergeStatus(data.repoName, data.id);
+		await requireOrganization(data.organizationName);
+		return service.checkMergeStatus(locator(data), data.id);
 	});
 
 export const getPullRequestDiffFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => getPullRequestSchema.parse(data))
 	.handler(async ({ data }) => {
-		return service.getPullRequestDiff(data.repoName, data.id);
+		await requireOrganization(data.organizationName);
+		return service.getPullRequestDiff(locator(data), data.id);
 	});
 
 export const setPullRequestFileViewedFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => setPullRequestFileViewedSchema.parse(data))
 	.handler(async ({ data }) => {
+		await requireOrganization(data.organizationName);
 		return service.setPullRequestFileViewed(
-			data.repoName,
+			locator(data),
 			data.id,
 			data.filePath,
 			data.viewed,

@@ -55,6 +55,10 @@ WARNING: Running in NoAuth mode in production. This is insecure!
 
 NoAuth mode will be replaced with a proper authentication system (`AuthProvider`) in a future version (v0.2.0), supporting custom registration, OAuth, LDAP, and access control.
 
+Organization mode is independent from authentication.
+`ORGANIZATION_MODE=single` exposes only the fixed `default` organization,
+while `multi` exposes all organizations. Neither mode adds access control.
+
 ## Related
 
 - [Git HTTP operations](../git-http.md) — how clone and push work in NoAuth mode

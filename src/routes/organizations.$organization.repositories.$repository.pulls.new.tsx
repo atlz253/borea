@@ -6,10 +6,18 @@ import {
 } from "#/modules/pull-requests";
 import { listBranchesFn } from "#/modules/repositories";
 
-export const Route = createFileRoute("/repositories/$name/pulls/new")({
-	loader: ({ params }) => listBranchesFn({ data: { name: params.name } }),
+export const Route = createFileRoute(
+	"/organizations/$organization/repositories/$repository/pulls/new",
+)({
+	loader: ({ params }) =>
+		listBranchesFn({
+			data: {
+				organizationName: params.organization,
+				name: params.repository,
+			},
+		}),
 	component: () => {
-		const { name } = Route.useParams();
+		const { organization, repository } = Route.useParams();
 		const branches = Route.useLoaderData();
 		const navigate = useNavigate();
 		const [submitting, setSubmitting] = useState(false);
@@ -23,15 +31,20 @@ export const Route = createFileRoute("/repositories/$name/pulls/new")({
 			try {
 				const pr = await createPullRequestFn({
 					data: {
-						repoName: name,
+						organizationName: organization,
+						repoName: repository,
 						title: data.title,
 						sourceBranch: data.sourceBranch,
 						targetBranch: data.targetBranch,
 					},
 				});
 				await navigate({
-					to: "/repositories/$name/pulls/$pullId",
-					params: { name, pullId: String(pr.id) },
+					to: "/organizations/$organization/repositories/$repository/pulls/$pullId",
+					params: {
+						organization,
+						repository,
+						pullId: String(pr.id),
+					},
 				});
 			} finally {
 				setSubmitting(false);

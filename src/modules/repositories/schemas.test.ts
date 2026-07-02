@@ -57,6 +57,7 @@ describe("getFileSchema", () => {
 				ref: "main",
 			}),
 		).toEqual({
+			organizationName: "default",
 			name: "my-repo",
 			path: "src/index.ts",
 			ref: "main",
@@ -112,7 +113,11 @@ describe("deleteRepositorySchema", () => {
 				name: "my-repo",
 				confirmation: "my-repo",
 			}),
-		).toEqual({ name: "my-repo", confirmation: "my-repo" });
+		).toEqual({
+			organizationName: "default",
+			name: "my-repo",
+			confirmation: "my-repo",
+		});
 	});
 
 	it("rejects a mismatched or differently cased confirmation", () => {

@@ -15,7 +15,7 @@ async function waitForHydration(page: Page) {
 }
 
 async function createRepoViaUI(page: Page, repoName: string) {
-	await page.goto("/repositories", { waitUntil: "load" });
+	await page.goto("/organizations/default", { waitUntil: "load" });
 	await waitForHydration(page);
 
 	await page.getByRole("button", { name: /new repository/i }).click();
@@ -56,9 +56,13 @@ test("navigating from repositories list to a repo shows empty state", async ({
 	const link = page.getByRole("link", { name: repoName });
 	await link.click();
 	try {
-		await page.waitForURL(`/repositories/${repoName}`, { timeout: 10000 });
+		await page.waitForURL(`/organizations/default/repositories/${repoName}`, {
+			timeout: 10000,
+		});
 	} catch {
-		await page.goto(`/repositories/${repoName}`, { waitUntil: "load" });
+		await page.goto(`/organizations/default/repositories/${repoName}`, {
+			waitUntil: "load",
+		});
 	}
 
 	await expect(page.getByRole("heading", { name: repoName })).toBeVisible();
@@ -73,7 +77,9 @@ test("direct URL to an empty repo shows empty state", async ({ page }) => {
 	const repoName = `e2e-direct-${UNIQUE}`;
 	await createRepoViaUI(page, repoName);
 
-	await page.goto(`/repositories/${repoName}`, { waitUntil: "load" });
+	await page.goto(`/organizations/default/repositories/${repoName}`, {
+		waitUntil: "load",
+	});
 
 	await expect(page.getByText("This repository is empty")).toBeVisible();
 
@@ -81,9 +87,12 @@ test("direct URL to an empty repo shows empty state", async ({ page }) => {
 });
 
 test("non-existent repo shows an error", async ({ page }) => {
-	await page.goto(`/repositories/does-not-exist-${UNIQUE}`, {
-		waitUntil: "load",
-	});
+	await page.goto(
+		`/organizations/default/repositories/does-not-exist-${UNIQUE}`,
+		{
+			waitUntil: "load",
+		},
+	);
 
 	await expect(page.getByText(/not found/i)).toBeVisible();
 });

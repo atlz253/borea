@@ -4,7 +4,7 @@ import { waitForHydration } from "./helpers";
 test("recent repos sidebar toggles Show more / Show less", async ({ page }) => {
 	test.setTimeout(60000);
 
-	await page.goto("/repositories", { waitUntil: "load" });
+	await page.goto("/organizations/default", { waitUntil: "load" });
 	await waitForHydration(page);
 
 	const showMore = page.getByText("Show more");
@@ -26,12 +26,12 @@ test("recent repos sidebar toggles Show more / Show less", async ({ page }) => {
 test("clicking a recent repo in sidebar navigates to it", async ({ page }) => {
 	test.setTimeout(60000);
 
-	await page.goto("/repositories", { waitUntil: "load" });
+	await page.goto("/organizations/default", { waitUntil: "load" });
 	await waitForHydration(page);
 
 	const navButtons = page.getByRole("navigation").getByRole("button");
 	if ((await navButtons.count()) > 1) {
 		await navButtons.nth(1).click();
-		await page.waitForURL(/\/repositories\/[^/]+$/);
+		await page.waitForURL(/\/organizations\/default\/repositories\/[^/]+$/);
 	}
 });

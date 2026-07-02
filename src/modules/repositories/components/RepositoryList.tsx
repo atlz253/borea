@@ -20,11 +20,14 @@ export default function RepositoryList({
 	return (
 		<Stack gap="xs">
 			{repositories.map((repo) => (
-				<Group key={repo.name} gap="sm">
+				<Group key={`${repo.organizationName}:${repo.name}`} gap="sm">
 					<GitBranch size={16} />
 					<Link
-						to="/repositories/$name"
-						params={{ name: repo.name }}
+						to="/organizations/$organization/repositories/$repository"
+						params={{
+							organization: repo.organizationName,
+							repository: repo.name,
+						}}
 						style={LINK_STYLE}
 					>
 						{repo.name}

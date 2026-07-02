@@ -6,12 +6,23 @@ import {
 } from "#/modules/repositories";
 
 export const Route = createFileRoute(
-	"/repositories/$name/tree/$branch/commits/$sha",
+	"/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha",
 )({
 	loader: ({ params }) =>
 		Promise.all([
-			getCommitDiffFn({ data: { name: params.name, sha: params.sha } }),
-			listBranchesFn({ data: { name: params.name } }),
+			getCommitDiffFn({
+				data: {
+					organizationName: params.organization,
+					name: params.repository,
+					sha: params.sha,
+				},
+			}),
+			listBranchesFn({
+				data: {
+					organizationName: params.organization,
+					name: params.repository,
+				},
+			}),
 		]).then(([result, branches]) => {
 			const selectedBranch = branches.find(
 				(b: { name: string }) => b.name === params.branch,
@@ -22,11 +33,12 @@ export const Route = createFileRoute(
 			return { result, branches, selectedBranch: params.branch };
 		}),
 	component: () => {
-		const { name, branch } = Route.useParams();
+		const { organization, repository, branch } = Route.useParams();
 		const { result, branches } = Route.useLoaderData();
 		return (
 			<CommitDiffPage
-				name={name}
+				organizationName={organization}
+				name={repository}
 				branch={branch}
 				result={result}
 				branches={branches}

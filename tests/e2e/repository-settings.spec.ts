@@ -6,7 +6,7 @@ test("deletes a repository after exact name confirmation", async ({
 }, testInfo) => {
 	const name = `delete-${Date.now()}-${testInfo.workerIndex}`;
 
-	await page.goto("/repositories", { waitUntil: "load" });
+	await page.goto("/organizations/default", { waitUntil: "load" });
 	await waitForHydration(page);
 	await page.getByRole("button", { name: "New repository" }).click();
 	await page.getByLabel("Repository name").fill(name);
@@ -14,10 +14,12 @@ test("deletes a repository after exact name confirmation", async ({
 	await page.waitForLoadState("load");
 
 	await page.getByRole("link", { name, exact: true }).first().click();
-	await expect(page).toHaveURL(`/repositories/${name}`);
+	await expect(page).toHaveURL(`/organizations/default/repositories/${name}`);
 	await waitForHydration(page);
 	await page.getByRole("tab", { name: "Settings" }).click();
-	await expect(page).toHaveURL(`/repositories/${name}/settings`);
+	await expect(page).toHaveURL(
+		`/organizations/default/repositories/${name}/settings`,
+	);
 
 	await page.getByRole("button", { name: "Delete repository" }).click();
 	const dialog = page.getByRole("dialog", { name: "Delete repository" });
@@ -32,6 +34,6 @@ test("deletes a repository after exact name confirmation", async ({
 	await expect(confirmButton).toBeEnabled();
 	await confirmButton.click();
 
-	await expect(page).toHaveURL("/repositories");
+	await expect(page).toHaveURL("/organizations/default");
 	await expect(page.getByRole("link", { name, exact: true })).toHaveCount(0);
 });

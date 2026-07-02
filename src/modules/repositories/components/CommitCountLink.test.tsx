@@ -16,7 +16,7 @@ vi.mock("@tanstack/react-router", () => ({
 		<a
 			href="/test"
 			data-to={to}
-			data-name={params.name}
+			data-name={params.repository}
 			data-branch={params.branch}
 		>
 			{children}
@@ -59,7 +59,7 @@ describe("CommitCountLink", () => {
 		renderLink({ repoName: "my-repo", branchName: "main" });
 		const link = screen.getByRole("link");
 		expect(link.getAttribute("data-to")).toBe(
-			"/repositories/$name/tree/$branch/commits",
+			"/organizations/$organization/repositories/$repository/tree/$branch/commits",
 		);
 		expect(link.getAttribute("data-name")).toBe("my-repo");
 		expect(link.getAttribute("data-branch")).toBe("main");

@@ -1,5 +1,5 @@
 import { MantineProvider } from "@mantine/core";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -16,12 +16,16 @@ vi.mock("@tanstack/react-router", () => ({
 vi.mock("#/modules/repositories", () => ({
 	listRepositoriesFn: vi.fn(),
 }));
+vi.mock("#/modules/organizations", () => ({
+	listOrganizationsFn: vi.fn().mockResolvedValue([{ name: "default" }]),
+}));
 
 import { listRepositoriesFn } from "#/modules/repositories";
 import SidebarRecentRepositories from "./SidebarRecentRepositories";
 
 function makeRepo(overrides: Partial<Repository> = {}): Repository {
 	return {
+		organizationName: "default",
 		name: "repo-1",
 		description: undefined,
 		createdAt: new Date("2024-01-01"),
@@ -63,7 +67,7 @@ describe("SidebarRecentRepositories", () => {
 				<SidebarRecentRepositories opened={true} />
 			</MantineProvider>,
 		);
-		expect(listRepositoriesFn).toHaveBeenCalledTimes(1);
+		await waitFor(() => expect(listRepositoriesFn).toHaveBeenCalledTimes(1));
 
 		rerender(
 			<MantineProvider>
@@ -93,8 +97,8 @@ describe("SidebarRecentRepositories", () => {
 
 		const items = await screen.findAllByRole("button", { name: /repo-/i });
 		expect(items).toHaveLength(5);
-		expect(screen.getByText("repo-6")).toBeInTheDocument();
-		expect(screen.queryByText("repo-1")).not.toBeInTheDocument();
+		expect(screen.getByText("default/repo-6")).toBeInTheDocument();
+		expect(screen.queryByText("default/repo-1")).not.toBeInTheDocument();
 		expect(screen.getByText(/show more/i)).toBeInTheDocument();
 	});
 
@@ -143,16 +147,16 @@ describe("SidebarRecentRepositories", () => {
 		await user.click(screen.getByRole("button", { name: /alpha/i }));
 
 		expect(navigateFn).toHaveBeenCalledWith({
-			to: "/repositories/$name",
-			params: { name: "alpha" },
+			to: "/organizations/$organization/repositories/$repository",
+			params: { organization: "default", repository: "alpha" },
 		});
 	});
 
-	it("marks NavLink as active when pathname matches /repositories/<name>", async () => {
+	it("marks NavLink as active when pathname matches the namespaced path", async () => {
 		vi.mocked(listRepositoriesFn).mockResolvedValue([
 			makeRepo({ name: "alpha" }),
 		]);
-		locationRef.pathname = "/repositories/alpha";
+		locationRef.pathname = "/organizations/default/repositories/alpha";
 		await renderSidebar({ opened: true });
 
 		const item = await screen.findByRole("button", { name: /alpha/i });
@@ -163,7 +167,7 @@ describe("SidebarRecentRepositories", () => {
 		vi.mocked(listRepositoriesFn).mockResolvedValue([
 			makeRepo({ name: "alpha" }),
 		]);
-		locationRef.pathname = "/repositories/other";
+		locationRef.pathname = "/organizations/default/repositories/other";
 		await renderSidebar({ opened: true });
 
 		const item = await screen.findByRole("button", { name: /alpha/i });

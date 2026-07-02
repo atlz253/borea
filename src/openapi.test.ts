@@ -9,15 +9,19 @@ describe("generateOpenApiDocument", () => {
 		expect(document.openapi).toBe("3.1.0");
 		expect(Object.keys(paths)).toEqual(
 			expect.arrayContaining([
-				"/api/v1/repositories",
-				"/api/v1/repositories/{name}",
-				"/api/v1/repositories/{name}/pull-requests",
-				"/api/v1/repositories/{name}/pull-requests/{pullId}",
-				"/api/v1/repositories/{name}/pull-requests/{pullId}/merge",
+				"/api/v1/organizations",
+				"/api/v1/organizations/{organization}",
+				"/api/v1/organizations/{organization}/repositories",
+				"/api/v1/organizations/{organization}/repositories/{repository}",
+				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests",
+				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}",
+				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}/merge",
 			]),
 		);
 		expect(
-			paths["/api/v1/repositories/{name}/pull-requests/{pullId}/merge"]?.post,
+			paths[
+				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}/merge"
+			]?.post,
 		).toBeDefined();
 	});
 });

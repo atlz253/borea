@@ -21,6 +21,7 @@ vi.mock("../server/pull-request.functions", () => ({
 
 const pullRequest: PullRequest = {
 	id: 1,
+	organizationName: "default",
 	repoName: "my-repo",
 	title: "Review this change",
 	sourceBranch: "feature",
@@ -100,6 +101,7 @@ describe("PullRequestFilesPage", () => {
 		});
 		expect(mocks.setViewed).toHaveBeenCalledWith({
 			data: {
+				organizationName: "default",
 				repoName: "my-repo",
 				id: 1,
 				filePath: "feature.ts",

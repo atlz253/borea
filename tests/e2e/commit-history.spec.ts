@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("commit history lists commits and links to diff", async ({ page }) => {
@@ -54,7 +54,7 @@ test("commit history lists commits and links to diff", async ({ page }) => {
 			},
 		});
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
 			cwd: workDir,
@@ -62,16 +62,22 @@ test("commit history lists commits and links to diff", async ({ page }) => {
 			timeout: 30_000,
 		});
 
-		await page.goto(`/repositories/${repoName}`, { waitUntil: "load" });
+		await page.goto(`/organizations/default/repositories/${repoName}`, {
+			waitUntil: "load",
+		});
 		await waitForHydration(page);
 
 		await expect(page).toHaveURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}`,
+			),
 		);
 
 		await page.getByRole("link", { name: /commits?$/i }).click();
 		await page.waitForURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}/commits`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}/commits`,
+			),
 		);
 		await waitForHydration(page);
 
@@ -91,7 +97,9 @@ test("commit history lists commits and links to diff", async ({ page }) => {
 
 		await page.getByText("first commit").click();
 		await page.waitForURL(
-			new RegExp(`/repositories/${repoName}/tree/${defaultBranch}/commits/.+`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}/commits/.+`,
+			),
 		);
 		await waitForHydration(page);
 
@@ -115,9 +123,12 @@ test("navigating to commits on non-existent branch shows error", async ({
 	try {
 		await execa("git", ["init", "--bare", barePath]);
 
-		await page.goto(`/repositories/${repoName}/tree/main/commits`, {
-			waitUntil: "load",
-		});
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/tree/main/commits`,
+			{
+				waitUntil: "load",
+			},
+		);
 		await waitForHydration(page);
 
 		await expect(page.getByText(/not found/i)).toBeVisible();

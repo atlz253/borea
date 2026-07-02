@@ -7,14 +7,15 @@ import {
 import { handleApiRequest, parseJsonBody } from "#/platform/http";
 
 export const Route = createFileRoute(
-	"/api/v1/repositories/$name/pull-requests/$pullId/merge",
+	"/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge",
 )({
 	server: {
 		handlers: {
 			POST: async ({ params, request }) =>
 				handleApiRequest(async () => {
 					const input = getPullRequestSchema.parse({
-						repoName: params.name,
+						organizationName: params.organization,
+						repoName: params.repository,
 						id: Number(params.pullId),
 					});
 					const body = await parseJsonBody(request, mergePullRequestBodySchema);

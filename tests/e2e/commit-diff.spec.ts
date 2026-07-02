@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 async function shaForRef(workDir: string, ref: string): Promise<string> {
@@ -73,7 +73,7 @@ test("commit diff shows modified and added files", async ({ page }) => {
 
 		const sha = await shaForRef(workDir, "HEAD");
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
 			cwd: workDir,
@@ -82,14 +82,14 @@ test("commit diff shows modified and added files", async ({ page }) => {
 		});
 
 		await page.goto(
-			`/repositories/${repoName}/tree/${defaultBranch}/commits/${sha}`,
+			`/organizations/default/repositories/${repoName}/tree/${defaultBranch}/commits/${sha}`,
 			{ waitUntil: "load" },
 		);
 		await waitForHydration(page);
 
 		await expect(page).toHaveURL(
 			new RegExp(
-				`/repositories/${repoName}/tree/${defaultBranch}/commits/${sha}`,
+				`/organizations/default/repositories/${repoName}/tree/${defaultBranch}/commits/${sha}`,
 			),
 		);
 
@@ -144,7 +144,7 @@ test("empty commit shows no file changes", async ({ page }) => {
 
 		const sha = await shaForRef(workDir, "HEAD");
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
 			cwd: workDir,
@@ -153,7 +153,7 @@ test("empty commit shows no file changes", async ({ page }) => {
 		});
 
 		await page.goto(
-			`/repositories/${repoName}/tree/${defaultBranch}/commits/${sha}`,
+			`/organizations/default/repositories/${repoName}/tree/${defaultBranch}/commits/${sha}`,
 			{ waitUntil: "load" },
 		);
 		await waitForHydration(page);

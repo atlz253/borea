@@ -18,6 +18,7 @@ export type {
 	MergeResult,
 	MergeStatus,
 	RepositoryInfo,
+	RepositoryLocator,
 	TreeEntry,
 	TreeEntryType,
 } from "./git-provider";

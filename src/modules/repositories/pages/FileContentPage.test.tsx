@@ -96,6 +96,7 @@ describe("FileContentPage", () => {
 
 		expect(getRepositoryFileFn).toHaveBeenCalledWith({
 			data: {
+				organizationName: "default",
 				name: "my-repo",
 				path: "large.ts",
 				ref: "main",

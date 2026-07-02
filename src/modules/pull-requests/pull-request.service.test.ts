@@ -39,6 +39,7 @@ function createMockStore(): PullRequestStore {
 
 const prData = {
 	id: 1,
+	organizationName: "default",
 	repoName: "my-repo",
 	title: "Test PR",
 	sourceBranch: "feature",

@@ -4,27 +4,34 @@ import type {
 	MergeOptions,
 	MergeResult,
 	MergeStatus,
+	RepositoryLocator,
 } from "#/modules/git";
 import { ConflictError, NotFoundError } from "#/platform/errors";
 import type { PullRequestStore } from "./pull-request.store";
 import type { PullRequest } from "./schemas";
 
+type RepositoryTarget = RepositoryLocator | string;
+
 export function createPullRequestService(
 	gitProvider: GitProvider,
 	store: PullRequestStore,
 ) {
-	async function ensureRepositoryExists(repoName: string): Promise<void> {
-		if (!(await gitProvider.exists(repoName))) {
-			throw new NotFoundError(`Repository "${repoName}" not found`);
+	async function ensureRepositoryExists(
+		locator: RepositoryTarget,
+	): Promise<void> {
+		if (!(await gitProvider.exists(locator as RepositoryLocator))) {
+			throw new NotFoundError(
+				`Repository "${typeof locator === "string" ? locator : locator.repositoryName}" not found`,
+			);
 		}
 	}
 
 	async function requirePullRequest(
-		repoName: string,
+		locator: RepositoryTarget,
 		id: number,
 	): Promise<PullRequest> {
-		await ensureRepositoryExists(repoName);
-		const pullRequest = await store.get(repoName, id);
+		await ensureRepositoryExists(locator);
+		const pullRequest = await store.get(locator as RepositoryLocator, id);
 		if (!pullRequest) {
 			throw new NotFoundError(`Pull request #${id} not found`);
 		}
@@ -33,19 +40,33 @@ export function createPullRequestService(
 
 	return {
 		async createPullRequest(input: {
+			organizationName?: string;
 			repoName: string;
 			title: string;
 			sourceBranch: string;
 			targetBranch: string;
 			authorName?: string;
 		}): Promise<PullRequest> {
-			const { repoName, title, sourceBranch, targetBranch, authorName } = input;
+			const {
+				organizationName,
+				repoName,
+				title,
+				sourceBranch,
+				targetBranch,
+				authorName,
+			} = input;
+			const locator: RepositoryTarget = organizationName
+				? { organizationName, repositoryName: repoName }
+				: repoName;
+			await ensureRepositoryExists(locator);
 
 			if (sourceBranch === targetBranch) {
 				throw new Error("Source and target branches must be different");
 			}
 
-			const branches = await gitProvider.listBranches(repoName);
+			const branches = await gitProvider.listBranches(
+				locator as RepositoryLocator,
+			);
 			const sourceExists = branches.some((b) => b.name === sourceBranch);
 			if (!sourceExists) {
 				throw new Error(`Source branch "${sourceBranch}" not found`);
@@ -55,33 +76,42 @@ export function createPullRequestService(
 				throw new Error(`Target branch "${targetBranch}" not found`);
 			}
 
-			return store.create({
+			const storeInput = {
 				repoName,
 				title,
 				sourceBranch,
 				targetBranch,
 				authorName: authorName ?? "anonymous",
-			});
+			};
+			if (organizationName) {
+				return store.create({ ...storeInput, organizationName });
+			}
+			return (
+				store.create as (input: typeof storeInput) => Promise<PullRequest>
+			)(storeInput);
 		},
 
-		async listPullRequests(repoName: string): Promise<PullRequest[]> {
-			await ensureRepositoryExists(repoName);
-			return store.list(repoName);
+		async listPullRequests(locator: RepositoryTarget): Promise<PullRequest[]> {
+			await ensureRepositoryExists(locator);
+			return store.list(locator as RepositoryLocator);
 		},
 
-		async getPullRequest(repoName: string, id: number): Promise<PullRequest> {
-			return requirePullRequest(repoName, id);
+		async getPullRequest(
+			locator: RepositoryTarget,
+			id: number,
+		): Promise<PullRequest> {
+			return requirePullRequest(locator, id);
 		},
 
 		async mergePullRequest(
-			repoName: string,
+			locator: RepositoryTarget,
 			id: number,
 			options?: { fastForward?: boolean; message?: string },
 		): Promise<{
 			pullRequest: PullRequest;
 			mergeResult: MergeResult;
 		}> {
-			const pr = await requirePullRequest(repoName, id);
+			const pr = await requirePullRequest(locator, id);
 			if (pr.status !== "open") {
 				throw new ConflictError(
 					`Pull request #${id} is already ${pr.status} and cannot be merged`,
@@ -89,7 +119,7 @@ export function createPullRequestService(
 			}
 
 			const mergeStatus = await gitProvider.canMerge(
-				repoName,
+				locator as RepositoryLocator,
 				pr.sourceBranch,
 				pr.targetBranch,
 			);
@@ -109,13 +139,13 @@ export function createPullRequestService(
 				options?.message ?? `Merge pull request #${id}: ${pr.title}`;
 
 			const mergeResult = await gitProvider.mergeBranch(
-				repoName,
+				locator as RepositoryLocator,
 				pr.sourceBranch,
 				pr.targetBranch,
 				mergeOpts,
 			);
 
-			const updated = await store.update(repoName, id, {
+			const updated = await store.update(locator as RepositoryLocator, id, {
 				status: "merged",
 				mergeCommitSha: mergeResult.mergedSha,
 			});
@@ -123,31 +153,42 @@ export function createPullRequestService(
 			return { pullRequest: updated, mergeResult };
 		},
 
-		async checkMergeStatus(repoName: string, id: number): Promise<MergeStatus> {
-			const pr = await requirePullRequest(repoName, id);
+		async checkMergeStatus(
+			locator: RepositoryTarget,
+			id: number,
+		): Promise<MergeStatus> {
+			const pr = await requirePullRequest(locator, id);
 
-			return gitProvider.canMerge(repoName, pr.sourceBranch, pr.targetBranch);
+			return gitProvider.canMerge(
+				locator as RepositoryLocator,
+				pr.sourceBranch,
+				pr.targetBranch,
+			);
 		},
 
 		async getPullRequestDiff(
-			repoName: string,
+			locator: RepositoryTarget,
 			id: number,
 		): Promise<DiffFile[]> {
-			const pr = await requirePullRequest(repoName, id);
+			const pr = await requirePullRequest(locator, id);
 
-			return gitProvider.getDiff(repoName, pr.targetBranch, pr.sourceBranch);
+			return gitProvider.getDiff(
+				locator as RepositoryLocator,
+				pr.targetBranch,
+				pr.sourceBranch,
+			);
 		},
 
 		async setPullRequestFileViewed(
-			repoName: string,
+			locator: RepositoryTarget,
 			id: number,
 			filePath: string,
 			viewed: boolean,
 		): Promise<PullRequest> {
-			const pr = await requirePullRequest(repoName, id);
+			const pr = await requirePullRequest(locator, id);
 
 			const files = await gitProvider.getDiff(
-				repoName,
+				locator as RepositoryLocator,
 				pr.targetBranch,
 				pr.sourceBranch,
 			);
@@ -160,7 +201,12 @@ export function createPullRequestService(
 				);
 			}
 
-			return store.setFileViewed(repoName, id, filePath, viewed);
+			return store.setFileViewed(
+				locator as RepositoryLocator,
+				id,
+				filePath,
+				viewed,
+			);
 		},
 	};
 }

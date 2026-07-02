@@ -10,11 +10,13 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 interface PullRequestListProps {
+	organizationName?: string;
 	repoName: string;
 	pullRequests: PullRequest[];
 }
 
 export default function PullRequestList({
+	organizationName = "default",
 	repoName,
 	pullRequests,
 }: PullRequestListProps) {
@@ -44,8 +46,12 @@ export default function PullRequestList({
 				<Group gap="xs">
 					<GitPullRequest size={16} />
 					<Link
-						to="/repositories/$name/pulls/$pullId"
-						params={{ name: repoName, pullId: String(pr.id) }}
+						to="/organizations/$organization/repositories/$repository/pulls/$pullId"
+						params={{
+							organization: organizationName,
+							repository: repoName,
+							pullId: String(pr.id),
+						}}
 						style={{
 							color: "var(--mantine-color-anchor-color)",
 							textDecoration: "none",

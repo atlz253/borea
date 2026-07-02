@@ -6,7 +6,7 @@ import { expect, test } from "@playwright/test";
 import { execa } from "execa";
 import { waitForHydration } from "./helpers";
 
-const STORAGE_PATH = "./data/repositories";
+const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("view small, large, and binary repository files", async ({ page }) => {
@@ -48,7 +48,7 @@ test("view small, large, and binary repository files", async ({ page }) => {
 			env: COMMIT_ENV,
 		});
 
-		const pushUrl = `${BASE_URL}/api/git/${repoName}.git`;
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
 			cwd: workDir,
@@ -75,14 +75,17 @@ test("view small, large, and binary repository files", async ({ page }) => {
 			timeout: 30000,
 		});
 
-		await page.goto(`/repositories/${repoName}/tree/${defaultBranch}`, {
-			waitUntil: "load",
-		});
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/tree/${defaultBranch}`,
+			{
+				waitUntil: "load",
+			},
+		);
 		await waitForHydration(page);
 		await page.getByRole("link", { name: "README.md" }).click();
 		await page.waitForURL(
 			new RegExp(
-				`/repositories/${repoName}/blob/${defaultBranch}/README\\.md$`,
+				`/organizations/default/repositories/${repoName}/blob/${defaultBranch}/README\\.md$`,
 			),
 		);
 		await expect(page.getByText("# Small file")).toBeVisible();
@@ -110,13 +113,18 @@ test("view small, large, and binary repository files", async ({ page }) => {
 		await page.getByRole("button", { name: defaultBranch }).click();
 		await page.getByRole("menuitem", { name: "feature-content" }).click();
 		await page.waitForURL(
-			new RegExp(`/repositories/${repoName}/blob/feature-content/README\\.md$`),
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/blob/feature-content/README\\.md$`,
+			),
 		);
 		await expect(page.getByText("# Feature file")).toBeVisible();
 
-		await page.goto(`/repositories/${repoName}/tree/${defaultBranch}`, {
-			waitUntil: "load",
-		});
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/tree/${defaultBranch}`,
+			{
+				waitUntil: "load",
+			},
+		);
 		await waitForHydration(page);
 		await page.getByRole("link", { name: "large.txt" }).click();
 		await expect(page.getByText("Large file")).toBeVisible();
@@ -125,9 +133,10 @@ test("view small, large, and binary repository files", async ({ page }) => {
 			timeout: 30000,
 		});
 
-		await page.goto(`/repositories/${repoName}/tree/${defaultBranch}`, {
-			waitUntil: "load",
-		});
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/tree/${defaultBranch}`,
+			{ waitUntil: "load" },
+		);
 		await waitForHydration(page);
 		await page.getByRole("link", { name: "binary.dat" }).click();
 		await expect(

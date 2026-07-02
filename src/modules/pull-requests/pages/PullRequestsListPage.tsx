@@ -5,11 +5,13 @@ import PullRequestList from "../components/PullRequestList";
 import type { PullRequest } from "../schemas";
 
 interface PullRequestsListPageProps {
+	organizationName?: string;
 	repoName: string;
 	pullRequests: PullRequest[];
 }
 
 export default function PullRequestsListPage({
+	organizationName = "default",
 	repoName,
 	pullRequests,
 }: PullRequestsListPageProps) {
@@ -26,7 +28,13 @@ export default function PullRequestsListPage({
 						</Text>
 					)}
 				</Stack>
-				<Link to="/repositories/$name/pulls/new" params={{ name: repoName }}>
+				<Link
+					to="/organizations/$organization/repositories/$repository/pulls/new"
+					params={{
+						organization: organizationName,
+						repository: repoName,
+					}}
+				>
 					<Button leftSection={<Plus size={16} />}>New pull request</Button>
 				</Link>
 			</Group>
@@ -48,7 +56,11 @@ export default function PullRequestsListPage({
 					</Group>
 				</Group>
 			) : (
-				<PullRequestList repoName={repoName} pullRequests={pullRequests} />
+				<PullRequestList
+					organizationName={organizationName}
+					repoName={repoName}
+					pullRequests={pullRequests}
+				/>
 			)}
 		</Container>
 	);

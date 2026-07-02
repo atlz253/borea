@@ -6,10 +6,15 @@ import {
 	RepositoryPage,
 } from "#/modules/repositories";
 
-export const Route = createFileRoute("/repositories/$name/")({
+export const Route = createFileRoute(
+	"/organizations/$organization/repositories/$repository/",
+)({
 	loader: async ({ params }) => {
 		const branches = await listBranchesFn({
-			data: { name: params.name },
+			data: {
+				organizationName: params.organization,
+				name: params.repository,
+			},
 		});
 		const defaultBranch = branches.find(
 			(b: { isHead: boolean }) => b.isHead,
@@ -17,26 +22,31 @@ export const Route = createFileRoute("/repositories/$name/")({
 
 		if (!defaultBranch) {
 			const entries = await listRepositoryFilesFn({
-				data: { name: params.name },
+				data: {
+					organizationName: params.organization,
+					name: params.repository,
+				},
 			});
 			return { entries, commitCount: 0, branches: [], selectedBranch: "" };
 		}
 
 		throw redirect({
-			to: "/repositories/$name/tree/$branch",
+			to: "/organizations/$organization/repositories/$repository/tree/$branch",
 			params: {
-				name: params.name,
+				organization: params.organization,
+				repository: params.repository,
 				branch: encodeURIComponent(defaultBranch),
 			},
 		});
 	},
 	component: () => {
-		const { name } = Route.useParams();
+		const { organization, repository } = Route.useParams();
 		const { entries, commitCount, branches, selectedBranch } =
 			Route.useLoaderData();
 		return (
 			<RepositoryPage
-				name={name}
+				organizationName={organization}
+				name={repository}
 				path=""
 				entries={entries}
 				commitCount={commitCount}

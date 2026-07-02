@@ -6,14 +6,15 @@ import {
 import { handleApiRequest } from "#/platform/http";
 
 export const Route = createFileRoute(
-	"/api/v1/repositories/$name/pull-requests",
+	"/api/v1/organizations/$organization/repositories/$repository/pull-requests",
 )({
 	server: {
 		handlers: {
 			GET: async ({ params }) =>
 				handleApiRequest(async () => {
 					const input = listPullRequestsSchema.parse({
-						repoName: params.name,
+						organizationName: params.organization,
+						repoName: params.repository,
 					});
 					return Response.json(await listPullRequestsFn({ data: input }));
 				}),

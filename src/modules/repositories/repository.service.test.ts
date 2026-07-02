@@ -73,7 +73,11 @@ describe("deleteRepository", () => {
 describe("createRepository", () => {
 	it("delegates to gitProvider.init with name and description", async () => {
 		const mockGit = createMockGit();
-		const expected = { name: "test", createdAt: new Date() };
+		const expected = {
+			organizationName: "default",
+			name: "test",
+			createdAt: new Date(),
+		};
 		vi.mocked(mockGit.init).mockResolvedValue(expected);
 
 		const result = await createRepository(mockGit, {
@@ -82,7 +86,7 @@ describe("createRepository", () => {
 		});
 
 		expect(mockGit.init).toHaveBeenCalledWith("test", "desc");
-		expect(result).toBe(expected);
+		expect(result).toEqual(expected);
 	});
 
 	it("forwards error when gitProvider.init fails", async () => {
@@ -98,23 +102,29 @@ describe("createRepository", () => {
 describe("listRepositories", () => {
 	it("delegates to gitProvider.list", async () => {
 		const mockGit = createMockGit();
-		const repos = [{ name: "a", createdAt: new Date() }];
+		const repos = [
+			{ organizationName: "default", name: "a", createdAt: new Date() },
+		];
 		vi.mocked(mockGit.list).mockResolvedValue(repos);
 
 		const result = await listRepositories(mockGit);
 
 		expect(mockGit.list).toHaveBeenCalledOnce();
-		expect(result).toBe(repos);
+		expect(result).toEqual(repos);
 	});
 });
 
 describe("getRepository", () => {
 	it("returns repository data from the provider", async () => {
 		const mockGit = createMockGit();
-		const repository = { name: "test", createdAt: new Date() };
+		const repository = {
+			organizationName: "default",
+			name: "test",
+			createdAt: new Date(),
+		};
 		vi.mocked(mockGit.get).mockResolvedValue(repository);
 
-		await expect(getRepository(mockGit, "test")).resolves.toBe(repository);
+		await expect(getRepository(mockGit, "test")).resolves.toEqual(repository);
 		expect(mockGit.get).toHaveBeenCalledWith("test");
 	});
 
