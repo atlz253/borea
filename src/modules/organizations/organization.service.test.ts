@@ -27,6 +27,9 @@ afterEach(async () => {
 });
 
 describe("organizations", () => {
+	const ownerId = "00000000-0000-4000-8000-000000000001";
+	const otherOwnerId = "00000000-0000-4000-8000-000000000002";
+
 	it("validates organization names", () => {
 		expect(organizationNameSchema.parse("team-1")).toBe("team-1");
 		expect(() => organizationNameSchema.parse("Team")).toThrow();
@@ -36,25 +39,65 @@ describe("organizations", () => {
 
 	it("creates, lists, and gets organizations", async () => {
 		const service = createOrganizationService(await createStore(), "multi");
-		const created = await service.createOrganization({
-			name: "team",
-			description: "Team",
-		});
+		const created = await service.createOrganization(
+			{
+				name: "team",
+				description: "Team",
+			},
+			ownerId,
+		);
 
 		expect(created.name).toBe("team");
-		await expect(service.getOrganization("team")).resolves.toMatchObject({
+		expect(created).not.toHaveProperty("ownerId");
+		await expect(
+			service.getOrganization("team", ownerId),
+		).resolves.toMatchObject({
 			name: "team",
 			description: "Team",
 		});
-		await expect(service.listOrganizations()).resolves.toHaveLength(1);
+		await expect(service.listOrganizations(ownerId)).resolves.toHaveLength(1);
 	});
 
 	it("rejects duplicate organizations", async () => {
 		const service = createOrganizationService(await createStore(), "multi");
-		await service.createOrganization({ name: "team", description: "" });
+		await service.createOrganization(
+			{ name: "team", description: "" },
+			ownerId,
+		);
 		await expect(
-			service.createOrganization({ name: "team", description: "" }),
+			service.createOrganization({ name: "team", description: "" }, ownerId),
 		).rejects.toBeInstanceOf(ConflictError);
+	});
+
+	it("exposes only organizations owned by the current user", async () => {
+		const service = createOrganizationService(await createStore(), "multi");
+		await service.createOrganization(
+			{ name: "first", description: "" },
+			ownerId,
+		);
+		await service.createOrganization(
+			{ name: "second", description: "" },
+			otherOwnerId,
+		);
+
+		await expect(service.listOrganizations(ownerId)).resolves.toMatchObject([
+			{ name: "first" },
+		]);
+		await expect(
+			service.getOrganization("second", ownerId),
+		).rejects.toBeInstanceOf(NotFoundError);
+	});
+
+	it("hides ownerless organizations unless ownership is bypassed", async () => {
+		const store = await createStore();
+		await store.create({ name: "legacy" });
+		const fullService = createOrganizationService(store, "multi");
+		const noAuthService = createOrganizationService(store, "multi", true);
+
+		await expect(fullService.listOrganizations(ownerId)).resolves.toEqual([]);
+		await expect(noAuthService.listOrganizations()).resolves.toMatchObject([
+			{ name: "legacy" },
+		]);
 	});
 
 	it("exposes only the default organization in single mode", async () => {

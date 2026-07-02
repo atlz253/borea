@@ -19,6 +19,7 @@ export {
 	createOrganizationFn,
 	getOrganizationFn,
 	getOrganizationModeFn,
+	getPublicOrganizationFn,
 	listOrganizationsFn,
 	requireOrganizationFn,
 } from "./server/organization.functions";

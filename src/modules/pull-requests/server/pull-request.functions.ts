@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertSameOriginFn, requireCurrentUserFn } from "#/modules/auth";
 import { gitProvider } from "#/modules/git";
 import { requireOrganizationFn } from "#/modules/organizations";
 import { createPullRequestService } from "../pull-request.service";
@@ -22,8 +23,10 @@ const requireOrganization = (organizationName: string) =>
 export const createPullRequestFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => createPullRequestSchema.parse(data))
 	.handler(async ({ data }) => {
+		await assertSameOriginFn();
 		await requireOrganization(data.organizationName);
-		return service.createPullRequest(data);
+		const user = await requireCurrentUserFn();
+		return service.createPullRequest({ ...data, authorName: user.name });
 	});
 
 export const listPullRequestsFn = createServerFn({ method: "GET" })
@@ -38,6 +41,8 @@ export const deletePullRequestsForRepositoryFn = createServerFn({
 })
 	.validator((data: unknown) => listPullRequestsSchema.parse(data))
 	.handler(async ({ data }) => {
+		await assertSameOriginFn();
+		await requireOrganization(data.organizationName);
 		await pullRequestStore.deleteAll(locator(data));
 	});
 
@@ -51,6 +56,7 @@ export const getPullRequestFn = createServerFn({ method: "GET" })
 export const mergePullRequestFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => mergePullRequestSchema.parse(data))
 	.handler(async ({ data }) => {
+		await assertSameOriginFn();
 		await requireOrganization(data.organizationName);
 		return service.mergePullRequest(locator(data), data.id, {
 			fastForward: data.fastForward,
@@ -74,6 +80,7 @@ export const getPullRequestDiffFn = createServerFn({ method: "GET" })
 export const setPullRequestFileViewedFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => setPullRequestFileViewedSchema.parse(data))
 	.handler(async ({ data }) => {
+		await assertSameOriginFn();
 		await requireOrganization(data.organizationName);
 		return service.setPullRequestFileViewed(
 			locator(data),

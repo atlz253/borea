@@ -14,7 +14,6 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import hljs from "highlight.js";
-import AppShellLayout from "../components/AppShellLayout";
 import { theme } from "../theme";
 
 const codeHighlightAdapter = createHighlightJsAdapter(hljs);
@@ -59,7 +58,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					deduplicateInlineStyles
 				>
 					<CodeHighlightAdapterProvider adapter={codeHighlightAdapter}>
-						<AppShellLayout>{children}</AppShellLayout>
+						{children}
 					</CodeHighlightAdapterProvider>
 				</MantineProvider>
 				<TanStackDevtools

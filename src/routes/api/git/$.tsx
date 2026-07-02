@@ -7,7 +7,7 @@ import {
 	gitProvider,
 	parseSmartHttpPath,
 } from "#/modules/git";
-import { getOrganizationFn } from "#/modules/organizations";
+import { getPublicOrganizationFn } from "#/modules/organizations";
 
 export const Route = createFileRoute("/api/git/$")({
 	server: {
@@ -34,7 +34,7 @@ export const Route = createFileRoute("/api/git/$")({
 				}
 
 				try {
-					await getOrganizationFn({
+					await getPublicOrganizationFn({
 						data: { organizationName: parsed.organizationName },
 					});
 				} catch {
@@ -79,7 +79,7 @@ export const Route = createFileRoute("/api/git/$")({
 				}
 
 				try {
-					await getOrganizationFn({
+					await getPublicOrganizationFn({
 						data: { organizationName: parsed.organizationName },
 					});
 				} catch {

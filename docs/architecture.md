@@ -9,7 +9,7 @@ src/
   components/             Shared UI components (Header, Footer, Sidebar, AppShell layout)
   modules/                Domain modules — each is a self-contained slice of business logic
     git/                  Git provider, smart-HTTP service, commit/branch operations
-    auth/                 AuthProvider interface + NoAuthProvider (MVP)
+    auth/                 File auth provider, NoAuth provider, sessions, user store and UI
     organizations/        Organization model, mode policy, persistence, UI and API
     repositories/         Repository listing, file tree, server functions for the UI
     pull-requests/        Pull/merge requests (scaffold, not yet implemented)
@@ -42,6 +42,7 @@ All architectural decisions are recorded as ADRs in `docs/ADR/`.
 | 0008 | Git smart-HTTP push implementation |
 | 0009 | Commit history: GitProvider extension with branches and commits |
 | 0018 | Organizations, repository namespaces, and single-organization mode |
+| 0019 | File authentication, cookie sessions, and organization ownership |
 
 ## Architecture Principles
 
@@ -52,7 +53,7 @@ All external dependencies are accessed through unified interfaces with swappable
 - **GitProvider** — repository operations, commit history, file tree, smart-HTTP streaming
 - **DatabaseProvider** — data persistence (stub for MVP, filesystem-based for now)
 - **StorageProvider** — file storage (local filesystem for MVP)
-- **AuthProvider** — authentication; `NoAuthProvider` is the MVP implementation
+- **AuthProvider** — file-backed local authentication or fixed-user NoAuth
 
 ### Thin Routes
 
@@ -64,10 +65,17 @@ Nirvana serves the Git smart-HTTP protocol through the `/api/git/<organization>/
 
 ### Organization Modes
 
-`ORGANIZATION_MODE=multi` exposes all organizations and allows creation.
-`ORGANIZATION_MODE=single` exposes only the automatically created `default`
-organization. Both modes use the same namespaced routes and storage layout.
+In full authentication mode, `ORGANIZATION_MODE=multi` exposes only
+organizations owned by the current user. `ORGANIZATION_MODE=single` is
+available only with NoAuth and exposes the automatically created `default`
+organization.
 
-### NoAuth Mode
+### Authentication Modes
 
-The MVP runs without authentication (see `docs/security/noauth-mode.md`). All operations are performed on behalf of a fixed, configurable user. This is blocked in production unless explicitly overridden.
+`AUTH_MODE=full` is the default and uses file-backed users plus encrypted
+cookie sessions. `AUTH_MODE=noauth` performs operations as a fixed user,
+bypasses organization ownership, and is blocked in production unless
+explicitly overridden.
+
+Git smart-HTTP remains public in both modes until repository visibility and Git
+credentials are implemented.

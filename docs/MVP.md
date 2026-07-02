@@ -32,7 +32,7 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 - Implement a Git hosting service with basic functionality
 - Establish architectural abstractions for future extensibility
 - Enable self-hosted deployment
-- Operate in no-authentication mode to simplify testing and development
+- Use file-backed authentication by default while retaining explicit NoAuth for testing and development
 
 ---
 
@@ -77,9 +77,10 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 
 **4.3. User Management**
 
-- Authentication module designed as optional via `AuthProvider`
-- MVP uses `NoAuthProvider` — no-authentication mode
-- All actions are performed on behalf of a fixed user (configurable name, default "anonymous")
+- Authentication through a swappable `AuthProvider`
+- File-backed user registration and login with cookie sessions
+- Explicit `NoAuthProvider` mode for development and testing
+- Users can access only organizations they own in full mode
 
 **4.4. Web Interface**
 
@@ -94,7 +95,7 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 
 - REST API with OpenAPI specification
 - Public API for future integrations
-- All endpoints accessible without authentication in MVP
+- REST resources require authentication in full mode; Git smart-HTTP remains public
 
 ---
 
@@ -114,7 +115,8 @@ Not considered at the MVP stage. Optimization will be performed as real loads ap
 
 **5.3. Operating Modes and Configuration**
 
-- **NoAuth mode** (MVP): operation without authentication, all actions on behalf of a fixed user
+- **Full mode** (default): file-backed accounts and cookie sessions
+- **NoAuth mode**: explicit operation without authentication on behalf of a fixed user
 - **Protection against accidental NoAuth activation in production**:
   - Check the `NODE_ENV` environment variable
   - Prohibit launching NoAuth mode when `NODE_ENV=production` without the explicit `--allow-noauth-in-production` flag
@@ -302,7 +304,13 @@ Markdown in the repository at the initial stage.
 
 ```bash
 # Operating mode
-AUTH_MODE=noauth  # or "full" for future version with authentication
+AUTH_MODE=full  # or "noauth" for explicit development mode
+
+# Full-mode session signing (minimum 32 characters)
+SESSION_SECRET=replace-with-at-least-32-characters
+
+# File-backed users
+USERS_PATH=./data/users
 
 # Default username for NoAuth mode
 DEFAULT_USER_NAME=anonymous

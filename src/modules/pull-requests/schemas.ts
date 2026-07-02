@@ -5,7 +5,6 @@ import { organizationNameSchema } from "#/modules/organizations";
 const MAX_REPO_NAME_LENGTH = 100;
 const MAX_BRANCH_NAME_LENGTH = 200;
 const MAX_TITLE_LENGTH = 500;
-const MAX_AUTHOR_NAME_LENGTH = 200;
 const MAX_FILE_PATH_LENGTH = 4096;
 const MAX_PR_ID = Number.MAX_SAFE_INTEGER;
 
@@ -52,7 +51,6 @@ export const createPullRequestSchema = z.object({
 	title: prTitleSchema,
 	sourceBranch: branchRefSchema,
 	targetBranch: branchRefSchema,
-	authorName: z.string().min(1).max(MAX_AUTHOR_NAME_LENGTH).optional(),
 });
 
 export const listPullRequestsSchema = z.object({

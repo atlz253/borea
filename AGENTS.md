@@ -7,7 +7,7 @@ Guidance for AI coding agents (and human contributors) working in this repositor
 Nirvana is an open-source software development workspace (analogue of JetBrains Space / Yandex SourceCraft). The MVP is a Git hosting service with repositories, pull/merge requests, code review, and a REST API — a modular monolith deployable as a single Docker container. Currently at the pre-MVP scaffolding stage.
 
 - **Spec:** `docs/MVP.md` — read this before making architectural changes.
-- **Decisions:** `docs/ADR/README.md` — index of all ADRs (0001–0017). Record any new architectural decision as a numbered ADR before implementing it.
+- **Decisions:** `docs/ADR/README.md` — index of all ADRs (0001–0019). Record any new architectural decision as a numbered ADR before implementing it.
 
 ## Tech Stack
 
@@ -72,7 +72,8 @@ npm run format      # Biome format
 | --- | --- |
 | `docs/MVP.md` | Technical specification — source of truth for requirements |
 | `docs/ADR/` | Architecture Decision Records |
-| `docs/ADR/README.md` | ADR index (0001–0017) |
+| `docs/ADR/README.md` | ADR index (0001–0019) |
+| `docs/security/authentication.md` | Full authentication, sessions, and ownership documentation |
 | `docs/architecture.md` | Architecture overview for developers |
 | `docs/git-http.md` | User guide for clone/push over HTTP |
 | `docs/repository-page.md` | User guide for repository UI pages |
@@ -87,6 +88,7 @@ npm run format      # Biome format
 | `tests/e2e/` | Playwright E2E test files |
 | `playwright.config.ts` | Playwright configuration |
 | `src/modules/` | Domain modules (git, auth, organizations, repositories, pull-requests) |
+| `src/modules/auth/` | AuthProvider implementations, user store, sessions, schemas, UI and API |
 | `src/modules/pull-requests/` | PR module: `schemas.ts`, `pull-request.store.ts`, `pull-request.service.ts`, `server/pull-request.functions.ts`, `components/`, `pages/` |
 | `src/routes/repositories.$name.tree.$branch.commits.$sha.tsx` | Route for commit diff viewing |
 | `src/modules/repositories/pages/CommitDiffPage.tsx` | Commit diff detail page |
@@ -95,7 +97,7 @@ npm run format      # Biome format
 | `src/routes/repositories.$name.pulls.$pullId.index.tsx` | PR Conversation tab (detail + merge controls) |
 | `src/routes/repositories.$name.pulls.$pullId.files.tsx` | PR Files changed tab (diff view) |
 | `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
-| `src/platform/config/` | AppConfig: `storagePath`, `pullRequestsPath`, `gitBinPath` — sourced from env (`REPOSITORIES_PATH`, `PULL_REQUESTS_PATH`, `GIT_BIN_PATH`) |
+| `src/platform/config/` | AppConfig for storage, Git, auth mode, user path, session secret, and organization mode |
 | `src/routes/api/` | Server routes for REST API and Git HTTP — delegates to module services |
 | `src/routes/api/v1/` | Versioned repository and pull request REST API routes |
 | `src/components/` | Shared presentational components |

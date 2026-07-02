@@ -2,12 +2,14 @@ import {
 	OpenAPIRegistry,
 	OpenApiGeneratorV31,
 } from "@asteasolutions/zod-to-openapi";
+import { registerAuthOpenApi } from "#/modules/auth";
 import { registerOrganizationOpenApi } from "#/modules/organizations";
 import { registerPullRequestOpenApi } from "#/modules/pull-requests";
 import { registerRepositoryOpenApi } from "#/modules/repositories";
 
 export function generateOpenApiDocument() {
 	const registry = new OpenAPIRegistry();
+	registerAuthOpenApi(registry);
 	registerOrganizationOpenApi(registry);
 	registerRepositoryOpenApi(registry);
 	registerPullRequestOpenApi(registry);
@@ -18,7 +20,7 @@ export function generateOpenApiDocument() {
 			title: "Nirvana REST API",
 			version: "1.0.0",
 			description:
-				"Public REST API for Nirvana repositories and pull requests.",
+				"Authenticated REST API for Nirvana organizations, repositories, and pull requests.",
 		},
 	});
 }

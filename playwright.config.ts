@@ -34,6 +34,7 @@ export default defineConfig({
 		reuseExistingServer: !process.env.CI,
 		timeout: 120_000,
 		env: {
+			AUTH_MODE: "noauth",
 			DISABLE_HMR_OVERLAY: "1",
 			ORGANIZATION_MODE: "single",
 		},

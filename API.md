@@ -1,6 +1,9 @@
 # API Reference
 
-Nirvana exposes a versioned REST API and the Git smart-HTTP protocol. No authentication is required in the current NoAuth mode.
+Nirvana exposes a versioned REST API and the Git smart-HTTP protocol. REST
+resources require a cookie session in the default full authentication mode.
+Authentication endpoints and the OpenAPI document are public. In NoAuth mode,
+REST requests use the fixed user without a login flow.
 
 ## REST API v1
 
@@ -16,21 +19,51 @@ The base path is `/api/v1`. Successful responses contain resources directly. JSO
 Validation errors can include a `details` field. Status codes are:
 
 - `400` — invalid path parameters or JSON body
+- `401` — authentication is required or credentials are invalid
 - `404` — repository or pull request not found
 - `409` — pull request state or merge conflict
 - `500` — unexpected server error
 
 The OpenAPI 3.1 document is available from `GET /api/v1/openapi.json`.
 
+### Authentication
+
+#### `POST /api/v1/auth/register`
+
+Creates a user and starts a seven-day cookie session.
+
+```json
+{
+  "name": "Alice",
+  "email": "alice@example.com",
+  "password": "password123"
+}
+```
+
+#### `POST /api/v1/auth/login`
+
+Starts a session using `email` and `password`. Invalid credentials return
+`401`.
+
+#### `POST /api/v1/auth/logout`
+
+Clears the current session and returns `204 No Content`.
+
+#### `GET /api/v1/auth/me`
+
+Returns the current user or `401`.
+
 ### Repositories
 
 #### `GET /api/v1/organizations`
 
-Lists organizations visible in the active organization mode.
+Lists organizations owned by the current user. NoAuth returns all
+organizations.
 
 #### `POST /api/v1/organizations`
 
-Creates an organization in multi mode. Returns `409` in single mode.
+Creates an organization owned by the current user. Returns `409` in NoAuth
+single mode.
 
 #### `GET /api/v1/organizations/{organization}`
 
@@ -113,6 +146,8 @@ Merge conflicts and attempts to merge a closed or already merged pull request re
 ## Git Smart-HTTP
 
 Git operations use `/api/git/<organization>/<repository>.git/`.
+They remain public in this version, including push, and do not use the REST
+cookie session.
 
 ### `GET /api/git/<organization>/<repository>.git/info/refs?service=<service>`
 

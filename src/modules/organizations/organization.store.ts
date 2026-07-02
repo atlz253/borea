@@ -9,9 +9,13 @@ import {
 } from "./schemas";
 
 export interface OrganizationStore {
-	create(input: { name: string; description?: string }): Promise<Organization>;
-	list(): Promise<Organization[]>;
-	get(name: string): Promise<Organization | undefined>;
+	create(input: {
+		name: string;
+		description?: string;
+		ownerId?: string;
+	}): Promise<Organization & { ownerId?: string }>;
+	list(): Promise<Array<Organization & { ownerId?: string }>>;
+	get(name: string): Promise<(Organization & { ownerId?: string }) | undefined>;
 }
 
 function resolveOrganizationPath(basePath: string, name: string): string {
@@ -34,7 +38,8 @@ export class FileSystemOrganizationStore implements OrganizationStore {
 	async create(input: {
 		name: string;
 		description?: string;
-	}): Promise<Organization> {
+		ownerId?: string;
+	}): Promise<Organization & { ownerId?: string }> {
 		const organizationPath = resolveOrganizationPath(this.basePath, input.name);
 		const metadataPath = path.join(organizationPath, "organization.json");
 		if (existsSync(metadataPath)) {
@@ -51,11 +56,18 @@ export class FileSystemOrganizationStore implements OrganizationStore {
 			description: input.description || undefined,
 			createdAt: new Date(),
 		};
+		const storedOrganization = {
+			...organization,
+			...(input.ownerId ? { ownerId: input.ownerId } : {}),
+		};
 		const temporaryPath = path.join(organizationPath, "organization.tmp");
 		await writeFile(
 			temporaryPath,
 			JSON.stringify(
-				{ ...organization, createdAt: organization.createdAt.toISOString() },
+				{
+					...storedOrganization,
+					createdAt: organization.createdAt.toISOString(),
+				},
 				null,
 				"\t",
 			),
@@ -69,10 +81,10 @@ export class FileSystemOrganizationStore implements OrganizationStore {
 			}
 			throw error;
 		}
-		return organization;
+		return storedOrganization;
 	}
 
-	async list(): Promise<Organization[]> {
+	async list(): Promise<Array<Organization & { ownerId?: string }>> {
 		await mkdir(this.basePath, { recursive: true });
 		const entries = await readdir(this.basePath, { withFileTypes: true });
 		const organizations = await Promise.all(

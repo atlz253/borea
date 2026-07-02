@@ -2,6 +2,11 @@
 
 Nirvana supports standard Git operations over HTTP — you can clone repositories and push your changes just like with GitHub, GitLab, or any other Git hosting service.
 
+> Git smart-HTTP is currently public in both authentication modes. Clone,
+> fetch, and push do not validate the web session. Do not use it for
+> confidential repositories until Git authentication and repository visibility
+> are implemented.
+
 ## Cloning a Repository
 
 1. Open the repository page in Nirvana (e.g., `http://localhost:3000/organizations/default/repositories/my-project`).

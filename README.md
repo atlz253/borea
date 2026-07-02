@@ -28,8 +28,13 @@ Nirvana is a platform project, built as a modular monolith with provider-based a
 
 ```bash
 npm install
+set SESSION_SECRET=replace-with-at-least-32-characters
 npm run dev      # http://localhost:3000
 ```
+
+PowerShell users can set the variable with
+`$env:SESSION_SECRET="replace-with-at-least-32-characters"`. Use
+`AUTH_MODE=noauth` for an explicit development-only fixed-user mode.
 
 ### Prerequisites
 
@@ -89,7 +94,7 @@ nirvana/
 │   ├── components/                 # Shared UI components (AppShellLayout, Header, Footer, Sidebar)
 │   ├── modules/                    # Domain modules
 │   │   ├── git/                    # GitProvider, smart-HTTP service, CLI provider
-│   │   ├── auth/                   # AuthProvider interface + NoAuthProvider
+│   │   ├── auth/                   # File authentication, sessions, user store, NoAuth
 │   │   ├── repositories/           # Repository listing, file tree, pages, server functions
 │   │   └── pull-requests/          # Pull/merge request services, storage, and UI
 │   ├── platform/                   # Cross-domain infrastructure
@@ -162,7 +167,8 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 - **File tree browsing** — navigate repository files with breadcrumbs and directory listing (✅)
 - **Commit history** — table view of commits with branch context (✅)
 - **Pull request review progress** — persistent Viewed marks collapse reviewed file diffs (✅)
-- **NoAuth mode** for MVP — all actions performed on behalf of a fixed user; blocked in production unless explicitly enabled
+- **File authentication** — registration, login, encrypted cookie sessions, and owner-scoped organizations
+- **NoAuth mode** — explicit fixed-user development mode; blocked in production unless enabled
 - **REST API v1** — repository and pull request operations with OpenAPI 3.1 (✅)
 
 See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/README.md) for details.
@@ -176,7 +182,7 @@ See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/README.md) fo
   - ✅ REST API v1 with OpenAPI 3.1
   - 🔲 Docker deployment
   - 🔲 Complete documentation (in progress)
-- **v0.2.0 — Authentication:** auth module, user registration/login, basic access control
+- **v0.2.0 — Authentication:** file-backed registration/login and organization ownership implemented; profiles and richer access control remain
 - **Future:** issue tracking, wiki, CI/CD integrations, OAuth/LDAP
 
 ## License

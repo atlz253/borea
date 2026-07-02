@@ -22,6 +22,7 @@ This directory contains Architecture Decision Records (ADRs) for Nirvana. Each A
 | 0016 | [Pull Request Viewed Files](0016-pull-request-viewed-files.md) | Persistent path-based Viewed state for pull request files in NoAuth mode |
 | 0017 | [REST API v1](0017-rest-api-v1.md) | Versioned repository and pull request REST API with typed errors and OpenAPI 3.1 |
 | 0018 | [Organizations and Repository Namespaces](0018-organizations-and-repository-namespaces.md) | Organization domain module, namespaced repositories, and single-organization mode |
+| 0019 | [File Authentication and Organization Ownership](0019-file-authentication-and-organization-ownership.md) | File-backed users, cookie sessions, NoAuth compatibility, and owner-scoped organizations |
 
 ## Adding a New ADR
 

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { assertSameOriginFn } from "#/modules/auth";
 import { gitProvider } from "#/modules/git";
 import {
 	organizationNameSchema,
@@ -62,6 +63,7 @@ export const getRepositoryFn = createServerFn({ method: "GET" })
 export const createRepositoryFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => createRepositorySchema.parse(data))
 	.handler(async ({ data }) => {
+		await assertSameOriginFn();
 		await requireOrganization(data.organizationName);
 		return createRepository(gitProvider, data);
 	});
@@ -83,6 +85,7 @@ const pullRequestDataDeleter = {
 export const deleteRepositoryFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => deleteRepositorySchema.parse(data))
 	.handler(async ({ data }) => {
+		await assertSameOriginFn();
 		await requireOrganization(data.organizationName);
 		await deleteRepository(gitProvider, pullRequestDataDeleter, locator(data));
 	});
@@ -90,6 +93,7 @@ export const deleteRepositoryFn = createServerFn({ method: "POST" })
 export const deleteRepositoryApiFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => repositoryLocatorSchema.parse(data))
 	.handler(async ({ data }) => {
+		await assertSameOriginFn();
 		await requireOrganization(data.organizationName);
 		await deleteRepository(gitProvider, pullRequestDataDeleter, locator(data));
 	});
@@ -124,6 +128,7 @@ export const listBranchesFn = createServerFn({ method: "GET" })
 export const createBranchFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => createBranchSchema.parse(data))
 	.handler(async ({ data }) => {
+		await assertSameOriginFn();
 		await requireOrganization(data.organizationName);
 		return createRepositoryBranch(
 			gitProvider,

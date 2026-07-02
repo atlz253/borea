@@ -15,6 +15,7 @@
 - [Using Repository Pages](repository-page.md) — how to browse repositories, files, and commit history
 - [Pull Request Code Review](code-review.md) — how to mark changed files as viewed
 - [NoAuth Mode](security/noauth-mode.md) — what NoAuth is, risks, and how to configure it
+- [Authentication](security/authentication.md) — accounts, sessions, organization ownership, and configuration
 
 ## API Reference
 

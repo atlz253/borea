@@ -21,6 +21,7 @@ export default defineConfig({
 		reuseExistingServer: false,
 		timeout: 120_000,
 		env: {
+			AUTH_MODE: "noauth",
 			DISABLE_HMR_OVERLAY: "1",
 			ORGANIZATION_MODE: "multi",
 			ORGANIZATIONS_PATH: "./data/e2e-organizations/organizations",

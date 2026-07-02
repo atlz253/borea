@@ -15,8 +15,9 @@
     "format": "biome format",
     "lint": "biome lint",
     "check": "biome check",
-    "test:e2e": "playwright test && playwright test --config playwright.organizations.config.ts",
+    "test:e2e": "playwright test && playwright test --config playwright.organizations.config.ts && playwright test --config playwright.auth.config.ts",
     "test:e2e:organizations": "playwright test --config playwright.organizations.config.ts",
+    "test:e2e:auth": "playwright test --config playwright.auth.config.ts",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:install": "playwright install"
   },

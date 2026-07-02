@@ -9,12 +9,24 @@ import {
 import { render, screen } from "@testing-library/react";
 import Header from "./Header";
 
+const USER = {
+	id: "00000000-0000-4000-8000-000000000001",
+	name: "Test User",
+	email: "test@example.com",
+	createdAt: new Date(0).toISOString(),
+};
+
 async function renderHeader() {
 	const rootRoute = createRootRoute({
 		component: () => (
 			<AppShell header={{ height: 56 }}>
 				<AppShell.Header>
-					<Header opened={false} onBurgerClick={() => {}} />
+					<Header
+						opened={false}
+						onBurgerClick={() => {}}
+						user={USER}
+						authMode="full"
+					/>
 				</AppShell.Header>
 			</AppShell>
 		),

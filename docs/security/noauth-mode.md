@@ -23,15 +23,15 @@ Since NoAuth mode requires no credentials:
 
 ## How to Enable and Disable
 
-By default, Nirvana runs in NoAuth mode when `NODE_ENV` is set to anything other than `production`.
-
-### Development (default)
+Full authentication is the default. Enable NoAuth explicitly:
 
 ```bash
-NODE_ENV=development
+AUTH_MODE=noauth
+DEFAULT_USER_NAME=anonymous
 ```
 
-NoAuth mode is allowed. No warnings.
+NoAuth does not display the sign-in or registration flow. The fixed user can
+access all organizations, including ownerless legacy data.
 
 ### Production
 
@@ -51,15 +51,14 @@ Even with the override, a warning is logged on every startup:
 WARNING: Running in NoAuth mode in production. This is insecure!
 ```
 
-## Future
+## Organization Mode
 
-NoAuth mode will be replaced with a proper authentication system (`AuthProvider`) in a future version (v0.2.0), supporting custom registration, OAuth, LDAP, and access control.
-
-Organization mode is independent from authentication.
-`ORGANIZATION_MODE=single` exposes only the fixed `default` organization,
-while `multi` exposes all organizations. Neither mode adds access control.
+`ORGANIZATION_MODE=single` is supported only in NoAuth mode and exposes the
+fixed `default` organization. Multi mode exposes every organization because
+NoAuth intentionally bypasses ownership checks.
 
 ## Related
 
 - [Git HTTP operations](../git-http.md) — how clone and push work in NoAuth mode
+- [Authentication](authentication.md) — full authentication configuration and limitations
 - Technical Specification (`docs/MVP.md` §5.3, §8.4) — architecture of NoAuth mode and `NoAuthProvider`

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OrganizationsRouteImport } from './routes/organizations'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrganizationsIndexRouteImport } from './routes/organizations.index'
 import { Route as OrganizationsOrganizationIndexRouteImport } from './routes/organizations.$organization.index'
@@ -18,6 +19,10 @@ import { Route as ApiV1OpenapiDotjsonRouteImport } from './routes/api/v1/openapi
 import { Route as ApiGitSplatRouteImport } from './routes/api/git/$'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryRouteImport } from './routes/organizations.$organization.repositories.$repository'
 import { Route as ApiV1OrganizationsOrganizationRouteImport } from './routes/api/v1/organizations.$organization'
+import { Route as ApiV1AuthRegisterRouteImport } from './routes/api/v1/auth.register'
+import { Route as ApiV1AuthMeRouteImport } from './routes/api/v1/auth.me'
+import { Route as ApiV1AuthLogoutRouteImport } from './routes/api/v1/auth.logout'
+import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth.login'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositorySettingsRouteImport } from './routes/organizations.$organization.repositories.$repository.settings'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRouteImport } from './routes/api/v1/organizations.$organization.repositories'
@@ -40,6 +45,11 @@ import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryPullReques
 const OrganizationsRoute = OrganizationsRouteImport.update({
   id: '/organizations',
   path: '/organizations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -85,6 +95,26 @@ const ApiV1OrganizationsOrganizationRoute =
     path: '/$organization',
     getParentRoute: () => ApiV1OrganizationsRoute,
   } as any)
+const ApiV1AuthRegisterRoute = ApiV1AuthRegisterRouteImport.update({
+  id: '/api/v1/auth/register',
+  path: '/api/v1/auth/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthMeRoute = ApiV1AuthMeRouteImport.update({
+  id: '/api/v1/auth/me',
+  path: '/api/v1/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthLogoutRoute = ApiV1AuthLogoutRouteImport.update({
+  id: '/api/v1/auth/logout',
+  path: '/api/v1/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiV1AuthLoginRoute = ApiV1AuthLoginRouteImport.update({
+  id: '/api/v1/auth/login',
+  path: '/api/v1/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrganizationsOrganizationRepositoriesRepositoryIndexRoute =
   OrganizationsOrganizationRepositoriesRepositoryIndexRouteImport.update({
     id: '/',
@@ -229,12 +259,17 @@ const ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMerg
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/organizations': typeof OrganizationsRouteWithChildren
   '/organizations/': typeof OrganizationsIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
   '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
   '/api/v1/organizations': typeof ApiV1OrganizationsRouteWithChildren
   '/organizations/$organization/': typeof OrganizationsOrganizationIndexRoute
+  '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
+  '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
+  '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/register': typeof ApiV1AuthRegisterRoute
   '/api/v1/organizations/$organization': typeof ApiV1OrganizationsOrganizationRouteWithChildren
   '/organizations/$organization/repositories/$repository': typeof OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
@@ -258,11 +293,16 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/organizations': typeof OrganizationsIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
   '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
   '/api/v1/organizations': typeof ApiV1OrganizationsRouteWithChildren
   '/organizations/$organization': typeof OrganizationsOrganizationIndexRoute
+  '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
+  '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
+  '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/register': typeof ApiV1AuthRegisterRoute
   '/api/v1/organizations/$organization': typeof ApiV1OrganizationsOrganizationRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
   '/organizations/$organization/repositories/$repository/settings': typeof OrganizationsOrganizationRepositoriesRepositorySettingsRoute
@@ -284,12 +324,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/organizations': typeof OrganizationsRouteWithChildren
   '/organizations/': typeof OrganizationsIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
   '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
   '/api/v1/organizations': typeof ApiV1OrganizationsRouteWithChildren
   '/organizations/$organization/': typeof OrganizationsOrganizationIndexRoute
+  '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
+  '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
+  '/api/v1/auth/me': typeof ApiV1AuthMeRoute
+  '/api/v1/auth/register': typeof ApiV1AuthRegisterRoute
   '/api/v1/organizations/$organization': typeof ApiV1OrganizationsOrganizationRouteWithChildren
   '/organizations/$organization/repositories/$repository': typeof OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
@@ -315,12 +360,17 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/organizations'
     | '/organizations/'
     | '/api/git/$'
     | '/api/v1/openapi.json'
     | '/api/v1/organizations'
     | '/organizations/$organization/'
+    | '/api/v1/auth/login'
+    | '/api/v1/auth/logout'
+    | '/api/v1/auth/me'
+    | '/api/v1/auth/register'
     | '/api/v1/organizations/$organization'
     | '/organizations/$organization/repositories/$repository'
     | '/api/v1/organizations/$organization/repositories'
@@ -344,11 +394,16 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/organizations'
     | '/api/git/$'
     | '/api/v1/openapi.json'
     | '/api/v1/organizations'
     | '/organizations/$organization'
+    | '/api/v1/auth/login'
+    | '/api/v1/auth/logout'
+    | '/api/v1/auth/me'
+    | '/api/v1/auth/register'
     | '/api/v1/organizations/$organization'
     | '/api/v1/organizations/$organization/repositories'
     | '/organizations/$organization/repositories/$repository/settings'
@@ -369,12 +424,17 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/organizations'
     | '/organizations/'
     | '/api/git/$'
     | '/api/v1/openapi.json'
     | '/api/v1/organizations'
     | '/organizations/$organization/'
+    | '/api/v1/auth/login'
+    | '/api/v1/auth/logout'
+    | '/api/v1/auth/me'
+    | '/api/v1/auth/register'
     | '/api/v1/organizations/$organization'
     | '/organizations/$organization/repositories/$repository'
     | '/api/v1/organizations/$organization/repositories'
@@ -399,10 +459,15 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   OrganizationsRoute: typeof OrganizationsRouteWithChildren
   ApiGitSplatRoute: typeof ApiGitSplatRoute
   ApiV1OpenapiDotjsonRoute: typeof ApiV1OpenapiDotjsonRoute
   ApiV1OrganizationsRoute: typeof ApiV1OrganizationsRouteWithChildren
+  ApiV1AuthLoginRoute: typeof ApiV1AuthLoginRoute
+  ApiV1AuthLogoutRoute: typeof ApiV1AuthLogoutRoute
+  ApiV1AuthMeRoute: typeof ApiV1AuthMeRoute
+  ApiV1AuthRegisterRoute: typeof ApiV1AuthRegisterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -412,6 +477,13 @@ declare module '@tanstack/react-router' {
       path: '/organizations'
       fullPath: '/organizations'
       preLoaderRoute: typeof OrganizationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -469,6 +541,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/organizations/$organization'
       preLoaderRoute: typeof ApiV1OrganizationsOrganizationRouteImport
       parentRoute: typeof ApiV1OrganizationsRoute
+    }
+    '/api/v1/auth/register': {
+      id: '/api/v1/auth/register'
+      path: '/api/v1/auth/register'
+      fullPath: '/api/v1/auth/register'
+      preLoaderRoute: typeof ApiV1AuthRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/me': {
+      id: '/api/v1/auth/me'
+      path: '/api/v1/auth/me'
+      fullPath: '/api/v1/auth/me'
+      preLoaderRoute: typeof ApiV1AuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/logout': {
+      id: '/api/v1/auth/logout'
+      path: '/api/v1/auth/logout'
+      fullPath: '/api/v1/auth/logout'
+      preLoaderRoute: typeof ApiV1AuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/v1/auth/login': {
+      id: '/api/v1/auth/login'
+      path: '/api/v1/auth/login'
+      fullPath: '/api/v1/auth/login'
+      preLoaderRoute: typeof ApiV1AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/organizations/$organization/repositories/$repository/': {
       id: '/organizations/$organization/repositories/$repository/'
@@ -780,10 +880,15 @@ const ApiV1OrganizationsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   OrganizationsRoute: OrganizationsRouteWithChildren,
   ApiGitSplatRoute: ApiGitSplatRoute,
   ApiV1OpenapiDotjsonRoute: ApiV1OpenapiDotjsonRoute,
   ApiV1OrganizationsRoute: ApiV1OrganizationsRouteWithChildren,
+  ApiV1AuthLoginRoute: ApiV1AuthLoginRoute,
+  ApiV1AuthLogoutRoute: ApiV1AuthLogoutRoute,
+  ApiV1AuthMeRoute: ApiV1AuthMeRoute,
+  ApiV1AuthRegisterRoute: ApiV1AuthRegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

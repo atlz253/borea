@@ -30,10 +30,19 @@ vi.mock("./Footer", () => ({
 
 import AppShellLayout from "./AppShellLayout";
 
+const USER = {
+	id: "00000000-0000-4000-8000-000000000001",
+	name: "Test User",
+	email: "test@example.com",
+	createdAt: new Date(0).toISOString(),
+};
+
 function renderLayout(props: { children?: React.ReactNode } = {}) {
 	return render(
 		<MantineProvider>
-			<AppShellLayout>{props.children ?? <p>Content</p>}</AppShellLayout>
+			<AppShellLayout user={USER} authMode="full">
+				{props.children ?? <p>Content</p>}
+			</AppShellLayout>
 		</MantineProvider>,
 	);
 }

@@ -31,11 +31,19 @@ export const organizationSchema = z.object({
 	createdAt: z.date(),
 });
 
-export const organizationStorageSchema = organizationSchema.extend({
+export const organizationStorageSchema = z.object({
+	name: organizationNameSchema,
+	description: z.string().optional(),
+	createdAt: z.iso.datetime(),
+	ownerId: z.uuid().optional(),
+});
+
+export const organizationResponseSchema = z.object({
+	name: organizationNameSchema,
+	description: z.string().optional(),
 	createdAt: z.iso.datetime(),
 });
 
-export const organizationResponseSchema = organizationStorageSchema;
-
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>;
 export type Organization = z.infer<typeof organizationSchema>;
+export type StoredOrganization = z.infer<typeof organizationStorageSchema>;

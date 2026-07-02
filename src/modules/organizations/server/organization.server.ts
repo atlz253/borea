@@ -11,4 +11,10 @@ export const organizationMode = config.organizationMode;
 export const organizationService = createOrganizationService(
 	organizationStore,
 	organizationMode,
+	config.authMode === "noauth",
+);
+export const publicOrganizationService = createOrganizationService(
+	organizationStore,
+	organizationMode,
+	true,
 );

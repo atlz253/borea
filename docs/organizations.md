@@ -6,6 +6,8 @@ name can exist independently in different organizations.
 ## Organization List
 
 Open `/organizations` to view the organizations available to the current user.
+In full authentication mode this list contains only organizations created by
+that user. Organization names remain globally unique.
 The sidebar shows the five most recently created organizations. Use
 **Show more** to display the complete list and **Show less** to collapse it.
 
@@ -23,5 +25,5 @@ The sidebar initially shows the five most recently created repositories. Use
 **Repositories** heading to return to the current organization's repository
 list.
 
-In single-organization mode, `/organizations` redirects to the fixed `default`
-organization, so the sidebar opens directly in repository context.
+In NoAuth single-organization mode, `/organizations` redirects to the fixed
+`default` organization, so the sidebar opens directly in repository context.

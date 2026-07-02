@@ -1,5 +1,29 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import AppShellLayout from "#/components/AppShellLayout";
+import { getCurrentUserFn } from "#/modules/auth";
 
 export const Route = createFileRoute("/organizations")({
-	component: () => <Outlet />,
+	beforeLoad: async ({ location }) => {
+		const auth = await getCurrentUserFn();
+		if (!auth.user) {
+			throw redirect({
+				to: "/auth",
+				search: { redirect: location.href },
+			});
+		}
+		return auth;
+	},
+	component: OrganizationsLayout,
 });
+
+function OrganizationsLayout() {
+	const { authMode, user } = Route.useRouteContext();
+	if (!user) {
+		return null;
+	}
+	return (
+		<AppShellLayout user={user} authMode={authMode}>
+			<Outlet />
+		</AppShellLayout>
+	);
+}
