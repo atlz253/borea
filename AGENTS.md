@@ -44,6 +44,7 @@ npm run build       # Production build → dist/
 npm run test:coverage  # Unit tests with coverage report
 npm run lint        # Biome lint
 npm run format      # Biome format
+npm run typecheck   # TypeScript type checking
 ```
 
 ## Code Conventions
