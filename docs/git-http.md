@@ -4,8 +4,7 @@ Nirvana supports standard Git operations over HTTP — you can clone repositorie
 
 > Git smart-HTTP is currently public in both authentication modes. Clone,
 > fetch, and push do not validate the web session. Do not use it for
-> confidential repositories until Git authentication and repository visibility
-> are implemented.
+> confidential repositories until Git authentication is implemented.
 
 ## Cloning a Repository
 
@@ -47,7 +46,12 @@ Nirvana supports standard Git operations over HTTP — you can clone repositorie
 
 ## Authentication
 
-In the current MVP version, Nirvana runs in **NoAuth mode**: no login, password, or token is needed to clone or push. Anyone who can reach the server can access all repositories.
+Git smart-HTTP does not currently accept credentials. Anyone who knows a Git
+URL can clone, fetch, or push even when organization and repository roles
+restrict the UI and REST API.
+
+A future Git authentication change will require repository `read` for clone and
+fetch, and `write` for push.
 
 > **Important:** This is intended for development and testing only. Running NoAuth mode in production is insecure. See [NoAuth Mode](security/noauth-mode.md) for details and risks.
 

@@ -3,6 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Check, ChevronDown, GitBranch, GitBranchPlus } from "lucide-react";
 import { useState } from "react";
 import type { BranchInfo } from "#/modules/git";
+import { useRepositoryAccess } from "#/modules/organizations";
 import { createBranchFn } from "#/modules/repositories";
 
 interface BranchSwitcherProps {
@@ -24,6 +25,7 @@ export default function BranchSwitcher({
 	currentBlobPath,
 	toCommits,
 }: BranchSwitcherProps) {
+	const access = useRepositoryAccess();
 	const navigate = useNavigate();
 	const [opened, setOpened] = useState(false);
 	const [newBranchName, setNewBranchName] = useState("");
@@ -134,17 +136,21 @@ export default function BranchSwitcher({
 							<Text size="sm">{branch.name}</Text>
 						</Menu.Item>
 					))}
-					<Menu.Divider />
-					<Menu.Item
-						leftSection={<GitBranchPlus size={14} />}
-						onClick={() => {
-							setNewBranchName("");
-							setError(null);
-							setOpened(true);
-						}}
-					>
-						<Text size="sm">New branch</Text>
-					</Menu.Item>
+					{access.canWrite && (
+						<>
+							<Menu.Divider />
+							<Menu.Item
+								leftSection={<GitBranchPlus size={14} />}
+								onClick={() => {
+									setNewBranchName("");
+									setError(null);
+									setOpened(true);
+								}}
+							>
+								<Text size="sm">New branch</Text>
+							</Menu.Item>
+						</>
+					)}
 				</Menu.Dropdown>
 			</Menu>
 

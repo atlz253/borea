@@ -138,6 +138,7 @@ nirvana/
 - [Pull Request Code Review](docs/code-review.md) — how to mark changed files as viewed
 - [API Reference](API.md) — REST API v1 and Git smart-HTTP endpoints
 - [NoAuth Mode](docs/security/noauth-mode.md) — development-mode authentication
+- [Access Control](docs/security/access-control.md) — organization roles and repository grants
 - [Contributing Guide](CONTRIBUTING.md) — how to contribute
 
 ### Architecture Decision Records
@@ -156,6 +157,7 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 | 0008 | Git Smart-HTTP Push |
 | 0009 | Commit History |
 | 0017 | REST API v1 |
+| 0021 | Organization and Repository Access Control |
 
 ## Architecture (summary)
 
@@ -168,6 +170,7 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 - **Commit history** — table view of commits with branch context (✅)
 - **Pull request review progress** — persistent Viewed marks collapse reviewed file diffs (✅)
 - **File authentication** — registration, login, encrypted cookie sessions, and owner-scoped organizations
+- **Role-based access control** — organization roles, private repository grants, and owner-managed settings
 - **NoAuth mode** — explicit fixed-user development mode; blocked in production unless enabled
 - **REST API v1** — repository and pull request operations with OpenAPI 3.1 (✅)
 
@@ -182,7 +185,7 @@ See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/README.md) fo
   - ✅ REST API v1 with OpenAPI 3.1
   - 🔲 Docker deployment
   - 🔲 Complete documentation (in progress)
-- **v0.2.0 — Authentication:** file-backed registration/login and organization ownership implemented; profiles and richer access control remain
+- **v0.2.0 — Authentication:** file-backed registration/login, organization roles, and repository access control implemented; profiles remain
 - **Future:** issue tracking, wiki, CI/CD integrations, OAuth/LDAP
 
 ## License

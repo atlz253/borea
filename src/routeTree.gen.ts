@@ -31,6 +31,7 @@ import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsIndexRoute
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsNewRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.new'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.$pullId'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository'
+import { Route as ApiV1OrganizationsOrganizationMembersUserIdRouteImport } from './routes/api/v1/organizations.$organization.members.$userId'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.$pullId.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.commits'
@@ -38,9 +39,11 @@ import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchSplat
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsPullIdFilesRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.$pullId.files'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryBlobBranchSplatRouteImport } from './routes/organizations.$organization.repositories.$repository.blob.$branch.$'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository.pull-requests'
+import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository.members'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.commits.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.commits.$sha'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository.pull-requests.$pullId'
+import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository.members.$userId'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMergeRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository.pull-requests.$pullId.merge'
 
 const OrganizationsRoute = OrganizationsRouteImport.update({
@@ -164,6 +167,12 @@ const ApiV1OrganizationsOrganizationRepositoriesRepositoryRoute =
     path: '/$repository',
     getParentRoute: () => ApiV1OrganizationsOrganizationRepositoriesRoute,
   } as any)
+const ApiV1OrganizationsOrganizationMembersUserIdRoute =
+  ApiV1OrganizationsOrganizationMembersUserIdRouteImport.update({
+    id: '/$userId',
+    path: '/$userId',
+    getParentRoute: () => ApiV1OrganizationsOrganizationMembersRoute,
+  } as any)
 const OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRoute =
   OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRouteImport.update(
     {
@@ -227,6 +236,15 @@ const ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRoute =
         ApiV1OrganizationsOrganizationRepositoriesRepositoryRoute,
     } as any,
   )
+const ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRoute =
+  ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteImport.update(
+    {
+      id: '/members',
+      path: '/members',
+      getParentRoute: () =>
+        ApiV1OrganizationsOrganizationRepositoriesRepositoryRoute,
+    } as any,
+  )
 const OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute =
   OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRouteImport.update(
     {
@@ -254,6 +272,15 @@ const ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRout
         ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRoute,
     } as any,
   )
+const ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute =
+  ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRouteImport.update(
+    {
+      id: '/$userId',
+      path: '/$userId',
+      getParentRoute: () =>
+        ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRoute,
+    } as any,
+  )
 const ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMergeRoute =
   ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMergeRouteImport.update(
     {
@@ -279,14 +306,16 @@ export interface FileRoutesByFullPath {
   '/api/v1/auth/register': typeof ApiV1AuthRegisterRoute
   '/api/v1/organizations/$organization': typeof ApiV1OrganizationsOrganizationRouteWithChildren
   '/organizations/$organization/repositories/$repository': typeof OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
-  '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRoute
+  '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
   '/organizations/$organization/repositories/$repository/settings': typeof OrganizationsOrganizationRepositoriesRepositorySettingsRoute
   '/organizations/$organization/repositories/$repository/': typeof OrganizationsOrganizationRepositoriesRepositoryIndexRoute
+  '/api/v1/organizations/$organization/members/$userId': typeof ApiV1OrganizationsOrganizationMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/$pullId': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/new': typeof OrganizationsOrganizationRepositoriesRepositoryPullsNewRoute
   '/organizations/$organization/repositories/$repository/pulls/': typeof OrganizationsOrganizationRepositoriesRepositoryPullsIndexRoute
+  '/api/v1/organizations/$organization/repositories/$repository/members': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteWithChildren
   '/organizations/$organization/repositories/$repository/blob/$branch/$': typeof OrganizationsOrganizationRepositoriesRepositoryBlobBranchSplatRoute
   '/organizations/$organization/repositories/$repository/pulls/$pullId/files': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdFilesRoute
@@ -294,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/organizations/$organization/repositories/$repository/tree/$branch/commits': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/$pullId/': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRoute
+  '/api/v1/organizations/$organization/repositories/$repository/members/$userId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteWithChildren
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute
@@ -312,19 +342,22 @@ export interface FileRoutesByTo {
   '/api/v1/auth/me': typeof ApiV1AuthMeRoute
   '/api/v1/auth/register': typeof ApiV1AuthRegisterRoute
   '/api/v1/organizations/$organization': typeof ApiV1OrganizationsOrganizationRouteWithChildren
-  '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRoute
+  '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
   '/organizations/$organization/repositories/$repository/settings': typeof OrganizationsOrganizationRepositoriesRepositorySettingsRoute
   '/organizations/$organization/repositories/$repository': typeof OrganizationsOrganizationRepositoriesRepositoryIndexRoute
+  '/api/v1/organizations/$organization/members/$userId': typeof ApiV1OrganizationsOrganizationMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/new': typeof OrganizationsOrganizationRepositoriesRepositoryPullsNewRoute
   '/organizations/$organization/repositories/$repository/pulls': typeof OrganizationsOrganizationRepositoriesRepositoryPullsIndexRoute
+  '/api/v1/organizations/$organization/repositories/$repository/members': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteWithChildren
   '/organizations/$organization/repositories/$repository/blob/$branch/$': typeof OrganizationsOrganizationRepositoriesRepositoryBlobBranchSplatRoute
   '/organizations/$organization/repositories/$repository/pulls/$pullId/files': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdFilesRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/$': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchSplatRoute
   '/organizations/$organization/repositories/$repository/pulls/$pullId': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRoute
   '/organizations/$organization/repositories/$repository/tree/$branch': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRoute
+  '/api/v1/organizations/$organization/repositories/$repository/members/$userId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteWithChildren
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute
@@ -346,14 +379,16 @@ export interface FileRoutesById {
   '/api/v1/auth/register': typeof ApiV1AuthRegisterRoute
   '/api/v1/organizations/$organization': typeof ApiV1OrganizationsOrganizationRouteWithChildren
   '/organizations/$organization/repositories/$repository': typeof OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
-  '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRoute
+  '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
   '/organizations/$organization/repositories/$repository/settings': typeof OrganizationsOrganizationRepositoriesRepositorySettingsRoute
   '/organizations/$organization/repositories/$repository/': typeof OrganizationsOrganizationRepositoriesRepositoryIndexRoute
+  '/api/v1/organizations/$organization/members/$userId': typeof ApiV1OrganizationsOrganizationMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/$pullId': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/new': typeof OrganizationsOrganizationRepositoriesRepositoryPullsNewRoute
   '/organizations/$organization/repositories/$repository/pulls/': typeof OrganizationsOrganizationRepositoriesRepositoryPullsIndexRoute
+  '/api/v1/organizations/$organization/repositories/$repository/members': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteWithChildren
   '/organizations/$organization/repositories/$repository/blob/$branch/$': typeof OrganizationsOrganizationRepositoriesRepositoryBlobBranchSplatRoute
   '/organizations/$organization/repositories/$repository/pulls/$pullId/files': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdFilesRoute
@@ -361,6 +396,7 @@ export interface FileRoutesById {
   '/organizations/$organization/repositories/$repository/tree/$branch/commits': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/$pullId/': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRoute
+  '/api/v1/organizations/$organization/repositories/$repository/members/$userId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteWithChildren
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute
@@ -387,10 +423,12 @@ export interface FileRouteTypes {
     | '/api/v1/organizations/$organization/repositories'
     | '/organizations/$organization/repositories/$repository/settings'
     | '/organizations/$organization/repositories/$repository/'
+    | '/api/v1/organizations/$organization/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId'
     | '/organizations/$organization/repositories/$repository/pulls/new'
     | '/organizations/$organization/repositories/$repository/pulls/'
+    | '/api/v1/organizations/$organization/repositories/$repository/members'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests'
     | '/organizations/$organization/repositories/$repository/blob/$branch/$'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/files'
@@ -398,6 +436,7 @@ export interface FileRouteTypes {
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/'
     | '/organizations/$organization/repositories/$repository/tree/$branch/'
+    | '/api/v1/organizations/$organization/repositories/$repository/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/'
@@ -420,15 +459,18 @@ export interface FileRouteTypes {
     | '/api/v1/organizations/$organization/repositories'
     | '/organizations/$organization/repositories/$repository/settings'
     | '/organizations/$organization/repositories/$repository'
+    | '/api/v1/organizations/$organization/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository'
     | '/organizations/$organization/repositories/$repository/pulls/new'
     | '/organizations/$organization/repositories/$repository/pulls'
+    | '/api/v1/organizations/$organization/repositories/$repository/members'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests'
     | '/organizations/$organization/repositories/$repository/blob/$branch/$'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/files'
     | '/organizations/$organization/repositories/$repository/tree/$branch/$'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId'
     | '/organizations/$organization/repositories/$repository/tree/$branch'
+    | '/api/v1/organizations/$organization/repositories/$repository/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits'
@@ -453,10 +495,12 @@ export interface FileRouteTypes {
     | '/api/v1/organizations/$organization/repositories'
     | '/organizations/$organization/repositories/$repository/settings'
     | '/organizations/$organization/repositories/$repository/'
+    | '/api/v1/organizations/$organization/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId'
     | '/organizations/$organization/repositories/$repository/pulls/new'
     | '/organizations/$organization/repositories/$repository/pulls/'
+    | '/api/v1/organizations/$organization/repositories/$repository/members'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests'
     | '/organizations/$organization/repositories/$repository/blob/$branch/$'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/files'
@@ -464,6 +508,7 @@ export interface FileRouteTypes {
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/'
     | '/organizations/$organization/repositories/$repository/tree/$branch/'
+    | '/api/v1/organizations/$organization/repositories/$repository/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/'
@@ -639,6 +684,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteImport
       parentRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRoute
     }
+    '/api/v1/organizations/$organization/members/$userId': {
+      id: '/api/v1/organizations/$organization/members/$userId'
+      path: '/$userId'
+      fullPath: '/api/v1/organizations/$organization/members/$userId'
+      preLoaderRoute: typeof ApiV1OrganizationsOrganizationMembersUserIdRouteImport
+      parentRoute: typeof ApiV1OrganizationsOrganizationMembersRoute
+    }
     '/organizations/$organization/repositories/$repository/tree/$branch/': {
       id: '/organizations/$organization/repositories/$repository/tree/$branch/'
       path: '/tree/$branch'
@@ -688,6 +740,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteImport
       parentRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRoute
     }
+    '/api/v1/organizations/$organization/repositories/$repository/members': {
+      id: '/api/v1/organizations/$organization/repositories/$repository/members'
+      path: '/members'
+      fullPath: '/api/v1/organizations/$organization/repositories/$repository/members'
+      preLoaderRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteImport
+      parentRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRoute
+    }
     '/organizations/$organization/repositories/$repository/tree/$branch/commits/': {
       id: '/organizations/$organization/repositories/$repository/tree/$branch/commits/'
       path: '/'
@@ -708,6 +767,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId'
       preLoaderRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteImport
       parentRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRoute
+    }
+    '/api/v1/organizations/$organization/repositories/$repository/members/$userId': {
+      id: '/api/v1/organizations/$organization/repositories/$repository/members/$userId'
+      path: '/$userId'
+      fullPath: '/api/v1/organizations/$organization/repositories/$repository/members/$userId'
+      preLoaderRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRouteImport
+      parentRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRoute
     }
     '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge': {
       id: '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge'
@@ -811,6 +877,36 @@ const OrganizationsRouteWithChildren = OrganizationsRoute._addFileChildren(
   OrganizationsRouteChildren,
 )
 
+interface ApiV1OrganizationsOrganizationMembersRouteChildren {
+  ApiV1OrganizationsOrganizationMembersUserIdRoute: typeof ApiV1OrganizationsOrganizationMembersUserIdRoute
+}
+
+const ApiV1OrganizationsOrganizationMembersRouteChildren: ApiV1OrganizationsOrganizationMembersRouteChildren =
+  {
+    ApiV1OrganizationsOrganizationMembersUserIdRoute:
+      ApiV1OrganizationsOrganizationMembersUserIdRoute,
+  }
+
+const ApiV1OrganizationsOrganizationMembersRouteWithChildren =
+  ApiV1OrganizationsOrganizationMembersRoute._addFileChildren(
+    ApiV1OrganizationsOrganizationMembersRouteChildren,
+  )
+
+interface ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteChildren {
+  ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute
+}
+
+const ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteChildren: ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteChildren =
+  {
+    ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute:
+      ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute,
+  }
+
+const ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteWithChildren =
+  ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRoute._addFileChildren(
+    ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteChildren,
+  )
+
 interface ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteChildren {
   ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMergeRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMergeRoute
 }
@@ -842,11 +938,14 @@ const ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteWithC
   )
 
 interface ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteChildren {
+  ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteWithChildren
   ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteWithChildren
 }
 
 const ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteChildren: ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteChildren =
   {
+    ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRoute:
+      ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteWithChildren,
     ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRoute:
       ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteWithChildren,
   }
@@ -872,14 +971,14 @@ const ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren =
   )
 
 interface ApiV1OrganizationsOrganizationRouteChildren {
-  ApiV1OrganizationsOrganizationMembersRoute: typeof ApiV1OrganizationsOrganizationMembersRoute
+  ApiV1OrganizationsOrganizationMembersRoute: typeof ApiV1OrganizationsOrganizationMembersRouteWithChildren
   ApiV1OrganizationsOrganizationRepositoriesRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
 }
 
 const ApiV1OrganizationsOrganizationRouteChildren: ApiV1OrganizationsOrganizationRouteChildren =
   {
     ApiV1OrganizationsOrganizationMembersRoute:
-      ApiV1OrganizationsOrganizationMembersRoute,
+      ApiV1OrganizationsOrganizationMembersRouteWithChildren,
     ApiV1OrganizationsOrganizationRepositoriesRoute:
       ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren,
   }

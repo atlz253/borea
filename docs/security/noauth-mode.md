@@ -31,7 +31,8 @@ DEFAULT_USER_NAME=anonymous
 ```
 
 NoAuth does not display the sign-in or registration flow. The fixed user can
-access all organizations, including ownerless legacy data.
+access all organizations and repositories. Organization membership and
+repository-grant controls are hidden because access checks are bypassed.
 
 ### Production
 
@@ -55,10 +56,11 @@ WARNING: Running in NoAuth mode in production. This is insecure!
 
 `ORGANIZATION_MODE=single` is supported only in NoAuth mode and exposes the
 fixed `default` organization. Multi mode exposes every organization because
-NoAuth intentionally bypasses ownership checks.
+NoAuth intentionally bypasses role and grant checks.
 
 ## Related
 
 - [Git HTTP operations](../git-http.md) — how clone and push work in NoAuth mode
 - [Authentication](authentication.md) — full authentication configuration and limitations
+- [Access Control](access-control.md) — role enforcement used outside NoAuth
 - Technical Specification (`docs/MVP.md` §5.3, §8.4) — architecture of NoAuth mode and `NoAuthProvider`

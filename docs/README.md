@@ -16,6 +16,7 @@
 - [Pull Request Code Review](code-review.md) — how to mark changed files as viewed
 - [NoAuth Mode](security/noauth-mode.md) — what NoAuth is, risks, and how to configure it
 - [Authentication](security/authentication.md) — accounts, sessions, organization ownership, and configuration
+- [Access Control](security/access-control.md) — organization roles, repository grants, and enforcement boundaries
 
 ## API Reference
 

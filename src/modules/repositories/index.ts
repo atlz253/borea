@@ -27,6 +27,7 @@ export {
 	countCommitsFn,
 	createBranchFn,
 	createRepositoryFn,
+	deleteOrganizationRepositoriesFn,
 	deleteRepositoryApiFn,
 	deleteRepositoryFn,
 	getCommitDiffFn,

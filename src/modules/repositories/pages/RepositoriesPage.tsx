@@ -15,11 +15,13 @@ import type { Repository } from "../schemas";
 import { createRepositoryFn } from "../server/repository.functions";
 
 interface RepositoriesPageProps {
+	canCreate?: boolean;
 	organizationName?: string;
 	repositories: Repository[];
 }
 
 export default function RepositoriesPage({
+	canCreate = true,
 	organizationName = "default",
 	repositories,
 }: RepositoriesPageProps) {
@@ -60,17 +62,19 @@ export default function RepositoriesPage({
 					</Text>
 					<Title order={1}>{organizationName}</Title>
 				</div>
-				<Button
-					leftSection={<Plus size={16} />}
-					onClick={() => setShowForm(true)}
-				>
-					New repository
-				</Button>
+				{canCreate && (
+					<Button
+						leftSection={<Plus size={16} />}
+						onClick={() => setShowForm(true)}
+					>
+						New repository
+					</Button>
+				)}
 			</Group>
 
 			<RepositoryList repositories={repositories} />
 
-			{showForm && (
+			{canCreate && showForm && (
 				<Box
 					mt="lg"
 					p="md"

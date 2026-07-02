@@ -6,10 +6,21 @@ import {
 	useNavigate,
 	useRouterState,
 } from "@tanstack/react-router";
+import {
+	getRepositoryAccessFn,
+	RepositoryAccessProvider,
+} from "#/modules/organizations";
 
 export const Route = createFileRoute(
 	"/organizations/$organization/repositories/$repository",
 )({
+	loader: ({ params }) =>
+		getRepositoryAccessFn({
+			data: {
+				organizationName: params.organization,
+				repositoryName: params.repository,
+			},
+		}),
 	component: RepositoryLayout,
 });
 
@@ -20,6 +31,7 @@ const LINK_STYLE = {
 
 function RepositoryLayout() {
 	const { organization, repository } = Route.useParams();
+	const access = Route.useLoaderData();
 	const navigate = useNavigate();
 	const location = useRouterState({ select: (s) => s.location });
 
@@ -72,22 +84,26 @@ function RepositoryLayout() {
 						>
 							Pull requests
 						</Tabs.Tab>
-						<Tabs.Tab
-							value="settings"
-							onClick={() =>
-								navigate({
-									to: "/organizations/$organization/repositories/$repository/settings",
-									params: { organization, repository },
-								})
-							}
-						>
-							Settings
-						</Tabs.Tab>
+						{(access.canManageAccess || access.canDelete) && (
+							<Tabs.Tab
+								value="settings"
+								onClick={() =>
+									navigate({
+										to: "/organizations/$organization/repositories/$repository/settings",
+										params: { organization, repository },
+									})
+								}
+							>
+								Settings
+							</Tabs.Tab>
+						)}
 					</Tabs.List>
 				</Tabs>
 			</Container>
 
-			<Outlet />
+			<RepositoryAccessProvider access={access}>
+				<Outlet />
+			</RepositoryAccessProvider>
 		</>
 	);
 }

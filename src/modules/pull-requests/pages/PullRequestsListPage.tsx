@@ -1,6 +1,7 @@
 import { Button, Container, Group, Stack, Text, Title } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { GitPullRequest, Plus } from "lucide-react";
+import { useRepositoryAccess } from "#/modules/organizations";
 import PullRequestList from "../components/PullRequestList";
 import type { PullRequest } from "../schemas";
 
@@ -15,6 +16,7 @@ export default function PullRequestsListPage({
 	repoName,
 	pullRequests,
 }: PullRequestsListPageProps) {
+	const access = useRepositoryAccess();
 	const openCount = pullRequests.filter((pr) => pr.status === "open").length;
 
 	return (
@@ -28,15 +30,17 @@ export default function PullRequestsListPage({
 						</Text>
 					)}
 				</Stack>
-				<Link
-					to="/organizations/$organization/repositories/$repository/pulls/new"
-					params={{
-						organization: organizationName,
-						repository: repoName,
-					}}
-				>
-					<Button leftSection={<Plus size={16} />}>New pull request</Button>
-				</Link>
+				{access.canWrite && (
+					<Link
+						to="/organizations/$organization/repositories/$repository/pulls/new"
+						params={{
+							organization: organizationName,
+							repository: repoName,
+						}}
+					>
+						<Button leftSection={<Plus size={16} />}>New pull request</Button>
+					</Link>
+				)}
 			</Group>
 
 			{pullRequests.length === 0 ? (

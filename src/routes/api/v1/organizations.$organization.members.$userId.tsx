@@ -1,34 +1,31 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 import {
-	deleteOrganizationFn,
-	getOrganizationFn,
 	organizationNameSchema,
-	updateOrganizationFn,
-	updateOrganizationSchema,
+	removeOrganizationMemberFn,
+	updateOrganizationMemberRoleFn,
+	updateOrganizationMemberRoleSchema,
 } from "#/modules/organizations";
 import { handleApiRequest, parseJsonBody } from "#/platform/http";
 
-export const Route = createFileRoute("/api/v1/organizations/$organization")({
+export const Route = createFileRoute(
+	"/api/v1/organizations/$organization/members/$userId",
+)({
 	server: {
 		handlers: {
-			GET: async ({ params }) =>
-				handleApiRequest(async () => {
-					const organizationName = organizationNameSchema.parse(
-						params.organization,
-					);
-					return Response.json(
-						await getOrganizationFn({ data: { organizationName } }),
-					);
-				}),
 			PATCH: async ({ params, request }) =>
 				handleApiRequest(async () => {
 					const organizationName = organizationNameSchema.parse(
 						params.organization,
 					);
-					const input = await parseJsonBody(request, updateOrganizationSchema);
+					const userId = z.uuid().parse(params.userId);
+					const input = await parseJsonBody(
+						request,
+						updateOrganizationMemberRoleSchema,
+					);
 					return Response.json(
-						await updateOrganizationFn({
-							data: { organizationName, description: input.description },
+						await updateOrganizationMemberRoleFn({
+							data: { organizationName, userId, role: input.role },
 						}),
 					);
 				}),
@@ -37,7 +34,10 @@ export const Route = createFileRoute("/api/v1/organizations/$organization")({
 					const organizationName = organizationNameSchema.parse(
 						params.organization,
 					);
-					await deleteOrganizationFn({ data: { organizationName } });
+					const userId = z.uuid().parse(params.userId);
+					await removeOrganizationMemberFn({
+						data: { organizationName, userId },
+					});
 					return new Response(null, { status: 204 });
 				}),
 		},

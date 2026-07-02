@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
 	ConflictError,
+	ForbiddenError,
 	NotFoundError,
 	ValidationError,
 } from "#/platform/errors";
@@ -10,6 +11,7 @@ import { handleApiRequest, parseJsonBody } from ".";
 describe("handleApiRequest", () => {
 	it.each([
 		[new ValidationError("invalid"), 400, "validation_error"],
+		[new ForbiddenError("denied"), 403, "forbidden"],
 		[new NotFoundError("missing"), 404, "not_found"],
 		[new ConflictError("conflict"), 409, "conflict"],
 	])("maps typed errors to JSON responses", async (error, status, code) => {

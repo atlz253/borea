@@ -13,6 +13,7 @@ import { AlertCircle, GitPullRequest } from "lucide-react";
 import { useEffect, useState } from "react";
 import SplitDiffView from "#/components/SplitDiffView";
 import type { DiffFile } from "#/modules/git";
+import { useRepositoryAccess } from "#/modules/organizations";
 import type { PullRequest, PullRequestStatus } from "../schemas";
 import { setPullRequestFileViewedFn } from "../server/pull-request.functions";
 
@@ -31,6 +32,7 @@ export default function PullRequestFilesPage({
 	pullRequest,
 	files,
 }: PullRequestFilesPageProps) {
+	const access = useRepositoryAccess();
 	const router = useRouter();
 	const [viewedFiles, setViewedFiles] = useState(
 		() => new Set(pullRequest.viewedFiles),
@@ -143,18 +145,20 @@ export default function PullRequestFilesPage({
 						file={file}
 						collapsed={viewed}
 						headerAction={
-							<Checkbox
-								label="Viewed"
-								aria-label={`Mark ${filePath} as viewed`}
-								checked={viewed}
-								disabled={savingFilePath !== null}
-								onChange={(event) => {
-									void handleViewedChange(
-										filePath,
-										event.currentTarget.checked,
-									);
-								}}
-							/>
+							access.canWrite ? (
+								<Checkbox
+									label="Viewed"
+									aria-label={`Mark ${filePath} as viewed`}
+									checked={viewed}
+									disabled={savingFilePath !== null}
+									onChange={(event) => {
+										void handleViewedChange(
+											filePath,
+											event.currentTarget.checked,
+										);
+									}}
+								/>
+							) : undefined
 						}
 					/>
 				);

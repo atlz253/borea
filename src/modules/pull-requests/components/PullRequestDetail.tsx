@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { AlertCircle, Check, GitMerge, GitPullRequest } from "lucide-react";
 import type { MergeStatus } from "#/modules/git";
+import { useRepositoryAccess } from "#/modules/organizations";
 import type { PullRequest, PullRequestStatus } from "../schemas";
 
 const STATUS_COLORS: Record<PullRequestStatus, string> = {
@@ -33,6 +34,7 @@ export default function PullRequestDetail({
 	merging,
 	mergeError,
 }: PullRequestDetailProps) {
+	const access = useRepositoryAccess();
 	const SHORT_SHA_LENGTH = 7;
 
 	const isOpen = pullRequest.status === "open";
@@ -113,7 +115,7 @@ export default function PullRequestDetail({
 					</Alert>
 				)}
 
-				{isOpen && (
+				{isOpen && access.canWrite && (
 					<Group gap="sm">
 						<Button
 							leftSection={<GitMerge size={16} />}

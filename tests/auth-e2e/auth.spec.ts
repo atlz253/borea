@@ -72,6 +72,9 @@ test("authenticates users and shares organizations through membership", async ({
 		password: "password123",
 	};
 	await register(bobPage, bob);
+	const bobProfile = (await (
+		await bobPage.request.get("/api/v1/auth/me")
+	).json()) as { id: string };
 	await expect(
 		bobPage.getByRole("link", { name: organizationName }),
 	).toHaveCount(0);
@@ -103,6 +106,11 @@ test("authenticates users and shares organizations through membership", async ({
 	await page.getByLabel("Invite member by email").fill(bob.email);
 	await page.getByRole("button", { name: "Invite member" }).click();
 	await expect(page.getByText(bob.email, { exact: true })).toBeVisible();
+	const promoteBob = await page.request.patch(
+		`/api/v1/organizations/${organizationName}/members/${bobProfile.id}`,
+		{ data: { role: "moderator" } },
+	);
+	expect(promoteBob.ok()).toBe(true);
 
 	const duplicateInvite = await page.request.post(
 		`/api/v1/organizations/${organizationName}/members`,

@@ -20,6 +20,7 @@ Validation errors can include a `details` field. Status codes are:
 
 - `400` — invalid path parameters or JSON body
 - `401` — authentication is required or credentials are invalid
+- `403` — authenticated user lacks permission for a visible resource
 - `404` — repository or pull request not found
 - `409` — pull request state or merge conflict
 - `500` — unexpected server error
@@ -62,23 +63,32 @@ organizations.
 
 #### `POST /api/v1/organizations`
 
-Creates an organization with the current user as its first member. Returns
+Creates an organization with the current user as its `owner`. Returns
 `409` in NoAuth single mode.
 
 #### `GET /api/v1/organizations/{organization}`
 
 Returns one organization.
 
+#### `PATCH /api/v1/organizations/{organization}`
+
+Updates the organization description. Available to the `owner` and
+`administrator`.
+
+#### `DELETE /api/v1/organizations/{organization}`
+
+Deletes the organization, its repositories, pull requests, and access metadata.
+Only the `owner` can use this endpoint.
+
 #### `GET /api/v1/organizations/{organization}/members`
 
-Returns the public profiles of all organization members. Only members can use
-this endpoint; other authenticated users receive `404`. Membership management
-is unavailable in NoAuth mode and returns `409`.
+Returns public profiles and lowercase organization roles for all members.
+Organization members can list this resource; outsiders receive `404`.
 
 #### `POST /api/v1/organizations/{organization}/members`
 
-Adds an already registered user as an equal organization member. Any existing
-member can call this endpoint.
+Adds an already registered user with the `member` role. The `owner`,
+administrators, and moderators can call this endpoint.
 
 ```json
 {
@@ -89,16 +99,38 @@ member can call this endpoint.
 Returns the added public user with status `201`. An unknown email returns
 `404`; adding an existing member returns `409`.
 
+#### `PATCH /api/v1/organizations/{organization}/members/{userId}`
+
+Changes an organization role:
+
+```json
+{
+  "role": "moderator"
+}
+```
+
+The `owner` can assign `member`, `moderator`, or `administrator`. Assigning
+`owner` transfers ownership and changes the previous owner to `member`.
+Administrators can switch ordinary members between `member` and `moderator`.
+
+#### `DELETE /api/v1/organizations/{organization}/members/{userId}`
+
+Removes a member according to the organization role hierarchy and revokes their
+repository grants. Repository owners cannot be removed and return `409`.
+
 #### `GET /api/v1/organizations/{organization}/repositories`
 
-Returns all repositories ordered by creation time, newest first.
+Returns repositories visible to the current user, ordered by creation time,
+newest first. Organization owners, administrators, and moderators see all
+repositories. Ordinary members need a repository grant.
 
 ```json
 [
   {
     "name": "example",
     "description": "Example repository",
-    "createdAt": "2026-07-02T12:00:00.000Z"
+    "createdAt": "2026-07-02T12:00:00.000Z",
+    "ownerId": "00000000-0000-4000-8000-000000000001"
   }
 ]
 ```
@@ -110,10 +142,34 @@ Returns one repository or `404` when it does not exist.
 #### `DELETE /api/v1/organizations/{organization}/repositories/{repository}`
 
 Deletes the Git repository and its stored pull requests. Returns `204 No Content`.
+Available to the repository owner and privileged organization roles.
 
 ```bash
 curl -X DELETE http://localhost:3000/api/v1/organizations/default/repositories/example
 ```
+
+#### `GET /api/v1/organizations/{organization}/repositories/{repository}/members`
+
+Returns explicit repository grants. Requires repository access-management
+permission.
+
+#### `PUT /api/v1/organizations/{organization}/repositories/{repository}/members/{userId}`
+
+Creates or replaces an explicit grant for an ordinary organization member:
+
+```json
+{
+  "role": "write"
+}
+```
+
+Repository roles are `read`, `write`, and `moderator`. Repository moderators
+can assign only `read` and `write`.
+
+#### `DELETE /api/v1/organizations/{organization}/repositories/{repository}/members/{userId}`
+
+Revokes an explicit repository grant. Repository moderators cannot revoke a
+`moderator` grant.
 
 ### Pull requests
 
@@ -167,7 +223,9 @@ Merge conflicts and attempts to merge a closed or already merged pull request re
 
 Git operations use `/api/git/<organization>/<repository>.git/`.
 They remain public in this version, including push, and do not use the REST
-cookie session.
+cookie session. UI and REST repository roles do not yet protect these routes.
+Future Git authentication will require `read` for upload-pack and `write` for
+receive-pack.
 
 ### `GET /api/git/<organization>/<repository>.git/info/refs?service=<service>`
 

@@ -4,6 +4,9 @@
 **Date:** 2026-07-02
 **Author:** Architecture Team
 
+Equal membership privileges and the stored member format are superseded by
+role-based access control in ADR 0021.
+
 ## Context
 
 ADR 0019 associates each organization with one owner. Teams need to share

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { requireRepositoryPermissionFn } from "#/modules/organizations";
 import {
 	CreatePullRequestPage,
 	createPullRequestFn,
@@ -9,13 +10,21 @@ import { listBranchesFn } from "#/modules/repositories";
 export const Route = createFileRoute(
 	"/organizations/$organization/repositories/$repository/pulls/new",
 )({
-	loader: ({ params }) =>
-		listBranchesFn({
+	loader: async ({ params }) => {
+		await requireRepositoryPermissionFn({
+			data: {
+				organizationName: params.organization,
+				repositoryName: params.repository,
+				permission: "write",
+			},
+		});
+		return listBranchesFn({
 			data: {
 				organizationName: params.organization,
 				name: params.repository,
 			},
-		}),
+		});
+	},
 	component: () => {
 		const { organization, repository } = Route.useParams();
 		const branches = Route.useLoaderData();

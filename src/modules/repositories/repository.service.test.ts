@@ -33,7 +33,7 @@ function createMockGit(): GitProvider {
 }
 
 describe("deleteRepository", () => {
-	it("deletes the Git repository before its pull request data", async () => {
+	it("deletes pull request data before the Git repository", async () => {
 		const mockGit = createMockGit();
 		const pullRequestStore = {
 			create: vi.fn(),
@@ -45,14 +45,14 @@ describe("deleteRepository", () => {
 
 		await deleteRepository(mockGit, pullRequestStore, "test");
 
-		expect(mockGit.delete).toHaveBeenCalledWith("test");
 		expect(pullRequestStore.deleteAll).toHaveBeenCalledWith("test");
-		expect(vi.mocked(mockGit.delete).mock.invocationCallOrder[0]).toBeLessThan(
+		expect(mockGit.delete).toHaveBeenCalledWith("test");
+		expect(
 			vi.mocked(pullRequestStore.deleteAll).mock.invocationCallOrder[0],
-		);
+		).toBeLessThan(vi.mocked(mockGit.delete).mock.invocationCallOrder[0] ?? 0);
 	});
 
-	it("does not delete pull request data when Git deletion fails", async () => {
+	it("does not delete Git when pull request cleanup fails", async () => {
 		const mockGit = createMockGit();
 		const pullRequestStore = {
 			create: vi.fn(),
@@ -61,12 +61,12 @@ describe("deleteRepository", () => {
 			update: vi.fn(),
 			deleteAll: vi.fn(),
 		};
-		vi.mocked(mockGit.delete).mockRejectedValue(new Error("delete failed"));
+		pullRequestStore.deleteAll.mockRejectedValue(new Error("delete failed"));
 
 		await expect(
 			deleteRepository(mockGit, pullRequestStore, "test"),
 		).rejects.toThrow("delete failed");
-		expect(pullRequestStore.deleteAll).not.toHaveBeenCalled();
+		expect(mockGit.delete).not.toHaveBeenCalled();
 	});
 });
 

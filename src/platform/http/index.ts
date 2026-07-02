@@ -2,6 +2,7 @@ import "./openapi-zod";
 import { ZodError, z } from "zod";
 import {
 	ConflictError,
+	ForbiddenError,
 	NotFoundError,
 	UnauthorizedError,
 	ValidationError,
@@ -12,6 +13,7 @@ const HTTP_NOT_FOUND = 404;
 const HTTP_CONFLICT = 409;
 const HTTP_INTERNAL_SERVER_ERROR = 500;
 const HTTP_UNAUTHORIZED = 401;
+const HTTP_FORBIDDEN = 403;
 
 export const apiErrorSchema = z.object({
 	code: z.string(),
@@ -62,6 +64,9 @@ export async function handleApiRequest(
 		}
 		if (error instanceof UnauthorizedError) {
 			return errorResponse(HTTP_UNAUTHORIZED, "unauthorized", error.message);
+		}
+		if (error instanceof ForbiddenError) {
+			return errorResponse(HTTP_FORBIDDEN, "forbidden", error.message);
 		}
 		if (error instanceof ConflictError) {
 			return errorResponse(

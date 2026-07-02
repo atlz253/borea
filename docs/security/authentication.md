@@ -30,15 +30,22 @@ Signing out clears it.
 
 ## Organization Access
 
-The user creating an organization becomes its first member. Every member has
-full access to the organization, its repositories, and its pull requests.
-Members can list other members and add an already registered account by email.
-Requests from non-members return `404`.
+The user creating an organization becomes its `owner`. Invited users start as
+`member` and can read organization information without seeing any repository.
+The owner can assign `administrator` or `moderator`; administrators can assign
+`moderator`.
+
+Repositories are private by default. Their creator is the repository owner.
+Ordinary members need an explicit `read`, `write`, or `moderator` grant.
+Requests for inaccessible organizations and repositories return `404`; denied
+actions on visible resources return `403`.
 
 Membership records are stored below each organization in
-`members/<userId>.json`. Existing organization data using `ownerId` is not
-migrated automatically. NoAuth bypasses access checks but does not expose
-membership management.
+`members/<userId>.json`. Repository ownership and grants are stored below
+`repositories/<repository>/`. Older equal-membership data is not supported.
+NoAuth bypasses access checks but does not expose membership management.
+
+See [Access Control](access-control.md) for the complete permission matrix.
 
 ## Current Limitations
 

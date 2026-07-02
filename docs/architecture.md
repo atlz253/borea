@@ -44,6 +44,7 @@ All architectural decisions are recorded as ADRs in `docs/ADR/`.
 | 0018 | Organizations, repository namespaces, and single-organization mode |
 | 0019 | File authentication, cookie sessions, and organization ownership |
 | 0020 | Equal organization membership and invitations |
+| 0021 | Organization and repository role-based access control |
 
 ## Architecture Principles
 
@@ -67,8 +68,9 @@ Nirvana serves the Git smart-HTTP protocol through the `/api/git/<organization>/
 ### Organization Modes
 
 In full authentication mode, `ORGANIZATION_MODE=multi` exposes only
-organizations where the current user is a member. Membership grants full access
-to the organization and all contained repositories and pull requests.
+organizations where the current user is a member. Organization roles control
+member management, settings, and repository administration. Ordinary members
+see only repositories with an explicit `read`, `write`, or `moderator` grant.
 `ORGANIZATION_MODE=single` is available only with NoAuth and exposes the
 automatically created `default` organization.
 

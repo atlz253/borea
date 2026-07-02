@@ -45,8 +45,8 @@ export async function deleteRepository(
 	pullRequestDataDeleter: PullRequestDataDeleter,
 	locator: RepositoryTarget,
 ): Promise<void> {
-	await gitProvider.delete(locator as RepositoryLocator);
 	await pullRequestDataDeleter.deleteAll(locator as RepositoryLocator);
+	await gitProvider.delete(locator as RepositoryLocator);
 }
 
 export async function listRepositories(

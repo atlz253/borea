@@ -49,6 +49,7 @@ export const repositorySchema = z.object({
 	name: z.string(),
 	description: z.string().optional(),
 	createdAt: z.date(),
+	ownerId: z.uuid().optional(),
 });
 
 export const repositoryResponseSchema = repositorySchema.extend({

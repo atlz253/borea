@@ -45,14 +45,15 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 
 **3.2. System Roles**
 
-- Developer (primary role for MVP)
-- All users have equal rights in MVP (no role differentiation)
+- Organization roles: `owner`, `administrator`, `moderator`, `member`
+- Repository roles: `read`, `write`, `moderator`
+- Role values are lowercase in storage and API payloads
 
 **3.3. Future Expansion**
 
 - DevOps, managers, QA, analysts (post-MVP)
 - Teams of up to 5000+ users (as demand arises)
-- Role and permission system
+- Git smart-HTTP credentials and token management
 
 ---
 
@@ -81,7 +82,8 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 - File-backed user registration and login with cookie sessions
 - Explicit `NoAuthProvider` mode for development and testing
 - Users can access organizations where they are members in full mode
-- Any organization member can add an existing user as an equal member
+- Organization roles control invitations, settings, and repository management
+- Ordinary members require explicit repository access
 
 **4.4. Web Interface**
 
@@ -90,7 +92,7 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 - Repository page with files and history
 - Pull/Merge request page
 - Repository settings
-- Repository and PR creation available to all without restrictions
+- Repository and PR creation is restricted by organization and repository roles
 
 **4.5. API**
 
@@ -246,7 +248,7 @@ class NoAuthProvider implements AuthProvider {
 
 - Authentication module (custom system, OAuth, LDAP, SAML)
 - Two-factor authentication (2FA)
-- Access control (read/write/admin)
+- Git smart-HTTP authentication for repository roles
 - Rate limiting
 - Extended auditing
 - Password hashing
@@ -367,7 +369,8 @@ ORGANIZATIONS_PATH=./data/organizations
 **14.1. Functional**
 
 - [X] User can create and open an organization
-- [X] Organization member can invite an existing user
+- [X] Authorized organization member can invite an existing user
+- [X] Organization and repository roles are enforced in UI and REST API
 - [X] User can create a repository via the web interface
 - [X] User can clone a repository over HTTP without authentication
 - [X] User can push to a repository without authentication
