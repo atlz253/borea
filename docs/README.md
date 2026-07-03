@@ -7,6 +7,7 @@
 ## Architecture
 
 - [Architecture Overview](architecture.md) — project structure, modules, providers, key decisions
+- [Docker Deployment](deployment.md) — build and run the production container
 
 ## User Documentation
 

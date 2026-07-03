@@ -76,6 +76,7 @@ npm run typecheck   # TypeScript type checking
 | `docs/ADR/README.md` | ADR index (0001–0019) |
 | `docs/security/authentication.md` | Full authentication, sessions, and ownership documentation |
 | `docs/architecture.md` | Architecture overview for developers |
+| `docs/deployment.md` | Production Docker image and Compose deployment guide |
 | `docs/git-http.md` | User guide for clone/push over HTTP |
 | `docs/repository-page.md` | User guide for repository UI pages |
 | `docs/commit-diff.md` | User guide for commit diff viewing |
@@ -104,6 +105,8 @@ npm run typecheck   # TypeScript type checking
 | `src/components/` | Shared presentational components |
 | `src/theme.ts` | Mantine theme customization (default: neutral dev-tool palette) |
 | `vite.config.ts` | Vite plugins: devtools, nitro, tanstackStart, react |
+| `Dockerfile` | Multi-stage production image with Nitro output and Git CLI |
+| `compose.yaml` | Single-container deployment with persistent application data |
 | `biome.json` | Linter/formatter configuration |
 | `tsconfig.json` | TypeScript config (strict, `noEmit`, bundler resolution) |
 

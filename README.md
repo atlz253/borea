@@ -66,21 +66,34 @@ The build outputs a self-contained Nitro Node server:
 
 ```bash
 npm run build
-node dist/server/index.mjs
+npm start
 ```
 
-For host-specific Nitro presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.), see <https://v3.nitro.build/deploy>.
+Build and run the production container:
+
+```bash
+docker compose up --build -d
+```
+
+The application is available at <http://localhost:3000>. Before production
+deployment, replace the development `SESSION_SECRET` in `.env`. Persistent
+application data is stored in a named Docker volume. See
+[Docker Deployment](docs/deployment.md) for image configuration, `docker run`
+usage, and data management.
 
 ## Project Structure
 
 ```
 nirvana/
+├── Dockerfile                      # Multi-stage production image
+├── compose.yaml                    # Local single-container deployment
 ├── CONTRIBUTING.md                 # Contributor guide
 ├── API.md                          # REST API and Git smart-HTTP reference
 ├── docs/
 │   ├── README.md                   # Documentation index
 │   ├── MVP.md                      # Technical specification
 │   ├── architecture.md             # Architecture overview
+│   ├── deployment.md               # Docker deployment guide
 │   ├── git-http.md                 # Clone/push via HTTP (user guide)
 │   ├── commit-diff.md              # Commit diff viewing (user guide)
 │   ├── code-review.md              # Pull request review progress (user guide)
@@ -133,6 +146,7 @@ nirvana/
 - [Documentation Index](docs/README.md) — overview of all documentation
 - [Technical Specification (MVP)](docs/MVP.md) — full requirements, architecture, acceptance criteria
 - [Architecture Overview](docs/architecture.md) — project structure, modules, providers
+- [Docker Deployment](docs/deployment.md) — production image and Compose usage
 - [Working with Repositories via HTTP](docs/git-http.md) — how to clone and push
 - [Using Repository Pages](docs/repository-page.md) — how to browse files and commits
 - [Pull Request Code Review](docs/code-review.md) — how to mark changed files as viewed
@@ -183,7 +197,7 @@ See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/README.md) fo
   - ✅ Smart-HTTP pull (clone/fetch) and push
   - 🟨 Pull/Merge requests with code review (viewed-file tracking implemented)
   - ✅ REST API v1 with OpenAPI 3.1
-  - 🔲 Docker deployment
+  - ✅ Docker deployment
   - 🔲 Complete documentation (in progress)
 - **v0.2.0 — Authentication:** file-backed registration/login, organization roles, and repository access control implemented; profiles remain
 - **Future:** issue tracking, wiki, CI/CD integrations, OAuth/LDAP
