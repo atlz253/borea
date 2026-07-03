@@ -53,7 +53,7 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 
 - DevOps, managers, QA, analysts (post-MVP)
 - Teams of up to 5000+ users (as demand arises)
-- Git smart-HTTP credentials and token management
+- Git token scopes and expiration policies
 
 ---
 
@@ -74,8 +74,8 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 
 **4.2. Git Protocol**
 
-- HTTP/HTTPS for clone/pull operations (public, no authentication)
-- HTTP/HTTPS for push operations (no authentication)
+- HTTP/HTTPS for clone/pull operations using a Git personal access token
+- HTTP/HTTPS for push operations using a Git personal access token
 
 **4.3. User Management**
 
@@ -93,13 +93,14 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 - Repository page with files and history
 - Pull/Merge request page
 - Repository settings
+- Git personal access token settings
 - Repository and PR creation is restricted by organization and repository roles
 
 **4.5. API**
 
 - REST API with OpenAPI specification
 - Public API for future integrations
-- REST resources require authentication in full mode; Git smart-HTTP remains public
+- REST resources require a cookie session in full mode; Git smart-HTTP requires a personal access token
 
 ---
 
@@ -217,6 +218,10 @@ interface AuthProvider {
   requireCurrentUser(): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserById(id: string): Promise<User | undefined>;
+  authenticateGitToken(token: string): Promise<User | null>;
+  createGitToken(userId: string, name: string): Promise<CreatedGitToken>;
+  listGitTokens(userId: string): Promise<GitToken[]>;
+  revokeGitToken(userId: string, tokenId: string): Promise<void>;
   // ... other methods
 }
 
@@ -249,7 +254,7 @@ class NoAuthProvider implements AuthProvider {
 
 - Authentication module (custom system, OAuth, LDAP, SAML)
 - Two-factor authentication (2FA)
-- Git smart-HTTP authentication for repository roles
+- Token scopes and expiration policies
 - Rate limiting
 - Extended auditing
 - Password hashing
@@ -373,8 +378,8 @@ ORGANIZATIONS_PATH=./data/organizations
 - [X] Authorized organization member can invite an existing user
 - [X] Organization and repository roles are enforced in UI and REST API
 - [X] User can create a repository via the web interface
-- [X] User can clone a repository over HTTP without authentication
-- [X] User can push to a repository without authentication
+- [X] User can clone a permitted repository over HTTP using a personal access token
+- [X] User can push to a permitted repository over HTTP using a personal access token
 - [X] User can browse files and commit history
 - [X] User can create a Pull Request
 - [X] User can leave comments on a changed file in a PR

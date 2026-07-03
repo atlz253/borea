@@ -1,5 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
-import { loginSchema, registerSchema } from "../schemas";
+import { z } from "zod";
+import {
+	createGitTokenSchema,
+	loginSchema,
+	registerSchema,
+} from "../schemas";
 
 export const assertSameOriginFn = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -46,3 +51,31 @@ export const logoutFn = createServerFn({ method: "POST" }).handler(async () => {
 	const { authProvider } = await import("./auth.server");
 	await authProvider.logout();
 });
+
+export const listGitTokensFn = createServerFn({ method: "GET" }).handler(
+	async () => {
+		const user = await requireCurrentUserFn();
+		const { authProvider } = await import("./auth.server");
+		return authProvider.listGitTokens(user.id);
+	},
+);
+
+export const createGitTokenFn = createServerFn({ method: "POST" })
+	.validator((data: unknown) => createGitTokenSchema.parse(data))
+	.handler(async ({ data }) => {
+		await assertSameOriginFn();
+		const user = await requireCurrentUserFn();
+		const { authProvider } = await import("./auth.server");
+		return authProvider.createGitToken(user.id, data.name);
+	});
+
+export const revokeGitTokenFn = createServerFn({ method: "POST" })
+	.validator((data: unknown) =>
+		z.uuid().parse((data as { tokenId?: unknown }).tokenId),
+	)
+	.handler(async ({ data }) => {
+		await assertSameOriginFn();
+		const user = await requireCurrentUserFn();
+		const { authProvider } = await import("./auth.server");
+		await authProvider.revokeGitToken(user.id, data);
+	});

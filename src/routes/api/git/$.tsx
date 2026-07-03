@@ -7,7 +7,43 @@ import {
 	gitProvider,
 	parseSmartHttpPath,
 } from "#/modules/git";
-import { getPublicOrganizationFn } from "#/modules/organizations";
+import { getGitRequestUser } from "#/modules/auth";
+import { requireRepositoryPermissionForUser } from "#/modules/organizations";
+import { ForbiddenError, NotFoundError } from "#/platform/errors";
+
+const UNAUTHORIZED_RESPONSE = {
+	status: 401,
+	headers: { "WWW-Authenticate": 'Basic realm="Nirvana Git"' },
+};
+
+async function authorize(
+	request: Request,
+	organizationName: string,
+	repositoryName: string,
+	service: "git-upload-pack" | "git-receive-pack",
+): Promise<Response | undefined> {
+	const user = await getGitRequestUser(request);
+	if (!user) {
+		return new Response("Authentication Required", UNAUTHORIZED_RESPONSE);
+	}
+	try {
+		await requireRepositoryPermissionForUser(
+			organizationName,
+			repositoryName,
+			user.id,
+			service === "git-upload-pack" ? "read" : "write",
+		);
+	} catch (error) {
+		if (error instanceof ForbiddenError) {
+			return new Response("Forbidden", { status: 403 });
+		}
+		if (error instanceof NotFoundError) {
+			return new Response("Repository Not Found", { status: 404 });
+		}
+		throw error;
+	}
+	return undefined;
+}
 
 export const Route = createFileRoute("/api/git/$")({
 	server: {
@@ -33,12 +69,14 @@ export const Route = createFileRoute("/api/git/$")({
 					return new Response("Not Found", { status: 404 });
 				}
 
-				try {
-					await getPublicOrganizationFn({
-						data: { organizationName: parsed.organizationName },
-					});
-				} catch {
-					return new Response("Repository Not Found", { status: 404 });
+				const authorizationError = await authorize(
+					request,
+					parsed.organizationName,
+					parsed.repoName,
+					parsed.service,
+				);
+				if (authorizationError) {
+					return authorizationError;
 				}
 				if (!(await gitProvider.exists(locator))) {
 					return new Response("Repository Not Found", { status: 404 });
@@ -78,12 +116,14 @@ export const Route = createFileRoute("/api/git/$")({
 					return new Response("Not Found", { status: 404 });
 				}
 
-				try {
-					await getPublicOrganizationFn({
-						data: { organizationName: parsed.organizationName },
-					});
-				} catch {
-					return new Response("Repository Not Found", { status: 404 });
+				const authorizationError = await authorize(
+					request,
+					parsed.organizationName,
+					parsed.repoName,
+					parsed.service,
+				);
+				if (authorizationError) {
+					return authorizationError;
 				}
 				if (!(await gitProvider.exists(locator))) {
 					return new Response("Repository Not Found", { status: 404 });

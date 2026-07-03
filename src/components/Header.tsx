@@ -8,7 +8,7 @@ import {
 	Title,
 } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import { logoutFn, type User } from "#/modules/auth";
 import type { AuthMode } from "#/platform/config";
 import ThemeToggle from "./ThemeToggle";
@@ -60,14 +60,25 @@ export default function Header({
 					</Text>
 				</Stack>
 				{authMode === "full" && (
-					<Button
-						variant="subtle"
-						size="compact-sm"
-						leftSection={<LogOut size={14} />}
-						onClick={() => void handleLogout()}
-					>
-						Log out
-					</Button>
+					<>
+						<Button
+							component={Link}
+							to="/settings/git-tokens"
+							variant="subtle"
+							size="compact-sm"
+							leftSection={<Settings size={14} />}
+						>
+							Settings
+						</Button>
+						<Button
+							variant="subtle"
+							size="compact-sm"
+							leftSection={<LogOut size={14} />}
+							onClick={() => void handleLogout()}
+						>
+							Log out
+						</Button>
+					</>
 				)}
 				<ThemeToggle />
 			</Group>

@@ -172,6 +172,7 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 | 0009 | Commit History |
 | 0017 | REST API v1 |
 | 0021 | Organization and Repository Access Control |
+| 0023 | Git Smart-HTTP Authentication |
 
 ## Architecture (summary)
 
@@ -179,7 +180,7 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 - **Provider abstractions** (GitProvider, DatabaseProvider, StorageProvider, AuthProvider) — all external dependencies accessed through swappable interfaces
 - **Thin routes** — route files delegate to page components in module folders
 - **Mantine AppShell layout** — consistent GitHub-like UI with header, sidebar, and end-of-content footer
-- **Git smart-HTTP** — HTTP clone and push through `/api/git/<name>.git/` (pull ✅, push ✅)
+- **Git smart-HTTP** — PAT-authenticated clone and push with repository permission enforcement
 - **File tree browsing** — navigate repository files with breadcrumbs and directory listing (✅)
 - **Commit history** — table view of commits with branch context (✅)
 - **Pull request review progress** — persistent Viewed marks collapse reviewed file diffs (✅)
@@ -199,7 +200,7 @@ See the [Technical Specification](docs/MVP.md) and [ADRs](docs/ADR/README.md) fo
   - ✅ REST API v1 with OpenAPI 3.1
   - ✅ Docker deployment
   - 🔲 Complete documentation (in progress)
-- **v0.2.0 — Authentication:** file-backed registration/login, organization roles, and repository access control implemented; profiles remain
+- **v0.2.0 — Authentication:** file-backed accounts, Git PATs, organization roles, and repository access control implemented; profiles remain
 - **Future:** issue tracking, wiki, CI/CD integrations, OAuth/LDAP
 
 ## License

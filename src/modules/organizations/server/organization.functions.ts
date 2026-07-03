@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { assertSameOriginFn, requireCurrentUserFn } from "#/modules/auth";
 import {
@@ -278,6 +278,23 @@ export const requireRepositoryPermissionFn = createServerFn({ method: "GET" })
 			data.permission,
 		);
 	});
+
+export const requireRepositoryPermissionForUser = createServerOnlyFn(
+	async (
+		organizationName: string,
+		repositoryName: string,
+		userId: string,
+		permission: z.infer<typeof repositoryPermissionSchema>,
+	) => {
+		const { organizationService } = await import("./organization.server");
+		return organizationService.requireRepositoryPermission(
+			organizationName,
+			repositoryName,
+			userId,
+			permission,
+		);
+	},
+);
 
 export const filterAccessibleRepositoriesFn = createServerFn({ method: "GET" })
 	.validator((data: unknown) => {

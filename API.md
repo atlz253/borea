@@ -2,8 +2,9 @@
 
 Nirvana exposes a versioned REST API and the Git smart-HTTP protocol. REST
 resources require a cookie session in the default full authentication mode.
-Authentication endpoints and the OpenAPI document are public. In NoAuth mode,
-REST requests use the fixed user without a login flow.
+Registration, login, and the OpenAPI document are public. Current-user and
+token-management endpoints require a cookie session. In NoAuth mode, REST
+requests use the fixed user without a login flow.
 
 ## REST API v1
 
@@ -53,6 +54,29 @@ Clears the current session and returns `204 No Content`.
 #### `GET /api/v1/auth/me`
 
 Returns the current user or `401`.
+
+#### `GET /api/v1/auth/git-tokens`
+
+Returns the current user's Git token metadata. Token secrets are never listed.
+Returns `403` in NoAuth mode.
+
+#### `POST /api/v1/auth/git-tokens`
+
+Creates a Git personal access token:
+
+```json
+{
+  "name": "Work laptop"
+}
+```
+
+Returns `201` with `id`, `name`, `createdAt`, and the one-time `token` value.
+The token cannot be retrieved again.
+
+#### `DELETE /api/v1/auth/git-tokens/{tokenId}`
+
+Revokes a token owned by the current user and returns `204`. Revoking an
+unknown token or another user's token is idempotent and does not disclose it.
 
 ### Repositories
 
@@ -222,10 +246,15 @@ Merge conflicts and attempts to merge a closed or already merged pull request re
 ## Git Smart-HTTP
 
 Git operations use `/api/git/<organization>/<repository>.git/`.
-They remain public in this version, including push, and do not use the REST
-cookie session. UI and REST repository roles do not yet protect these routes.
-Future Git authentication will require `read` for upload-pack and `write` for
-receive-pack.
+Full mode requires HTTP Basic authentication with a Git personal access token
+as the password. The username must be non-empty but is not used for identity
+lookup. REST cookie sessions and account passwords are not accepted.
+
+`git-upload-pack` requires repository `read`; `git-receive-pack` requires
+`write`. Missing or invalid credentials return `401` with
+`WWW-Authenticate: Basic realm="Nirvana Git"`. Inaccessible repositories
+return `404`, and authenticated readers attempting push receive `403`. NoAuth
+mode remains credential-free.
 
 ### `GET /api/git/<organization>/<repository>.git/info/refs?service=<service>`
 
@@ -242,9 +271,11 @@ Performs push negotiation.
 Clone and push examples:
 
 ```bash
-git clone http://localhost:3000/api/git/default/example.git
-git remote add origin http://localhost:3000/api/git/default/example.git
+git clone https://alice%40example.com@example.test/api/git/default/example.git
+git remote add origin https://alice%40example.com@example.test/api/git/default/example.git
 git push -u origin main
 ```
 
-See `docs/git-http.md` for user guidance and `docs/security/noauth-mode.md` for NoAuth security implications.
+Git prompts for the PAT as the password. Use HTTPS and a Git credential helper;
+do not embed the token in the URL. See `docs/git-http.md` for user guidance and
+`docs/security/noauth-mode.md` for NoAuth security implications.

@@ -56,6 +56,7 @@ export {
 	removeRepositoryMemberFn,
 	requireOrganizationFn,
 	requireOrganizationPermissionFn,
+	requireRepositoryPermissionForUser,
 	requireRepositoryPermissionFn,
 	setRepositoryMemberRoleFn,
 	updateOrganizationFn,

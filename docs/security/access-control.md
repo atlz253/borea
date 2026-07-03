@@ -42,9 +42,10 @@ returns `404`. An action denied on a visible resource returns `403`.
 
 ## NoAuth and Git HTTP
 
-NoAuth bypasses access checks and hides membership-management controls. It is
-intended only for local development.
+NoAuth bypasses access checks, hides membership-management controls, and keeps
+Git smart-HTTP credential-free. It is intended only for local development.
 
-Git smart-HTTP is not authenticated yet. Clone, fetch, and push remain public
-even when UI and REST access is restricted. Do not store confidential source
-code until Git credentials are implemented.
+Full mode requires a Git personal access token. Clone and fetch require
+repository `read`; push requires `write`. A user without read access receives
+`404`, while a reader attempting to push receives `403`. Role changes and token
+revocation apply to the next Git request.

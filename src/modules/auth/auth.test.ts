@@ -1,8 +1,21 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
+import {
+	mkdir,
+	mkdtemp,
+	readFile,
+	readdir,
+	rm,
+	writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { ConflictError, UnauthorizedError } from "#/platform/errors";
+import {
+	ConflictError,
+	ForbiddenError,
+	UnauthorizedError,
+} from "#/platform/errors";
+import { FileSystemGitTokenStore } from "./git-token.store";
 import { FileAuthProvider, NoAuthProvider } from "./providers";
 import { registerSchema } from "./schemas";
 import type { AuthSession } from "./session";
@@ -60,9 +73,13 @@ describe("file authentication", () => {
 	});
 
 	it("registers, logs in, and logs out without exposing credentials", async () => {
-		const { store } = await createStore();
+		const { directory, store } = await createStore();
 		const session = createSession();
-		const provider = new FileAuthProvider(store, session);
+		const provider = new FileAuthProvider(
+			store,
+			session,
+			new FileSystemGitTokenStore(directory),
+		);
 		const input = {
 			name: "Alice",
 			email: "alice@example.com",
@@ -88,8 +105,12 @@ describe("file authentication", () => {
 	});
 
 	it("rejects duplicates and invalid credentials", async () => {
-		const { store } = await createStore();
-		const provider = new FileAuthProvider(store, createSession());
+		const { directory, store } = await createStore();
+		const provider = new FileAuthProvider(
+			store,
+			createSession(),
+			new FileSystemGitTokenStore(directory),
+		);
 		const input = {
 			name: "Alice",
 			email: "alice@example.com",
@@ -103,6 +124,83 @@ describe("file authentication", () => {
 		await expect(
 			provider.login({ ...input, password: "incorrect" }),
 		).rejects.toBeInstanceOf(UnauthorizedError);
+	});
+
+	it("creates, isolates, verifies, and revokes Git tokens", async () => {
+		const { directory, store } = await createStore();
+		const provider = new FileAuthProvider(
+			store,
+			createSession(),
+			new FileSystemGitTokenStore(directory),
+		);
+		const alice = await provider.register({
+			name: "Alice",
+			email: "alice@example.com",
+			password: "password",
+		});
+		const bob = await provider.register({
+			name: "Bob",
+			email: "bob@example.com",
+			password: "password",
+		});
+
+		const aliceToken = await provider.createGitToken(alice.id, "Laptop");
+		const bobToken = await provider.createGitToken(bob.id, "Desktop");
+		expect(aliceToken.token).toMatch(
+			/^nirvana_[0-9a-f-]{36}_[A-Za-z0-9_-]{43}$/,
+		);
+		await expect(provider.listGitTokens(alice.id)).resolves.toEqual([
+			expect.objectContaining({ id: aliceToken.id, name: "Laptop" }),
+		]);
+		await expect(provider.listGitTokens(bob.id)).resolves.toEqual([
+			expect.objectContaining({ id: bobToken.id, name: "Desktop" }),
+		]);
+		await expect(
+			provider.authenticateGitToken(aliceToken.token),
+		).resolves.toMatchObject({ id: alice.id });
+		await expect(
+			provider.authenticateGitToken(`${aliceToken.token}invalid`),
+		).resolves.toBeNull();
+
+		const tokenFiles = await readdir(path.join(directory, "git-tokens"));
+		const stored = await readFile(
+			path.join(directory, "git-tokens", tokenFiles[0]),
+			"utf-8",
+		);
+		expect(stored).not.toContain(aliceToken.token);
+		expect(stored).not.toContain(aliceToken.token.split("_").at(-1));
+
+		await provider.revokeGitToken(bob.id, aliceToken.id);
+		await expect(
+			provider.authenticateGitToken(aliceToken.token),
+		).resolves.toMatchObject({ id: alice.id });
+		await provider.revokeGitToken(alice.id, aliceToken.id);
+		await expect(
+			provider.authenticateGitToken(aliceToken.token),
+		).resolves.toBeNull();
+	});
+
+	it("verifies Git token secrets containing underscores", async () => {
+		const { directory } = await createStore();
+		const tokenDirectory = path.join(directory, "git-tokens");
+		await mkdir(tokenDirectory);
+		const id = randomUUID();
+		const userId = randomUUID();
+		const secret = `_${"a".repeat(42)}`;
+		await writeFile(
+			path.join(tokenDirectory, `${id}.json`),
+			JSON.stringify({
+				id,
+				userId,
+				name: "Underscore token",
+				createdAt: new Date().toISOString(),
+				secretHash: createHash("sha256").update(secret).digest("hex"),
+			}),
+			"utf-8",
+		);
+		const store = new FileSystemGitTokenStore(directory);
+
+		await expect(store.verify(`nirvana_${id}_${secret}`)).resolves.toBe(userId);
 	});
 
 	it("ignores corrupt user files", async () => {
@@ -126,5 +224,11 @@ describe("NoAuthProvider", () => {
 		await expect(provider.requireCurrentUser()).resolves.toMatchObject({
 			name: "developer",
 		});
+		await expect(
+			provider.createGitToken(
+				"00000000-0000-4000-8000-000000000000",
+				"Laptop",
+			),
+		).rejects.toBeInstanceOf(ForbiddenError);
 	});
 });

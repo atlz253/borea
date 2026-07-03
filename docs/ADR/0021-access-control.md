@@ -36,8 +36,8 @@ can protect the UI and REST API, but cannot yet authorize clone, fetch, or push.
    an action on a visible resource receive `403`.
 9. Full mode enforces access in UI server functions and REST routes. NoAuth
    bypasses access checks and does not expose membership management.
-10. Git smart-HTTP remains public. A future credentials decision will require
-    `read` for upload-pack and `write` for receive-pack.
+10. Git smart-HTTP authentication is defined by ADR 0023. Full mode requires a
+    personal access token, `read` for upload-pack, and `write` for receive-pack.
 11. Existing ADR 0020 data is not migrated. Access control starts with a new
     data directory and accepts only the new storage format.
 
@@ -65,4 +65,5 @@ timestamps.
   initialization removes the new Git repository.
 - Organization deletion cascades through pull request data, Git repositories,
   access metadata, and organization metadata.
-- Git URLs must still be treated as public until Git authentication is added.
+- Git URLs in full mode require the credentials and permissions defined by ADR
+  0023.

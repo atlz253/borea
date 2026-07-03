@@ -1,4 +1,5 @@
 import { getConfig } from "#/platform/config";
+import { FileSystemGitTokenStore } from "../git-token.store";
 import { FileAuthProvider, NoAuthProvider } from "../providers";
 import { cookieAuthSession } from "../session";
 import { FileSystemUserStore } from "../user.store";
@@ -11,6 +12,7 @@ export const authProvider =
 		: new FileAuthProvider(
 				new FileSystemUserStore(config.usersPath),
 				cookieAuthSession,
+				new FileSystemGitTokenStore(config.usersPath),
 			);
 
 export const authMode = config.authMode;

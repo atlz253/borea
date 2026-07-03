@@ -28,6 +28,21 @@ Registration immediately creates a seven-day encrypted cookie session. The
 cookie is HTTP-only, uses `SameSite=Lax`, and is marked `Secure` in production.
 Signing out clears it.
 
+## Git Personal Access Tokens
+
+Full mode requires a personal access token for clone, fetch, and push over Git
+smart-HTTP. Create and revoke tokens on `/settings/git-tokens`. A token is
+shown only once when created, has no expiration, and remains valid until
+revoked.
+
+Use the account email as the HTTP Basic username and the token as the password.
+The username is required by Git clients but the token identifies its owner.
+Tokens are accepted only for Git smart-HTTP and cannot authenticate REST API
+requests.
+
+Never send a token over unencrypted HTTP outside local development. Production
+deployments must terminate HTTPS at the application or a trusted reverse proxy.
+
 ## Organization Access
 
 The user creating an organization becomes its `owner`. Invited users start as
@@ -49,6 +64,5 @@ See [Access Control](access-control.md) for the complete permission matrix.
 
 ## Current Limitations
 
-Git smart-HTTP remains public for clone, fetch, and push. Do not store
-confidential data until repository visibility and Git authentication described
-by ADR 0019 are implemented.
+Git tokens do not have scopes or expiration dates. Repository permissions are
+evaluated on every request, and revocation takes effect immediately.

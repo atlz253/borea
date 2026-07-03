@@ -1,7 +1,14 @@
-import { UnauthorizedError } from "#/platform/errors";
+import { ForbiddenError, UnauthorizedError } from "#/platform/errors";
 import type { AuthProvider } from "./auth-provider";
+import type { GitTokenStore } from "./git-token.store";
 import { verifyPassword } from "./password";
-import type { LoginInput, RegisterInput, User } from "./schemas";
+import type {
+	CreatedGitToken,
+	GitToken,
+	LoginInput,
+	RegisterInput,
+	User,
+} from "./schemas";
 import type { AuthSession } from "./session";
 import type { UserStore } from "./user.store";
 
@@ -9,6 +16,7 @@ export class FileAuthProvider implements AuthProvider {
 	constructor(
 		private readonly users: UserStore,
 		private readonly session: AuthSession,
+		private readonly gitTokens: GitTokenStore,
 	) {}
 
 	async getCurrentUser(): Promise<User | null> {
@@ -49,6 +57,26 @@ export class FileAuthProvider implements AuthProvider {
 		}
 		const { credential: _credential, ...user } = stored;
 		return user;
+	}
+
+	async authenticateGitToken(token: string): Promise<User | null> {
+		const userId = await this.gitTokens.verify(token);
+		return userId ? (await this.getUserById(userId)) ?? null : null;
+	}
+
+	async createGitToken(
+		userId: string,
+		name: string,
+	): Promise<CreatedGitToken> {
+		return this.gitTokens.create(userId, name);
+	}
+
+	async listGitTokens(userId: string): Promise<GitToken[]> {
+		return this.gitTokens.list(userId);
+	}
+
+	async revokeGitToken(userId: string, tokenId: string): Promise<void> {
+		await this.gitTokens.revoke(userId, tokenId);
 	}
 
 	async register(input: RegisterInput): Promise<User> {
@@ -98,6 +126,25 @@ export class NoAuthProvider implements AuthProvider {
 
 	async getUserById(id: string): Promise<User | undefined> {
 		return id === this.user.id ? this.user : undefined;
+	}
+
+	async authenticateGitToken(_token: string): Promise<User> {
+		return this.user;
+	}
+
+	async createGitToken(
+		_userId: string,
+		_name: string,
+	): Promise<CreatedGitToken> {
+		throw new ForbiddenError("Git tokens are unavailable in NoAuth mode");
+	}
+
+	async listGitTokens(_userId: string): Promise<GitToken[]> {
+		throw new ForbiddenError("Git tokens are unavailable in NoAuth mode");
+	}
+
+	async revokeGitToken(_userId: string, _tokenId: string): Promise<void> {
+		throw new ForbiddenError("Git tokens are unavailable in NoAuth mode");
 	}
 
 	async register(_input: RegisterInput): Promise<User> {
