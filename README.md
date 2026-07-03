@@ -28,13 +28,13 @@ Nirvana is a platform project, built as a modular monolith with provider-based a
 
 ```bash
 npm install
-set SESSION_SECRET=replace-with-at-least-32-characters
 npm run dev      # http://localhost:3000
 ```
 
-PowerShell users can set the variable with
-`$env:SESSION_SECRET="replace-with-at-least-32-characters"`. Use
-`AUTH_MODE=noauth` for an explicit development-only fixed-user mode.
+Default development settings are stored in `.env`. Override them locally in
+`.env.local`, which is ignored by Git. Set a private `SESSION_SECRET` containing
+at least 32 characters outside local development. Use `AUTH_MODE=noauth` for an
+explicit development-only fixed-user mode.
 
 ### Prerequisites
 
