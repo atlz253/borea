@@ -6,6 +6,7 @@ const MAX_REPO_NAME_LENGTH = 100;
 const MAX_BRANCH_NAME_LENGTH = 200;
 const MAX_TITLE_LENGTH = 500;
 const MAX_FILE_PATH_LENGTH = 4096;
+const MAX_COMMENT_LENGTH = 10_000;
 const MAX_PR_ID = Number.MAX_SAFE_INTEGER;
 
 export const repoNameSchema = z
@@ -84,6 +85,33 @@ export const setPullRequestFileViewedSchema = getPullRequestSchema.extend({
 	viewed: z.boolean(),
 });
 
+export const pullRequestCommentTargetSchema = z.discriminatedUnion("type", [
+	z.object({
+		type: z.literal("file"),
+		filePath: z.string().min(1).max(MAX_FILE_PATH_LENGTH),
+	}),
+]);
+
+export const pullRequestCommentSchema = z.object({
+	id: z.uuid(),
+	target: pullRequestCommentTargetSchema,
+	body: z.string().min(1).max(MAX_COMMENT_LENGTH),
+	authorId: z.uuid(),
+	authorName: z.string().min(1),
+	createdAt: z.iso.datetime(),
+});
+
+export const pullRequestCommentsSchema = z.array(pullRequestCommentSchema);
+
+export const addPullRequestFileCommentSchema = getPullRequestSchema.extend({
+	filePath: z.string().min(1).max(MAX_FILE_PATH_LENGTH),
+	body: z
+		.string()
+		.trim()
+		.min(1, "Comment is required")
+		.max(MAX_COMMENT_LENGTH, "Comment is too long"),
+});
+
 export const pullRequestStatusSchema = z.enum(["open", "merged", "closed"]);
 
 export const pullRequestSchema = z.object({
@@ -112,6 +140,13 @@ export type GetPullRequestInput = z.infer<typeof getPullRequestSchema>;
 export type MergePullRequestInput = z.infer<typeof mergePullRequestSchema>;
 export type SetPullRequestFileViewedInput = z.infer<
 	typeof setPullRequestFileViewedSchema
+>;
+export type PullRequestCommentTarget = z.infer<
+	typeof pullRequestCommentTargetSchema
+>;
+export type PullRequestComment = z.infer<typeof pullRequestCommentSchema>;
+export type AddPullRequestFileCommentInput = z.infer<
+	typeof addPullRequestFileCommentSchema
 >;
 export type PullRequest = z.infer<typeof pullRequestSchema>;
 export type PullRequestStatus = z.infer<typeof pullRequestStatusSchema>;

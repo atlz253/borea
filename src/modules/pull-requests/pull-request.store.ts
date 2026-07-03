@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import {
 	mkdir,
@@ -10,7 +11,12 @@ import {
 import path from "node:path";
 import type { RepositoryLocator } from "#/modules/git";
 import { getConfig } from "#/platform/config";
-import { type PullRequest, pullRequestSchema } from "./schemas";
+import {
+	type PullRequest,
+	type PullRequestComment,
+	pullRequestCommentsSchema,
+	pullRequestSchema,
+} from "./schemas";
 
 interface RepoMeta {
 	nextId: number;
@@ -40,6 +46,20 @@ export interface PullRequestStore {
 		filePath: string,
 		viewed: boolean,
 	): Promise<PullRequest>;
+	listComments(
+		locator: RepositoryLocator,
+		id: number,
+	): Promise<PullRequestComment[]>;
+	addComment(
+		locator: RepositoryLocator,
+		id: number,
+		input: {
+			target: PullRequestComment["target"];
+			body: string;
+			authorId: string;
+			authorName: string;
+		},
+	): Promise<PullRequestComment>;
 	deleteAll(locator: RepositoryLocator): Promise<void>;
 }
 
@@ -192,6 +212,58 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 		});
 	}
 
+	async listComments(
+		locator: RepositoryTarget,
+		id: number,
+	): Promise<PullRequestComment[]> {
+		const filePath = this.commentsFilePath(locator, id);
+		if (!existsSync(filePath)) {
+			return [];
+		}
+		const content = await readFile(filePath, "utf-8");
+		return pullRequestCommentsSchema
+			.parse(JSON.parse(content))
+			.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+	}
+
+	async addComment(
+		locator: RepositoryTarget,
+		id: number,
+		input: {
+			target: PullRequestComment["target"];
+			body: string;
+			authorId: string;
+			authorName: string;
+		},
+	): Promise<PullRequestComment> {
+		return this.withWriteLock(locator, id, async () => {
+			const existing = await this.get(locator, id);
+			if (!existing) {
+				throw new Error(
+					`Pull request #${id} not found in "${this.repositoryName(locator)}"`,
+				);
+			}
+			if (existing.status !== "open") {
+				throw new Error(
+					`Pull request #${id} is ${existing.status} and cannot be commented on`,
+				);
+			}
+
+			const comment: PullRequestComment = {
+				id: randomUUID(),
+				target: input.target,
+				body: input.body,
+				authorId: input.authorId,
+				authorName: input.authorName,
+				createdAt: new Date().toISOString(),
+			};
+			const comments = await this.listComments(locator, id);
+			comments.push(comment);
+			await this.writeCommentsFile(locator, id, comments);
+			return comment;
+		});
+	}
+
 	async deleteAll(locator: RepositoryTarget): Promise<void> {
 		await rm(this.repoDir(locator), {
 			recursive: true,
@@ -214,10 +286,28 @@ export class FileSystemPullRequestStore implements PullRequestStore {
 		return path.resolve(this.repoDir(locator), `${id}.json`);
 	}
 
+	private commentsFilePath(locator: RepositoryTarget, id: number): string {
+		return path.resolve(this.repoDir(locator), "comments", `${id}.json`);
+	}
+
 	private async writePrFile(repoDir: string, pr: PullRequest): Promise<void> {
 		const tmpPath = path.join(repoDir, `${pr.id}.tmp`);
 		const finalPath = path.join(repoDir, `${pr.id}.json`);
 		await writeFile(tmpPath, JSON.stringify(pr, null, "\t"), "utf-8");
+		await rename(tmpPath, finalPath);
+	}
+
+	private async writeCommentsFile(
+		locator: RepositoryTarget,
+		id: number,
+		comments: PullRequestComment[],
+	): Promise<void> {
+		const commentsDir = path.join(this.repoDir(locator), "comments");
+		await mkdir(commentsDir, { recursive: true });
+		const tmpPath = path.join(commentsDir, `${id}.tmp`);
+		const finalPath = path.join(commentsDir, `${id}.json`);
+		const validated = pullRequestCommentsSchema.parse(comments);
+		await writeFile(tmpPath, JSON.stringify(validated, null, "\t"), "utf-8");
 		await rename(tmpPath, finalPath);
 	}
 

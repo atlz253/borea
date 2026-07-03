@@ -1,4 +1,9 @@
+import { mkdtempSync, rmSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 import { expect, test } from "@playwright/test";
+import { execa } from "execa";
 import { waitForHydration } from "../e2e/helpers";
 
 interface TestAccount {
@@ -43,10 +48,63 @@ async function createAccount(
 	};
 }
 
+async function seedPullRequestBranches(
+	organizationName: string,
+	repositoryName: string,
+	suffix: string,
+) {
+	const barePath = resolve(
+		"./data/e2e-auth/repositories",
+		organizationName,
+		repositoryName,
+	);
+	const workDir = mkdtempSync(join(tmpdir(), `nirvana-auth-pr-${suffix}-`));
+	const { stdout } = await execa("git", [
+		"--git-dir",
+		barePath,
+		"symbolic-ref",
+		"--short",
+		"HEAD",
+	]);
+	const defaultBranch = stdout.trim();
+	await execa("git", ["init", workDir]);
+	await writeFile(join(workDir, "README.md"), "base\n", "utf-8");
+	await execa("git", ["add", "--all"], { cwd: workDir });
+	const gitEnv = {
+		GIT_AUTHOR_NAME: "Owner",
+		GIT_AUTHOR_EMAIL: "owner@example.com",
+		GIT_COMMITTER_NAME: "Owner",
+		GIT_COMMITTER_EMAIL: "owner@example.com",
+	};
+	await execa("git", ["commit", "--message=base"], {
+		cwd: workDir,
+		env: gitEnv,
+	});
+	await execa("git", ["remote", "add", "origin", barePath], { cwd: workDir });
+	await execa("git", ["push", "origin", `HEAD:${defaultBranch}`], {
+		cwd: workDir,
+	});
+	await execa("git", ["checkout", "-b", "review-comments"], { cwd: workDir });
+	await writeFile(
+		join(workDir, "feature.ts"),
+		"export const feature = true;\n",
+	);
+	await execa("git", ["add", "--all"], { cwd: workDir });
+	await execa("git", ["commit", "--message=feature"], {
+		cwd: workDir,
+		env: gitEnv,
+	});
+	await execa("git", ["push", "origin", "HEAD:review-comments"], {
+		cwd: workDir,
+	});
+	return { workDir };
+}
+
 test("enforces organization and repository role hierarchy", async ({
 	browser,
 	page,
 }) => {
+	test.setTimeout(120_000);
 	const suffix = Date.now().toString(36);
 	const owner = {
 		name: "Owner",
@@ -71,9 +129,27 @@ test("enforces organization and repository role hierarchy", async ({
 	await page.getByRole("button", { name: "New repository" }).click();
 	await page.getByLabel("Repository name").fill(repositoryName);
 	await page.getByRole("button", { name: "Create repository" }).click();
-	await expect(
-		page.getByRole("link", { name: repositoryName }),
-	).toBeVisible();
+	await expect(page.getByRole("link", { name: repositoryName })).toBeVisible();
+	const seededRepository = await seedPullRequestBranches(
+		organizationName,
+		repositoryName,
+		suffix,
+	);
+	await page.goto(
+		`/organizations/${organizationName}/repositories/${repositoryName}/pulls/new`,
+	);
+	await waitForHydration(page);
+	await page.getByLabel("Title").fill("Reader review");
+	await page.getByRole("combobox", { name: "Source branch" }).click();
+	await page.getByRole("option", { name: "review-comments" }).click();
+	await page.getByRole("button", { name: /Create pull request/i }).click();
+	await page.waitForURL(
+		new RegExp(
+			`/organizations/${organizationName}/repositories/${repositoryName}/pulls/\\d+`,
+		),
+	);
+	const pullRequestId = Number(page.url().split("/").at(-1));
+	expect(pullRequestId).toBeGreaterThan(0);
 
 	const reader = await createAccount(browser, "Reader", suffix);
 	const repositoryModerator = await createAccount(
@@ -81,21 +157,13 @@ test("enforces organization and repository role hierarchy", async ({
 		"RepositoryModerator",
 		suffix,
 	);
-	const grantedMember = await createAccount(
-		browser,
-		"GrantedMember",
-		suffix,
-	);
+	const grantedMember = await createAccount(browser, "GrantedMember", suffix);
 	const organizationModerator = await createAccount(
 		browser,
 		"OrganizationModerator",
 		suffix,
 	);
-	const administrator = await createAccount(
-		browser,
-		"Administrator",
-		suffix,
-	);
+	const administrator = await createAccount(browser, "Administrator", suffix);
 	const plainMember = await createAccount(browser, "PlainMember", suffix);
 	const accounts = [
 		reader,
@@ -156,16 +224,36 @@ test("enforces organization and repository role hierarchy", async ({
 	await expect(
 		reader.page.getByRole("button", { name: "New pull request" }),
 	).toHaveCount(0);
+	await expect(reader.page.getByRole("tab", { name: "Settings" })).toHaveCount(
+		0,
+	);
+	await reader.page.goto(
+		`/organizations/${organizationName}/repositories/${repositoryName}/pulls/${pullRequestId}/files`,
+	);
+	await waitForHydration(reader.page);
 	await expect(
-		reader.page.getByRole("tab", { name: "Settings" }),
+		reader.page.getByRole("checkbox", {
+			name: "Mark feature.ts as viewed",
+		}),
 	).toHaveCount(0);
+	const readerComment = reader.page.getByRole("textbox", {
+		name: "Comment on feature.ts",
+	});
+	await readerComment.fill("Read-only reviewer comment");
+	await reader.page.getByRole("button", { name: "Add comment" }).click();
+	await expect(
+		reader.page.getByText("Read-only reviewer comment"),
+	).toBeVisible();
 
 	const grantWriter = await page.request.put(
 		`${repositoryMemberUrl}/${reader.profile.id}`,
 		{ data: { role: "write" } },
 	);
 	expect(grantWriter.ok()).toBe(true);
-	await reader.page.reload();
+	await reader.page.goto(
+		`/organizations/${organizationName}/repositories/${repositoryName}/pulls`,
+	);
+	await waitForHydration(reader.page);
 	await expect(
 		reader.page.getByRole("button", { name: "New pull request" }),
 	).toBeVisible();
@@ -186,11 +274,10 @@ test("enforces organization and repository role hierarchy", async ({
 		{ data: { role: "write" } },
 	);
 	expect(moderatorGrant.ok()).toBe(true);
-	const forbiddenModeratorGrant =
-		await repositoryModerator.page.request.put(
-			`${repositoryMemberUrl}/${plainMember.profile.id}`,
-			{ data: { role: "moderator" } },
-		);
+	const forbiddenModeratorGrant = await repositoryModerator.page.request.put(
+		`${repositoryMemberUrl}/${plainMember.profile.id}`,
+		{ data: { role: "moderator" } },
+	);
 	expect(forbiddenModeratorGrant.status()).toBe(403);
 	const forbiddenDelete = await repositoryModerator.page.request.delete(
 		`/api/v1/organizations/${organizationName}/repositories/${repositoryName}`,
@@ -204,9 +291,7 @@ test("enforces organization and repository role hierarchy", async ({
 		grantedMember.page.getByRole("button", { name: "New pull request" }),
 	).toBeVisible();
 
-	await organizationModerator.page.goto(
-		`/organizations/${organizationName}`,
-	);
+	await organizationModerator.page.goto(`/organizations/${organizationName}`);
 	await expect(
 		organizationModerator.page.getByRole("button", {
 			name: "New repository",
@@ -254,4 +339,5 @@ test("enforces organization and repository role hierarchy", async ({
 	for (const account of accounts) {
 		await account.context.close();
 	}
+	rmSync(seededRepository.workDir, { recursive: true, force: true });
 });

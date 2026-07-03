@@ -8,7 +8,7 @@ import type {
 } from "#/modules/git";
 import { ConflictError, NotFoundError } from "#/platform/errors";
 import type { PullRequestStore } from "./pull-request.store";
-import type { PullRequest } from "./schemas";
+import type { PullRequest, PullRequestComment } from "./schemas";
 
 type RepositoryTarget = RepositoryLocator | string;
 
@@ -177,6 +177,50 @@ export function createPullRequestService(
 				pr.targetBranch,
 				pr.sourceBranch,
 			);
+		},
+
+		async listPullRequestComments(
+			locator: RepositoryTarget,
+			id: number,
+		): Promise<PullRequestComment[]> {
+			await requirePullRequest(locator, id);
+			return store.listComments(locator as RepositoryLocator, id);
+		},
+
+		async addPullRequestFileComment(
+			locator: RepositoryTarget,
+			id: number,
+			filePath: string,
+			body: string,
+			author: { id: string; name: string },
+		): Promise<PullRequestComment> {
+			const pr = await requirePullRequest(locator, id);
+			if (pr.status !== "open") {
+				throw new ConflictError(
+					`Pull request #${id} is ${pr.status} and cannot be commented on`,
+				);
+			}
+
+			const files = await gitProvider.getDiff(
+				locator as RepositoryLocator,
+				pr.targetBranch,
+				pr.sourceBranch,
+			);
+			const fileExists = files.some(
+				(file) => (file.newPath ?? file.oldPath) === filePath,
+			);
+			if (!fileExists) {
+				throw new Error(
+					`File "${filePath}" is not part of pull request #${id}`,
+				);
+			}
+
+			return store.addComment(locator as RepositoryLocator, id, {
+				target: { type: "file", filePath },
+				body,
+				authorId: author.id,
+				authorName: author.name,
+			});
 		},
 
 		async setPullRequestFileViewed(

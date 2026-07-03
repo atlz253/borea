@@ -33,6 +33,8 @@ function createMockStore(): PullRequestStore {
 		get: vi.fn(),
 		update: vi.fn(),
 		setFileViewed: vi.fn(),
+		listComments: vi.fn(),
+		addComment: vi.fn(),
 		deleteAll: vi.fn(),
 	};
 }
@@ -413,5 +415,121 @@ describe("setPullRequestFileViewed", () => {
 		await expect(
 			svc.setPullRequestFileViewed("my-repo", 999, "file.ts", true),
 		).rejects.toThrow("not found");
+	});
+});
+
+describe("pull request file comments", () => {
+	const author = {
+		id: "11111111-1111-4111-8111-111111111111",
+		name: "Alice",
+	};
+	const comment = {
+		id: "22222222-2222-4222-8222-222222222222",
+		target: { type: "file" as const, filePath: "src/file.ts" },
+		body: "Looks good",
+		authorId: author.id,
+		authorName: author.name,
+		createdAt: "2026-01-01T00:00:00.000Z",
+	};
+
+	it("lists comments after requiring the pull request", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(prData);
+		vi.mocked(store.listComments).mockResolvedValue([comment]);
+
+		const svc = createPullRequestService(git, store);
+		const result = await svc.listPullRequestComments("my-repo", 1);
+
+		expect(result).toEqual([comment]);
+		expect(store.listComments).toHaveBeenCalledWith("my-repo", 1);
+	});
+
+	it.each([
+		{
+			status: "added" as const,
+			oldPath: null,
+			newPath: "src/file.ts",
+		},
+		{
+			status: "modified" as const,
+			oldPath: "src/file.ts",
+			newPath: "src/file.ts",
+		},
+		{
+			status: "renamed" as const,
+			oldPath: "src/old.ts",
+			newPath: "src/file.ts",
+		},
+		{
+			status: "deleted" as const,
+			oldPath: "src/file.ts",
+			newPath: null,
+		},
+	])("adds a comment to a $status file", async (file) => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(prData);
+		vi.mocked(git.getDiff).mockResolvedValue([
+			{ ...file, hunks: [], isBinary: false },
+		]);
+		vi.mocked(store.addComment).mockResolvedValue(comment);
+
+		const svc = createPullRequestService(git, store);
+		const result = await svc.addPullRequestFileComment(
+			"my-repo",
+			1,
+			"src/file.ts",
+			"Looks good",
+			author,
+		);
+
+		expect(result).toEqual(comment);
+		expect(store.addComment).toHaveBeenCalledWith("my-repo", 1, {
+			target: { type: "file", filePath: "src/file.ts" },
+			body: "Looks good",
+			authorId: author.id,
+			authorName: author.name,
+		});
+	});
+
+	it("rejects a file outside the current diff", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue(prData);
+		vi.mocked(git.getDiff).mockResolvedValue([]);
+
+		const svc = createPullRequestService(git, store);
+
+		await expect(
+			svc.addPullRequestFileComment(
+				"my-repo",
+				1,
+				"unknown.ts",
+				"Comment",
+				author,
+			),
+		).rejects.toThrow("is not part of pull request");
+		expect(store.addComment).not.toHaveBeenCalled();
+	});
+
+	it("rejects comments on a non-open pull request", async () => {
+		const git = createMockGit();
+		const store = createMockStore();
+		vi.mocked(store.get).mockResolvedValue({ ...prData, status: "merged" });
+
+		const svc = createPullRequestService(git, store);
+
+		await expect(
+			svc.addPullRequestFileComment(
+				"my-repo",
+				1,
+				"src/file.ts",
+				"Comment",
+				author,
+			),
+		).rejects.toMatchObject({ name: "ConflictError" });
+		expect(git.getDiff).not.toHaveBeenCalled();
+		expect(store.addComment).not.toHaveBeenCalled();
 	});
 });

@@ -69,6 +69,7 @@ Semantic Versioning (MAJOR.MINOR.PATCH) following npm conventions
 - Pull/Merge requests:
   - Create, view, close
   - Code review (line-level comments)
+  - File-level discussion threads (implemented as an intermediate review step)
   - Basic discussion threads
 
 **4.2. Git Protocol**
@@ -376,6 +377,7 @@ ORGANIZATIONS_PATH=./data/organizations
 - [X] User can push to a repository without authentication
 - [X] User can browse files and commit history
 - [X] User can create a Pull Request
+- [X] User can leave comments on a changed file in a PR
 - [ ] User can leave a comment on a code line in a PR
 - [X] User can merge a PR
 - [X] All actions are performed on behalf of a fixed user (configurable)

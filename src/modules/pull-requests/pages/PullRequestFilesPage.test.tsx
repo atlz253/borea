@@ -3,12 +3,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { DiffFile } from "#/modules/git";
-import type { PullRequest } from "../schemas";
+import type { PullRequest, PullRequestComment } from "../schemas";
 import PullRequestFilesPage from "./PullRequestFilesPage";
 
 const mocks = vi.hoisted(() => ({
 	invalidate: vi.fn(),
 	setViewed: vi.fn(),
+	addComment: vi.fn(),
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -17,6 +18,7 @@ vi.mock("@tanstack/react-router", () => ({
 
 vi.mock("../server/pull-request.functions", () => ({
 	setPullRequestFileViewedFn: mocks.setViewed,
+	addPullRequestFileCommentFn: mocks.addComment,
 }));
 
 const pullRequest: PullRequest = {
@@ -56,10 +58,27 @@ const file: DiffFile = {
 	],
 };
 
-function renderPage(pr: PullRequest = pullRequest) {
+const comment: PullRequestComment = {
+	id: "22222222-2222-4222-8222-222222222222",
+	target: { type: "file", filePath: "feature.ts" },
+	body: "Please cover this with a test.",
+	authorId: "11111111-1111-4111-8111-111111111111",
+	authorName: "Alice",
+	createdAt: "2026-01-02T10:00:00.000Z",
+};
+
+function renderPage(
+	pr: PullRequest = pullRequest,
+	comments: PullRequestComment[] = [],
+	files: DiffFile[] = [file],
+) {
 	return render(
 		<MantineProvider>
-			<PullRequestFilesPage pullRequest={pr} files={[file]} />
+			<PullRequestFilesPage
+				pullRequest={pr}
+				files={files}
+				comments={comments}
+			/>
 		</MantineProvider>,
 	);
 }
@@ -73,6 +92,8 @@ describe("PullRequestFilesPage", () => {
 			...pullRequest,
 			viewedFiles: ["feature.ts"],
 		});
+		mocks.addComment.mockReset();
+		mocks.addComment.mockResolvedValue(comment);
 	});
 
 	it("renders persisted viewed state as collapsed", () => {
@@ -146,5 +167,80 @@ describe("PullRequestFilesPage", () => {
 			}),
 		).not.toBeChecked();
 		expect(screen.getByText("@@ -0,0 +1,1 @@")).toBeVisible();
+	});
+
+	it("renders comments while a viewed file diff is collapsed", () => {
+		renderPage({ ...pullRequest, viewedFiles: ["feature.ts"] }, [comment]);
+
+		expect(screen.getByText("Please cover this with a test.")).toBeVisible();
+		expect(screen.getByText("@@ -0,0 +1,1 @@")).not.toBeVisible();
+	});
+
+	it("adds a comment and clears the textarea", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		const textarea = screen.getByRole("textbox", {
+			name: "Comment on feature.ts",
+		});
+
+		await user.type(textarea, "Please cover this with a test.");
+		await user.click(screen.getByRole("button", { name: "Add comment" }));
+
+		await waitFor(() => {
+			expect(mocks.addComment).toHaveBeenCalledWith({
+				data: {
+					organizationName: "default",
+					repoName: "my-repo",
+					id: 1,
+					filePath: "feature.ts",
+					body: "Please cover this with a test.",
+				},
+			});
+		});
+		expect(textarea).toHaveValue("");
+		expect(screen.getByText("Please cover this with a test.")).toBeVisible();
+		expect(mocks.invalidate).toHaveBeenCalled();
+	});
+
+	it("keeps comment text and shows an error when submission fails", async () => {
+		const user = userEvent.setup();
+		mocks.addComment.mockRejectedValue(new Error("Storage unavailable"));
+		renderPage();
+		const textarea = screen.getByRole("textbox", {
+			name: "Comment on feature.ts",
+		});
+
+		await user.type(textarea, "Keep this text");
+		await user.click(screen.getByRole("button", { name: "Add comment" }));
+
+		await expect(screen.findByRole("alert")).resolves.toHaveTextContent(
+			"Storage unavailable",
+		);
+		expect(textarea).toHaveValue("Keep this text");
+	});
+
+	it("shows comment history without a form for a merged pull request", () => {
+		renderPage({ ...pullRequest, status: "merged" }, [comment]);
+
+		expect(screen.getByText("Please cover this with a test.")).toBeVisible();
+		expect(
+			screen.queryByRole("textbox", { name: "Comment on feature.ts" }),
+		).not.toBeInTheDocument();
+		expect(
+			screen.queryByRole("button", { name: "Add comment" }),
+		).not.toBeInTheDocument();
+	});
+
+	it("shows archived comments when a merged pull request diff is empty", () => {
+		renderPage({ ...pullRequest, status: "merged" }, [comment], []);
+
+		expect(screen.getByText("feature.ts")).toBeVisible();
+		expect(
+			screen.getByText("File is no longer in the current diff"),
+		).toBeVisible();
+		expect(screen.getByText("Please cover this with a test.")).toBeVisible();
+		expect(
+			screen.queryByRole("textbox", { name: "Comment on feature.ts" }),
+		).not.toBeInTheDocument();
 	});
 });

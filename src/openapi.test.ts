@@ -28,15 +28,10 @@ describe("generateOpenApiDocument", () => {
 		expect(
 			paths["/api/v1/organizations/{organization}/members"]?.post,
 		).toBeDefined();
+		expect(paths["/api/v1/organizations/{organization}"]?.patch).toBeDefined();
+		expect(paths["/api/v1/organizations/{organization}"]?.delete).toBeDefined();
 		expect(
-			paths["/api/v1/organizations/{organization}"]?.patch,
-		).toBeDefined();
-		expect(
-			paths["/api/v1/organizations/{organization}"]?.delete,
-		).toBeDefined();
-		expect(
-			paths["/api/v1/organizations/{organization}/members/{userId}"]
-				?.patch,
+			paths["/api/v1/organizations/{organization}/members/{userId}"]?.patch,
 		).toBeDefined();
 		expect(
 			paths[

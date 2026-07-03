@@ -14,7 +14,12 @@ import { useEffect, useState } from "react";
 import SplitDiffView from "#/components/SplitDiffView";
 import type { DiffFile } from "#/modules/git";
 import { useRepositoryAccess } from "#/modules/organizations";
-import type { PullRequest, PullRequestStatus } from "../schemas";
+import FileComments from "../components/FileComments";
+import type {
+	PullRequest,
+	PullRequestComment,
+	PullRequestStatus,
+} from "../schemas";
 import { setPullRequestFileViewedFn } from "../server/pull-request.functions";
 
 const STATUS_COLORS: Record<PullRequestStatus, string> = {
@@ -26,11 +31,13 @@ const STATUS_COLORS: Record<PullRequestStatus, string> = {
 interface PullRequestFilesPageProps {
 	pullRequest: PullRequest;
 	files: DiffFile[];
+	comments: PullRequestComment[];
 }
 
 export default function PullRequestFilesPage({
 	pullRequest,
 	files,
+	comments,
 }: PullRequestFilesPageProps) {
 	const access = useRepositoryAccess();
 	const router = useRouter();
@@ -39,6 +46,26 @@ export default function PullRequestFilesPage({
 	);
 	const [savingFilePath, setSavingFilePath] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
+	const commentsByFile = new Map<string, PullRequestComment[]>();
+	for (const comment of comments) {
+		if (comment.target.type !== "file") {
+			continue;
+		}
+		const current = commentsByFile.get(comment.target.filePath) ?? [];
+		current.push(comment);
+		commentsByFile.set(comment.target.filePath, current);
+	}
+	const currentFilePaths = new Set(
+		files
+			.map((file) => file.newPath ?? file.oldPath)
+			.filter((filePath): filePath is string => Boolean(filePath)),
+	);
+	const archivedComments =
+		pullRequest.status === "open"
+			? []
+			: [...commentsByFile.entries()].filter(
+					([filePath]) => !currentFilePaths.has(filePath),
+				);
 
 	useEffect(() => {
 		setViewedFiles(new Set(pullRequest.viewedFiles));
@@ -141,7 +168,7 @@ export default function PullRequestFilesPage({
 				const viewed = viewedFiles.has(filePath);
 				return (
 					<SplitDiffView
-						key={filePath}
+						key={`${pullRequest.organizationName}:${pullRequest.repoName}:${pullRequest.id}:${filePath}`}
 						file={file}
 						collapsed={viewed}
 						headerAction={
@@ -160,9 +187,32 @@ export default function PullRequestFilesPage({
 								/>
 							) : undefined
 						}
+						footer={
+							<FileComments
+								pullRequest={pullRequest}
+								filePath={filePath}
+								comments={commentsByFile.get(filePath) ?? []}
+							/>
+						}
 					/>
 				);
 			})}
+
+			{archivedComments.map(([filePath, fileComments]) => (
+				<Paper key={filePath} withBorder p="md" mb="md">
+					<Text size="sm" fw={600} ff="monospace">
+						{filePath}
+					</Text>
+					<Text size="xs" c="dimmed">
+						File is no longer in the current diff
+					</Text>
+					<FileComments
+						pullRequest={pullRequest}
+						filePath={filePath}
+						comments={fileComments}
+					/>
+				</Paper>
+			))}
 		</Stack>
 	);
 }

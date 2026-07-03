@@ -10,9 +10,7 @@ import { organizationRoleSchema, repositoryRoleSchema } from "./schemas";
 
 describe("organization access policy", () => {
 	it("accepts only lowercase role values", () => {
-		expect(organizationRoleSchema.parse("administrator")).toBe(
-			"administrator",
-		);
+		expect(organizationRoleSchema.parse("administrator")).toBe("administrator");
 		expect(repositoryRoleSchema.parse("write")).toBe("write");
 		expect(() => organizationRoleSchema.parse("OWNER")).toThrow();
 		expect(() => repositoryRoleSchema.parse("READ")).toThrow();

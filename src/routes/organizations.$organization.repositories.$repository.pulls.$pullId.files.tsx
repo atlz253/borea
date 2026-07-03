@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
 	getPullRequestDiffFn,
 	getPullRequestFn,
+	listPullRequestCommentsFn,
 	PullRequestFilesPage,
 } from "#/modules/pull-requests";
 
@@ -14,32 +15,33 @@ export const Route = createFileRoute(
 			throw new Error("Invalid pull request id");
 		}
 
-		const pullRequest = await getPullRequestFn({
-			data: {
-				organizationName: params.organization,
-				repoName: params.repository,
-				id,
-			},
-		});
+		const data = {
+			organizationName: params.organization,
+			repoName: params.repository,
+			id,
+		};
+		const [pullRequest, files, comments] = await Promise.all([
+			getPullRequestFn({ data }),
+			getPullRequestDiffFn({ data }),
+			listPullRequestCommentsFn({ data }),
+		]);
 		if (!pullRequest) {
 			throw new Error(`Pull request #${id} not found`);
 		}
 
-		const files = await getPullRequestDiffFn({
-			data: {
-				organizationName: params.organization,
-				repoName: params.repository,
-				id,
-			},
-		});
-
-		return { pullRequest, files };
+		return { pullRequest, files, comments };
 	},
 	component: PullRequestFilesRoute,
 });
 
 function PullRequestFilesRoute() {
-	const { pullRequest, files } = Route.useLoaderData();
+	const { pullRequest, files, comments } = Route.useLoaderData();
 
-	return <PullRequestFilesPage pullRequest={pullRequest} files={files} />;
+	return (
+		<PullRequestFilesPage
+			pullRequest={pullRequest}
+			files={files}
+			comments={comments}
+		/>
+	);
 }

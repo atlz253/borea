@@ -135,8 +135,7 @@ export function createRepositoryAccessPolicy({
 					context.organizationRole === "owner" ||
 					context.organizationRole === "administrator" ||
 					context.organizationRole === "moderator"),
-			canDelete:
-				bypassAccess || hasRepositoryPermission(context, "delete"),
+			canDelete: bypassAccess || hasRepositoryPermission(context, "delete"),
 		};
 	}
 

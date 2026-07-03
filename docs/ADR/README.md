@@ -25,6 +25,7 @@ This directory contains Architecture Decision Records (ADRs) for Nirvana. Each A
 | 0019 | [File Authentication and Organization Ownership](0019-file-authentication-and-organization-ownership.md) | File-backed users, cookie sessions, NoAuth compatibility, and owner-scoped organizations |
 | 0020 | [Equal Organization Membership](0020-organization-membership.md) | File-backed equal membership with invitations for existing users |
 | 0021 | [Organization and Repository Access Control](0021-access-control.md) | Lowercase organization roles, repository grants, ownership, and permission enforcement |
+| 0022 | [Pull Request File Comments](0022-pull-request-file-comments.md) | Append-only file discussion threads stored separately from public pull request metadata |
 
 ## Adding a New ADR
 

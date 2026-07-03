@@ -5,6 +5,7 @@ import { requireRepositoryPermissionFn } from "#/modules/organizations";
 import { createPullRequestService } from "../pull-request.service";
 import { pullRequestStore } from "../pull-request.store";
 import {
+	addPullRequestFileCommentSchema,
 	createPullRequestSchema,
 	getPullRequestSchema,
 	listPullRequestsSchema,
@@ -81,6 +82,28 @@ export const getPullRequestDiffFn = createServerFn({ method: "GET" })
 	.handler(async ({ data }) => {
 		await requireRepository(data.organizationName, data.repoName, "read");
 		return service.getPullRequestDiff(locator(data), data.id);
+	});
+
+export const listPullRequestCommentsFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) => getPullRequestSchema.parse(data))
+	.handler(async ({ data }) => {
+		await requireRepository(data.organizationName, data.repoName, "read");
+		return service.listPullRequestComments(locator(data), data.id);
+	});
+
+export const addPullRequestFileCommentFn = createServerFn({ method: "POST" })
+	.validator((data: unknown) => addPullRequestFileCommentSchema.parse(data))
+	.handler(async ({ data }) => {
+		await assertSameOriginFn();
+		await requireRepository(data.organizationName, data.repoName, "read");
+		const user = await requireCurrentUserFn();
+		return service.addPullRequestFileComment(
+			locator(data),
+			data.id,
+			data.filePath,
+			data.body,
+			user,
+		);
 	});
 
 export const setPullRequestFileViewedFn = createServerFn({ method: "POST" })

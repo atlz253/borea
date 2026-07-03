@@ -8,12 +8,14 @@ interface SplitDiffViewProps {
 	file: DiffFile;
 	collapsed?: boolean;
 	headerAction?: ReactNode;
+	footer?: ReactNode;
 }
 
 export default function SplitDiffView({
 	file,
 	collapsed = false,
 	headerAction,
+	footer,
 }: SplitDiffViewProps) {
 	const language = detectLanguage(file.newPath ?? file.oldPath ?? "");
 
@@ -52,6 +54,7 @@ export default function SplitDiffView({
 					))
 				)}
 			</Collapse>
+			{footer}
 		</Paper>
 	);
 }

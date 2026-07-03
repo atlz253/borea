@@ -6,15 +6,19 @@ export { default as PullRequestDetailPage } from "./pages/PullRequestDetailPage"
 export { default as PullRequestFilesPage } from "./pages/PullRequestFilesPage";
 export { default as PullRequestsListPage } from "./pages/PullRequestsListPage";
 export type {
+	AddPullRequestFileCommentInput,
 	CreatePullRequestInput,
 	GetPullRequestInput,
 	ListPullRequestsInput,
 	MergePullRequestInput,
 	PullRequest,
+	PullRequestComment,
+	PullRequestCommentTarget,
 	PullRequestStatus,
 	SetPullRequestFileViewedInput,
 } from "./schemas";
 export {
+	addPullRequestFileCommentSchema,
 	createPullRequestSchema,
 	getPullRequestSchema,
 	listPullRequestsSchema,
@@ -22,15 +26,20 @@ export {
 	mergePullRequestResponseSchema,
 	mergePullRequestSchema,
 	mergeResultSchema,
+	pullRequestCommentSchema,
+	pullRequestCommentsSchema,
+	pullRequestCommentTargetSchema,
 	pullRequestSchema,
 	setPullRequestFileViewedSchema,
 } from "./schemas";
 export {
+	addPullRequestFileCommentFn,
 	checkMergeStatusFn,
 	createPullRequestFn,
 	deletePullRequestsForRepositoryFn,
 	getPullRequestDiffFn,
 	getPullRequestFn,
+	listPullRequestCommentsFn,
 	listPullRequestsFn,
 	mergePullRequestFn,
 	setPullRequestFileViewedFn,

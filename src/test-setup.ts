@@ -33,3 +33,22 @@ if (typeof window !== "undefined" && !window.matchMedia) {
 		}),
 	});
 }
+
+if (typeof window !== "undefined" && !window.visualViewport) {
+	Object.defineProperty(window, "visualViewport", {
+		writable: true,
+		value: {
+			addEventListener: () => {},
+			removeEventListener: () => {},
+		},
+	});
+}
+
+if (typeof document !== "undefined" && !document.fonts) {
+	Object.defineProperty(document, "fonts", {
+		value: {
+			addEventListener: () => {},
+			removeEventListener: () => {},
+		},
+	});
+}

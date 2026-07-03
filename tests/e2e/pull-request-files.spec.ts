@@ -103,8 +103,28 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		await expect(page.getByText("E2E test pull request")).toBeVisible();
 		await expect(page.getByText("1 file changed")).toBeVisible();
 		await expect(page.getByText("ADDED")).toBeVisible();
-		await expect(page.getByText("feature.txt")).toBeVisible();
+		await expect(page.getByText("feature.txt", { exact: true })).toBeVisible();
 		await expect(page.getByText("feature content")).toBeVisible();
+
+		const commentInput = page.getByRole("textbox", {
+			name: "Comment on feature.txt",
+		});
+		const addCommentButton = page.getByRole("button", { name: "Add comment" });
+		await commentInput.fill("First file review comment");
+		await addCommentButton.click();
+		await expect(page.getByText("First file review comment")).toBeVisible();
+		await expect(commentInput).toHaveValue("");
+		await expect(commentInput).toBeEnabled();
+
+		await commentInput.fill("Second file review comment");
+		await addCommentButton.click();
+		await expect(page.getByText("Second file review comment")).toBeVisible();
+		await expect(commentInput).toBeEnabled();
+
+		await page.reload();
+		await waitForHydration(page);
+		await expect(page.getByText("First file review comment")).toBeVisible();
+		await expect(page.getByText("Second file review comment")).toBeVisible();
 
 		const viewedCheckbox = page.getByRole("checkbox", {
 			name: "Mark feature.txt as viewed",
@@ -114,6 +134,7 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		await expect(viewedCheckbox).toBeDisabled();
 		await expect(viewedCheckbox).toBeEnabled();
 		await expect(page.getByText("feature content")).toBeHidden();
+		await expect(page.getByText("First file review comment")).toBeVisible();
 
 		await page.reload();
 		await waitForHydration(page);
@@ -138,6 +159,15 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		await waitForHydration(page);
 
 		await expect(page.getByText("E2E test pull request")).toBeVisible();
+		await page.getByRole("button", { name: "Merge (fast-forward)" }).click();
+		await expect(page.getByText("Merged as")).toBeVisible({ timeout: 15_000 });
+
+		await page.getByRole("tab", { name: /Files changed/i }).click();
+		await waitForHydration(page);
+		await expect(page.getByText("First file review comment")).toBeVisible();
+		await expect(
+			page.getByRole("textbox", { name: "Comment on feature.txt" }),
+		).toHaveCount(0);
 	} finally {
 		rmSync(workDir, { recursive: true, force: true });
 		rmSync(barePath, { recursive: true, force: true });

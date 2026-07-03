@@ -191,4 +191,123 @@ describe("FileSystemPullRequestStore", () => {
 		const found = await store.get("my-repo", pr.id);
 		expect(found?.viewedFiles).toEqual(["a.ts", "b.ts"]);
 	});
+
+	it("returns an empty comment list when no comments exist", async () => {
+		const pr = await store.create(prInput);
+
+		expect(await store.listComments("my-repo", pr.id)).toEqual([]);
+	});
+
+	it("persists comment identity, author, target, and body", async () => {
+		const pr = await store.create(prInput);
+		const authorId = "11111111-1111-4111-8111-111111111111";
+
+		const comment = await store.addComment("my-repo", pr.id, {
+			target: { type: "file", filePath: "src/file.ts" },
+			body: "Review note",
+			authorId,
+			authorName: "Alice",
+		});
+
+		expect(comment).toMatchObject({
+			target: { type: "file", filePath: "src/file.ts" },
+			body: "Review note",
+			authorId,
+			authorName: "Alice",
+		});
+		expect(comment.id).toMatch(
+			/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+		);
+		expect(comment.createdAt).toBeTruthy();
+	});
+
+	it("reads comments from disk in chronological order", async () => {
+		const pr = await store.create(prInput);
+		const input = {
+			target: { type: "file" as const, filePath: "src/file.ts" },
+			authorId: "11111111-1111-4111-8111-111111111111",
+			authorName: "Alice",
+		};
+		await store.addComment("my-repo", pr.id, {
+			...input,
+			body: "First",
+		});
+		await store.addComment("my-repo", pr.id, {
+			...input,
+			body: "Second",
+		});
+
+		const secondStore = new FileSystemPullRequestStore(tmpDir);
+		const comments = await secondStore.listComments("my-repo", pr.id);
+
+		expect(comments.map((comment) => comment.body)).toEqual([
+			"First",
+			"Second",
+		]);
+	});
+
+	it("isolates comments by organization namespace", async () => {
+		const author = {
+			target: { type: "file" as const, filePath: "src/file.ts" },
+			body: "Organization A",
+			authorId: "11111111-1111-4111-8111-111111111111",
+			authorName: "Alice",
+		};
+		const prA = await store.create({
+			...prInput,
+			organizationName: "org-a",
+		});
+		const prB = await store.create({
+			...prInput,
+			organizationName: "org-b",
+		});
+		const locatorA = {
+			organizationName: "org-a",
+			repositoryName: "my-repo",
+		};
+		const locatorB = {
+			organizationName: "org-b",
+			repositoryName: "my-repo",
+		};
+
+		await store.addComment(locatorA, prA.id, author);
+
+		expect(await store.listComments(locatorA, prA.id)).toHaveLength(1);
+		expect(await store.listComments(locatorB, prB.id)).toEqual([]);
+	});
+
+	it("serializes concurrent comment appends", async () => {
+		const pr = await store.create(prInput);
+		const input = {
+			target: { type: "file" as const, filePath: "src/file.ts" },
+			authorId: "11111111-1111-4111-8111-111111111111",
+			authorName: "Alice",
+		};
+
+		await Promise.all([
+			store.addComment("my-repo", pr.id, { ...input, body: "First" }),
+			store.addComment("my-repo", pr.id, { ...input, body: "Second" }),
+		]);
+
+		const comments = await store.listComments("my-repo", pr.id);
+		expect(comments.map((comment) => comment.body)).toEqual([
+			"First",
+			"Second",
+		]);
+	});
+
+	it("rejects comments when the pull request is not open", async () => {
+		const pr = await store.create(prInput);
+		await store.update("my-repo", pr.id, { status: "merged" });
+
+		await expect(
+			store.addComment("my-repo", pr.id, {
+				target: { type: "file", filePath: "src/file.ts" },
+				body: "Too late",
+				authorId: "11111111-1111-4111-8111-111111111111",
+				authorName: "Alice",
+			}),
+		).rejects.toThrow("cannot be commented on");
+		expect(await store.listComments("my-repo", pr.id)).toEqual([]);
+	});
 });
