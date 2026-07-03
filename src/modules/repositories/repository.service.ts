@@ -5,7 +5,6 @@ import type {
 	FileContent,
 	GetCommitDiffResult,
 	GitProvider,
-	RepositoryInfo,
 	RepositoryLocator,
 	TreeEntry,
 } from "#/modules/git";
@@ -34,7 +33,7 @@ export async function createRepository(
 					organizationName,
 					repositoryName: input.name,
 				}
-			: (input.name as never),
+			: input.name,
 		input.description,
 	);
 	return { ...repository, organizationName };
@@ -55,11 +54,7 @@ export async function listRepositories(
 ): Promise<Repository[]> {
 	const repositories = organizationName
 		? await gitProvider.list(organizationName)
-		: await (
-				gitProvider.list as (
-					organizationName?: string,
-				) => Promise<RepositoryInfo[]>
-			)();
+		: await gitProvider.list();
 	return repositories.map((repository) => ({
 		...repository,
 		organizationName:

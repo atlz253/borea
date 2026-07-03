@@ -136,11 +136,11 @@ export interface GetCommitDiffResult {
 
 export interface GitProvider {
 	init(
-		locator: RepositoryLocator,
+		locator: RepositoryLocator | string,
 		description?: string,
 	): Promise<RepositoryInfo>;
 	delete(locator: RepositoryLocator): Promise<void>;
-	list(organizationName: string): Promise<RepositoryInfo[]>;
+	list(organizationName?: string): Promise<RepositoryInfo[]>;
 	get(locator: RepositoryLocator): Promise<RepositoryInfo | undefined>;
 	exists(locator: RepositoryLocator): Promise<boolean>;
 	listFiles(
