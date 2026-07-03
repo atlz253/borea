@@ -2,8 +2,8 @@ import { createHash, randomUUID } from "node:crypto";
 import {
 	mkdir,
 	mkdtemp,
-	readFile,
 	readdir,
+	readFile,
 	rm,
 	writeFile,
 } from "node:fs/promises";
@@ -225,10 +225,7 @@ describe("NoAuthProvider", () => {
 			name: "developer",
 		});
 		await expect(
-			provider.createGitToken(
-				"00000000-0000-4000-8000-000000000000",
-				"Laptop",
-			),
+			provider.createGitToken("00000000-0000-4000-8000-000000000000", "Laptop"),
 		).rejects.toBeInstanceOf(ForbiddenError);
 	});
 });

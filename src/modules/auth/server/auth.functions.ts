@@ -1,10 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import {
-	createGitTokenSchema,
-	loginSchema,
-	registerSchema,
-} from "../schemas";
+import { createGitTokenSchema, loginSchema, registerSchema } from "../schemas";
 
 export const assertSameOriginFn = createServerFn({ method: "GET" }).handler(
 	async () => {

@@ -116,11 +116,7 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 	await page.getByRole("button", { name: "Create repository" }).click();
 	await expect(page.getByRole("link", { name: repositoryName })).toBeVisible();
 
-	const seeded = await seedRepository(
-		organizationName,
-		repositoryName,
-		suffix,
-	);
+	const seeded = await seedRepository(organizationName, repositoryName, suffix);
 	const reader = await createAccount(browser, "Reader", suffix);
 	const hidden = await createAccount(browser, "Hidden", suffix);
 	const accounts = [reader, hidden];
@@ -146,9 +142,7 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 	await expect(
 		reader.page.getByText("Copy this token now. It will not be shown again."),
 	).toBeVisible();
-	const readerToken = await reader.page
-		.getByText(/^nirvana_/)
-		.textContent();
+	const readerToken = await reader.page.getByText(/^nirvana_/).textContent();
 	expect(readerToken).toBeTruthy();
 	await reader.page.keyboard.press("Escape");
 	await expect(reader.page.getByText("Git CLI")).toBeVisible();
@@ -163,9 +157,8 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 		{ data: { name: "Hidden client" } },
 	);
 	expect(hiddenTokenResponse.status()).toBe(201);
-	const hiddenToken = (
-		(await hiddenTokenResponse.json()) as { token: string }
-	).token;
+	const hiddenToken = ((await hiddenTokenResponse.json()) as { token: string })
+		.token;
 	const infoRefs = `/api/git/${organizationName}/${repositoryName}.git/info/refs?service=git-upload-pack`;
 
 	const unauthenticated = await page.request.get(infoRefs);
@@ -255,9 +248,9 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 	expect(allowedPush.exitCode).toBe(0);
 
 	await reader.page.getByRole("button", { name: "Revoke" }).click();
-	await expect(
-		reader.page.getByRole("button", { name: "Revoke" }),
-	).toHaveCount(0);
+	await expect(reader.page.getByRole("button", { name: "Revoke" })).toHaveCount(
+		0,
+	);
 	const revoked = await reader.page.request.get(infoRefs, {
 		headers: { Authorization: readerAuthorization },
 	});

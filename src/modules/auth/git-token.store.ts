@@ -6,11 +6,7 @@ import {
 } from "node:crypto";
 import { mkdir, readdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type {
-	CreatedGitToken,
-	GitToken,
-	StoredGitToken,
-} from "./schemas";
+import type { CreatedGitToken, GitToken, StoredGitToken } from "./schemas";
 import { gitTokenIdSchema, storedGitTokenSchema } from "./schemas";
 
 const TOKEN_PREFIX = "nirvana";
@@ -83,9 +79,7 @@ export class FileSystemGitTokenStore implements GitTokenStore {
 		const tokens = await Promise.all(
 			entries
 				.filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
-				.map((entry) =>
-					this.read(entry.name.slice(0, -JSON_EXTENSION_LENGTH)),
-				),
+				.map((entry) => this.read(entry.name.slice(0, -JSON_EXTENSION_LENGTH))),
 		);
 		return tokens
 			.filter(

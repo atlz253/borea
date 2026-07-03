@@ -10,9 +10,7 @@ export const Route = createFileRoute("/api/v1/auth/git-tokens")({
 	server: {
 		handlers: {
 			GET: async () =>
-				handleApiRequest(async () =>
-					Response.json(await listGitTokensFn()),
-				),
+				handleApiRequest(async () => Response.json(await listGitTokensFn())),
 			POST: async ({ request }) =>
 				handleApiRequest(async () => {
 					const input = await parseJsonBody(request, createGitTokenSchema);

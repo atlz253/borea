@@ -14,10 +14,7 @@ import {
 import { Check, Copy, KeyRound, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { CreatedGitToken, GitToken } from "../schemas";
-import {
-	createGitTokenFn,
-	revokeGitTokenFn,
-} from "../server/auth.functions";
+import { createGitTokenFn, revokeGitTokenFn } from "../server/auth.functions";
 
 const ISO_DATE_END = 10;
 const ISO_TIME_START = 11;
@@ -36,7 +33,9 @@ export default function GitTokensPage({
 }) {
 	const [tokens, setTokens] = useState(initialTokens);
 	const [name, setName] = useState("");
-	const [createdToken, setCreatedToken] = useState<CreatedGitToken | null>(null);
+	const [createdToken, setCreatedToken] = useState<CreatedGitToken | null>(
+		null,
+	);
 	const [error, setError] = useState<string | null>(null);
 	const [creating, setCreating] = useState(false);
 	const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -86,8 +85,7 @@ export default function GitTokensPage({
 			<div>
 				<Title order={1}>Git personal access tokens</Title>
 				<Text c="dimmed">
-					Use a token as the password for Git clone, fetch, and push over
-					HTTPS.
+					Use a token as the password for Git clone, fetch, and push over HTTPS.
 				</Text>
 			</div>
 

@@ -61,13 +61,10 @@ export class FileAuthProvider implements AuthProvider {
 
 	async authenticateGitToken(token: string): Promise<User | null> {
 		const userId = await this.gitTokens.verify(token);
-		return userId ? (await this.getUserById(userId)) ?? null : null;
+		return userId ? ((await this.getUserById(userId)) ?? null) : null;
 	}
 
-	async createGitToken(
-		userId: string,
-		name: string,
-	): Promise<CreatedGitToken> {
+	async createGitToken(userId: string, name: string): Promise<CreatedGitToken> {
 		return this.gitTokens.create(userId, name);
 	}
 

@@ -1,13 +1,13 @@
 import { Readable } from "node:stream";
 import { createGunzip } from "node:zlib";
 import { createFileRoute } from "@tanstack/react-router";
+import { getGitRequestUser } from "#/modules/auth";
 import {
 	contentTypeFor,
 	formatAdvertisement,
 	gitProvider,
 	parseSmartHttpPath,
 } from "#/modules/git";
-import { getGitRequestUser } from "#/modules/auth";
 import { requireRepositoryPermissionForUser } from "#/modules/organizations";
 import { ForbiddenError, NotFoundError } from "#/platform/errors";
 
