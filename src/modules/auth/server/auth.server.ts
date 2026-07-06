@@ -1,18 +1,20 @@
 import { getConfig } from "#/platform/config";
-import { FileSystemGitTokenStore } from "../git-token.store";
+import { PrismaDatabaseProvider } from "#/platform/database";
+import { PrismaGitTokenStore } from "../prisma-git-token.store";
+import { PrismaUserStore } from "../prisma-user.store";
 import { FileAuthProvider, NoAuthProvider } from "../providers";
 import { cookieAuthSession } from "../session";
-import { FileSystemUserStore } from "../user.store";
 
 const config = getConfig();
+const db = new PrismaDatabaseProvider();
 
 export const authProvider =
 	config.authMode === "noauth"
 		? new NoAuthProvider(config.defaultUserName)
 		: new FileAuthProvider(
-				new FileSystemUserStore(config.usersPath),
+				new PrismaUserStore(db),
 				cookieAuthSession,
-				new FileSystemGitTokenStore(config.usersPath),
+				new PrismaGitTokenStore(db),
 			);
 
 export const authMode = config.authMode;

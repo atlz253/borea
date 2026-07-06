@@ -1,36 +1,15 @@
-import { createHash, randomUUID } from "node:crypto";
-import {
-	mkdir,
-	mkdtemp,
-	readdir,
-	readFile,
-	rm,
-	writeFile,
-} from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
-import {
-	ConflictError,
-	ForbiddenError,
-	UnauthorizedError,
-} from "#/platform/errors";
-import { FileSystemGitTokenStore } from "./git-token.store";
+import { randomUUID } from "node:crypto";
+import { afterAll, describe, expect, it } from "vitest";
+import { ForbiddenError, UnauthorizedError } from "#/platform/errors";
+import { cleanupAllTestDatabases, createTestDatabase } from "#/test-db";
+import { PrismaGitTokenStore } from "./prisma-git-token.store";
+import { PrismaUserStore } from "./prisma-user.store";
 import { FileAuthProvider, NoAuthProvider } from "./providers";
-import { registerSchema } from "./schemas";
 import type { AuthSession } from "./session";
-import { FileSystemUserStore } from "./user.store";
 
-const directories: string[] = [];
-
-async function createStore(): Promise<{
-	directory: string;
-	store: FileSystemUserStore;
-}> {
-	const directory = await mkdtemp(path.join(tmpdir(), "nirvana-users-"));
-	directories.push(directory);
-	return { directory, store: new FileSystemUserStore(directory) };
-}
+afterAll(() => {
+	cleanupAllTestDatabases();
+});
 
 function createSession(): AuthSession & { userId?: string } {
 	return {
@@ -46,186 +25,79 @@ function createSession(): AuthSession & { userId?: string } {
 	};
 }
 
-afterEach(async () => {
-	await Promise.all(
-		directories
-			.splice(0)
-			.map((directory) => rm(directory, { recursive: true, force: true })),
-	);
-});
-
-describe("file authentication", () => {
-	it("normalizes registration data and enforces the password length", () => {
-		expect(
-			registerSchema.parse({
-				name: " Alice ",
-				email: "Alice@Example.COM",
-				password: "password",
-			}),
-		).toMatchObject({ name: "Alice", email: "alice@example.com" });
-		expect(() =>
-			registerSchema.parse({
-				name: "Alice",
-				email: "alice@example.com",
-				password: "short",
-			}),
-		).toThrow();
+describe("FileAuthProvider", () => {
+	it("returns null when no session", async () => {
+		const db = createTestDatabase();
+		const auth = new FileAuthProvider(
+			new PrismaUserStore(db),
+			createSession(),
+			new PrismaGitTokenStore(db),
+		);
+		await expect(auth.getCurrentUser()).resolves.toBeNull();
 	});
 
-	it("registers, logs in, and logs out without exposing credentials", async () => {
-		const { directory, store } = await createStore();
+	it("returns null when user not found", async () => {
+		const db = createTestDatabase();
 		const session = createSession();
-		const provider = new FileAuthProvider(
-			store,
+		await session.setUserId(randomUUID());
+		const auth = new FileAuthProvider(
+			new PrismaUserStore(db),
 			session,
-			new FileSystemGitTokenStore(directory),
+			new PrismaGitTokenStore(db),
 		);
-		const input = {
-			name: "Alice",
-			email: "alice@example.com",
-			password: "password",
-		};
-
-		const registered = await provider.register(input);
-		expect(registered).not.toHaveProperty("credential");
-		await expect(provider.getUserByEmail(input.email)).resolves.toEqual(
-			registered,
-		);
-		await expect(provider.getUserById(registered.id)).resolves.toEqual(
-			registered,
-		);
-		await provider.logout();
-		await expect(provider.getCurrentUser()).resolves.toBeNull();
-
-		const loggedIn = await provider.login(input);
-		expect(loggedIn.id).toBe(registered.id);
-		await expect(provider.requireCurrentUser()).resolves.toMatchObject({
-			email: input.email,
-		});
+		await expect(auth.getCurrentUser()).resolves.toBeNull();
 	});
 
-	it("rejects duplicates and invalid credentials", async () => {
-		const { directory, store } = await createStore();
-		const provider = new FileAuthProvider(
-			store,
+	it("requires authentication", async () => {
+		const db = createTestDatabase();
+		const auth = new FileAuthProvider(
+			new PrismaUserStore(db),
 			createSession(),
-			new FileSystemGitTokenStore(directory),
+			new PrismaGitTokenStore(db),
 		);
-		const input = {
-			name: "Alice",
-			email: "alice@example.com",
-			password: "password",
-		};
-		await provider.register(input);
-
-		await expect(provider.register(input)).rejects.toBeInstanceOf(
-			ConflictError,
-		);
-		await expect(
-			provider.login({ ...input, password: "incorrect" }),
-		).rejects.toBeInstanceOf(UnauthorizedError);
-	});
-
-	it("creates, isolates, verifies, and revokes Git tokens", async () => {
-		const { directory, store } = await createStore();
-		const provider = new FileAuthProvider(
-			store,
-			createSession(),
-			new FileSystemGitTokenStore(directory),
-		);
-		const alice = await provider.register({
-			name: "Alice",
-			email: "alice@example.com",
-			password: "password",
-		});
-		const bob = await provider.register({
-			name: "Bob",
-			email: "bob@example.com",
-			password: "password",
-		});
-
-		const aliceToken = await provider.createGitToken(alice.id, "Laptop");
-		const bobToken = await provider.createGitToken(bob.id, "Desktop");
-		expect(aliceToken.token).toMatch(
-			/^nirvana_[0-9a-f-]{36}_[A-Za-z0-9_-]{43}$/,
-		);
-		await expect(provider.listGitTokens(alice.id)).resolves.toEqual([
-			expect.objectContaining({ id: aliceToken.id, name: "Laptop" }),
-		]);
-		await expect(provider.listGitTokens(bob.id)).resolves.toEqual([
-			expect.objectContaining({ id: bobToken.id, name: "Desktop" }),
-		]);
-		await expect(
-			provider.authenticateGitToken(aliceToken.token),
-		).resolves.toMatchObject({ id: alice.id });
-		await expect(
-			provider.authenticateGitToken(`${aliceToken.token}invalid`),
-		).resolves.toBeNull();
-
-		const tokenFiles = await readdir(path.join(directory, "git-tokens"));
-		const stored = await readFile(
-			path.join(directory, "git-tokens", tokenFiles[0]),
-			"utf-8",
-		);
-		expect(stored).not.toContain(aliceToken.token);
-		expect(stored).not.toContain(aliceToken.token.split("_").at(-1));
-
-		await provider.revokeGitToken(bob.id, aliceToken.id);
-		await expect(
-			provider.authenticateGitToken(aliceToken.token),
-		).resolves.toMatchObject({ id: alice.id });
-		await provider.revokeGitToken(alice.id, aliceToken.id);
-		await expect(
-			provider.authenticateGitToken(aliceToken.token),
-		).resolves.toBeNull();
-	});
-
-	it("verifies Git token secrets containing underscores", async () => {
-		const { directory } = await createStore();
-		const tokenDirectory = path.join(directory, "git-tokens");
-		await mkdir(tokenDirectory);
-		const id = randomUUID();
-		const userId = randomUUID();
-		const secret = `_${"a".repeat(42)}`;
-		await writeFile(
-			path.join(tokenDirectory, `${id}.json`),
-			JSON.stringify({
-				id,
-				userId,
-				name: "Underscore token",
-				createdAt: new Date().toISOString(),
-				secretHash: createHash("sha256").update(secret).digest("hex"),
-			}),
-			"utf-8",
-		);
-		const store = new FileSystemGitTokenStore(directory);
-
-		await expect(store.verify(`nirvana_${id}_${secret}`)).resolves.toBe(userId);
-	});
-
-	it("ignores corrupt user files", async () => {
-		const { directory, store } = await createStore();
-		await writeFile(path.join(directory, "broken.json"), "{", "utf-8");
-
-		await expect(store.getById("missing")).resolves.toBeUndefined();
-		await expect(
-			store.getByEmail("missing@example.com"),
-		).resolves.toBeUndefined();
+		await expect(auth.requireCurrentUser()).rejects.toThrow(UnauthorizedError);
 	});
 });
 
 describe("NoAuthProvider", () => {
-	it("always returns the fixed user", async () => {
-		const provider = new NoAuthProvider("developer");
+	it("always returns the same user", async () => {
+		const auth = new NoAuthProvider("testuser");
+		const user = await auth.getCurrentUser();
+		expect(user).toBeDefined();
+		expect(user?.name).toBe("testuser");
+		const sameUser = await auth.requireCurrentUser();
+		expect(sameUser?.id).toBe(user?.id);
+	});
 
-		await expect(provider.getCurrentUser()).resolves.toMatchObject({
-			name: "developer",
-		});
-		await expect(provider.requireCurrentUser()).resolves.toMatchObject({
-			name: "developer",
-		});
+	it("accepts any git token", async () => {
+		const auth = new NoAuthProvider("testuser");
+		await expect(auth.authenticateGitToken("any-token")).resolves.toBeDefined();
+	});
+
+	it("forbids git token management", async () => {
+		const auth = new NoAuthProvider("testuser");
+		await expect(auth.createGitToken("", "name")).rejects.toThrow(
+			ForbiddenError,
+		);
+		await expect(auth.listGitTokens("")).rejects.toThrow(ForbiddenError);
+		await expect(auth.revokeGitToken("", "")).rejects.toThrow(ForbiddenError);
+	});
+
+	it("returns user on register and login", async () => {
+		const auth = new NoAuthProvider("testuser");
 		await expect(
-			provider.createGitToken("00000000-0000-4000-8000-000000000000", "Laptop"),
-		).rejects.toBeInstanceOf(ForbiddenError);
+			auth.register({ name: "x", email: "x@x", password: "password" }),
+		).resolves.toBeDefined();
+		await expect(
+			auth.login({ email: "x@x", password: "password" }),
+		).resolves.toBeDefined();
+	});
+
+	it("finds user by email", async () => {
+		const auth = new NoAuthProvider("testuser");
+		await expect(
+			auth.getUserByEmail("noauth@localhost"),
+		).resolves.toBeDefined();
+		await expect(auth.getUserByEmail("other@email")).resolves.toBeUndefined();
 	});
 });

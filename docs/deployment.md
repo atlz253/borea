@@ -50,9 +50,7 @@ The container sets these runtime defaults:
 | `HOST` | `0.0.0.0` |
 | `PORT` | `3000` |
 | `REPOSITORIES_PATH` | `./data/repositories` |
-| `PULL_REQUESTS_PATH` | `./data/pull-requests` |
-| `ORGANIZATIONS_PATH` | `./data/organizations` |
-| `USERS_PATH` | `./data/users` |
+| `DATABASE_URL` | `file:./data/nirvana.db` |
 
 Full authentication mode is the application default and requires
 `SESSION_SECRET`. All other application variables are documented in

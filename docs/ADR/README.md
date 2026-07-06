@@ -28,6 +28,7 @@ This directory contains Architecture Decision Records (ADRs) for Nirvana. Each A
 | 0022 | [Pull Request File Comments](0022-pull-request-file-comments.md) | Append-only file discussion threads stored separately from public pull request metadata |
 | 0023 | [Git Smart-HTTP Authentication](0023-git-smart-http-authentication.md) | Personal access tokens and repository permission enforcement for Git HTTP |
 | 0024 | [Branch Rename](0024-branch-rename.md) | In-UI branch renaming via GitProvider.renameBranch and server function |
+| 0025 | [SQLite + Prisma 7 ORM](0025-sqlite-prisma-orm.md) | Migrating metadata storage from JSON files to SQLite via Prisma 7 with JS driver adapter |
 
 ## Adding a New ADR
 

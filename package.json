@@ -6,9 +6,9 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "vite dev --port 3000",
+    "dev": "prisma generate && vite dev --port 3000",
     "generate-routes": "tsr generate",
-    "build": "vite build",
+    "build": "prisma generate && vite build",
     "start": "node .output/server/index.mjs",
     "preview": "vite preview",
     "test": "vitest run",
@@ -21,13 +21,20 @@
     "test:e2e:organizations": "playwright test --config playwright.organizations.config.ts",
     "test:e2e:auth": "playwright test --config playwright.auth.config.ts",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:install": "playwright install"
+    "test:e2e:install": "playwright install",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^8.5.0",
+    "@libsql/client": "^0.15.15",
     "@mantine/code-highlight": "^9.4.1",
     "@mantine/core": "^9.4.1",
     "@mantine/hooks": "^9.4.1",
+    "@prisma/adapter-libsql": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-router": "latest",
     "@tanstack/react-router-devtools": "latest",
@@ -60,6 +67,7 @@
     "@vitest/coverage-v8": "^4.1.9",
     "jsdom": "^28.1.0",
     "nf3": "0.3.19",
+    "prisma": "^7.8.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
     "vitest": "^4.1.5"

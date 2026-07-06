@@ -2,8 +2,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { assertSameOriginFn, requireCurrentUserFn } from "#/modules/auth";
 import { gitProvider } from "#/modules/git";
 import { requireRepositoryPermissionFn } from "#/modules/organizations";
+import { PrismaDatabaseProvider } from "#/platform/database";
+import { PrismaPullRequestStore } from "../prisma-pull-request.store";
 import { createPullRequestService } from "../pull-request.service";
-import { pullRequestStore } from "../pull-request.store";
+
+const pullRequestStore = new PrismaPullRequestStore(
+	new PrismaDatabaseProvider(),
+);
+
 import {
 	addPullRequestFileCommentSchema,
 	createPullRequestSchema,

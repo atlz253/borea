@@ -15,7 +15,7 @@ src/
     pull-requests/        Pull/merge requests (scaffold, not yet implemented)
   platform/               Cross-domain infrastructure
     config/               Application configuration (env variables)
-    database/             DatabaseProvider interface (stub for MVP)
+    database/             DatabaseProvider interface + PrismaDatabaseProvider (SQLite via Prisma 7)
     storage/              StorageProvider interface (stub for MVP)
     logger/               Structured logging
     errors/               Shared error types
@@ -53,8 +53,8 @@ All architectural decisions are recorded as ADRs in `docs/ADR/`.
 All external dependencies are accessed through unified interfaces with swappable implementations:
 
 - **GitProvider** — repository operations, commit history, file tree, smart-HTTP streaming
-- **DatabaseProvider** — data persistence (stub for MVP, filesystem-based for now)
-- **StorageProvider** — file storage (local filesystem for MVP)
+- **DatabaseProvider** — data persistence via SQLite backed by Prisma 7 (`PrismaDatabaseProvider` wraps `PrismaClient` with `@prisma/adapter-libsql`)
+- **StorageProvider** — file storage (local filesystem for MVP — bare Git repositories remain on disk)
 - **AuthProvider** — file-backed local authentication or fixed-user NoAuth
 
 ### Thin Routes

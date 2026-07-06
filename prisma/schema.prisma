@@ -1,0 +1,143 @@
+generator client {
+	provider = "prisma-client"
+	output   = "../src/generated/prisma"
+	runtime  = "nodejs"
+}
+
+datasource db {
+	provider = "sqlite"
+}
+
+model User {
+	id         String @id @default(uuid())
+	name       String
+	email      String @unique
+	createdAt  String
+	credential String
+
+	gitTokens          GitToken[]
+	orgMemberships     OrganizationMember[]
+	repoGrants         RepositoryMember[]
+	prComments          PullRequestComment[]
+	ownedOrganizations Organization[]  @relation("OrgOwner")
+	ownedRepositories   Repository[]    @relation("RepoOwner")
+	pullRequests        PullRequest[]
+
+	@@index([email])
+}
+
+model GitToken {
+	id         String @id @default(uuid())
+	userId     String
+	name       String
+	createdAt  String
+	secretHash String
+	user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	@@index([userId])
+}
+
+model Organization {
+	name        String  @id
+	description String?
+	createdAt   String
+	ownerId     String?
+
+	owner        User?                 @relation("OrgOwner", fields: [ownerId], references: [id])
+	members      OrganizationMember[]
+	repositories Repository[]
+
+	@@index([ownerId])
+}
+
+model OrganizationMember {
+	organizationName String
+	userId           String
+	role             String
+	createdAt        String
+
+	organization Organization @relation(fields: [organizationName], references: [name], onDelete: Cascade)
+	user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	@@id([organizationName, userId])
+	@@index([userId])
+}
+
+model Repository {
+	id               String  @id @default(uuid())
+	organizationName String
+	name             String
+	description      String?
+	createdAt        String
+	ownerId          String
+
+	organization Organization        @relation(fields: [organizationName], references: [name], onDelete: Cascade)
+	owner        User                @relation("RepoOwner", fields: [ownerId], references: [id])
+	members      RepositoryMember[]
+	pullRequests PullRequest[]
+
+	@@index([organizationName])
+}
+
+model RepositoryMember {
+	repositoryId String
+	userId       String
+	role         String
+	createdAt    String
+	updatedAt    String
+
+	repository Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+	user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	@@id([repositoryId, userId])
+	@@index([userId])
+}
+
+model PullRequest {
+	repositoryId   String
+	prNumber       Int
+	title          String
+	sourceBranch   String
+	targetBranch   String
+	status         String
+	mergeCommitSha String?
+	authorName     String
+	authorId       String?
+	createdAt      String
+	updatedAt      String
+	viewedFiles    String @default("[]")
+
+	repository   Repository              @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+	author       User?                   @relation(fields: [authorId], references: [id])
+	comments     PullRequestComment[]
+
+	@@id([repositoryId, prNumber])
+	@@index([repositoryId, status])
+}
+
+model PullRequestComment {
+	id             String @id @default(uuid())
+	repositoryId   String
+	prNumber       Int
+	targetType     String
+	targetFilePath String
+	body           String
+	authorId       String
+	authorName     String
+	createdAt      String
+
+	pullRequest PullRequest @relation(fields: [repositoryId, prNumber], references: [repositoryId, prNumber], onDelete: Cascade)
+	author      User        @relation(fields: [authorId], references: [id])
+
+	@@index([repositoryId, prNumber])
+	@@index([authorId])
+}
+
+model PullRequestCounter {
+	repositoryId String @id
+	lastNumber   Int    @default(0)
+
+	@@index([repositoryId])
+}
+
+

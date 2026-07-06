@@ -1,12 +1,10 @@
 import { logger } from "#/platform/logger";
 
 const ENV_REPOSITORIES_PATH = "REPOSITORIES_PATH";
-const ENV_PULL_REQUESTS_PATH = "PULL_REQUESTS_PATH";
-const ENV_ORGANIZATIONS_PATH = "ORGANIZATIONS_PATH";
+const ENV_DATABASE_URL = "DATABASE_URL";
 const ENV_ORGANIZATION_MODE = "ORGANIZATION_MODE";
 const ENV_GIT_BIN_PATH = "GIT_BIN_PATH";
 const ENV_AUTH_MODE = "AUTH_MODE";
-const ENV_USERS_PATH = "USERS_PATH";
 const ENV_SESSION_SECRET = "SESSION_SECRET";
 const ENV_DEFAULT_USER_NAME = "DEFAULT_USER_NAME";
 const ENV_ALLOW_NOAUTH_IN_PRODUCTION = "ALLOW_NOAUTH_IN_PRODUCTION";
@@ -17,12 +15,10 @@ export type AuthMode = "full" | "noauth";
 
 export interface AppConfig {
 	storagePath: string;
-	pullRequestsPath: string;
-	organizationsPath: string;
+	databaseUrl: string;
 	organizationMode: OrganizationMode;
 	gitBinPath: string;
 	authMode: AuthMode;
-	usersPath: string;
 	sessionSecret?: string;
 	defaultUserName: string;
 }
@@ -95,14 +91,10 @@ export function getConfig(): AppConfig {
 	validateAuthenticationConfig(authMode, organizationMode, sessionSecret);
 	cached = {
 		storagePath: process.env[ENV_REPOSITORIES_PATH] ?? "./data/repositories",
-		pullRequestsPath:
-			process.env[ENV_PULL_REQUESTS_PATH] ?? "./data/pull-requests",
-		organizationsPath:
-			process.env[ENV_ORGANIZATIONS_PATH] ?? "./data/organizations",
+		databaseUrl: process.env[ENV_DATABASE_URL] ?? "file:./data/nirvana.db",
 		organizationMode,
 		gitBinPath: process.env[ENV_GIT_BIN_PATH] ?? "git",
 		authMode,
-		usersPath: process.env[ENV_USERS_PATH] ?? "./data/users",
 		sessionSecret,
 		defaultUserName: process.env[ENV_DEFAULT_USER_NAME] ?? "anonymous",
 	};

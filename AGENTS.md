@@ -21,6 +21,7 @@ Nirvana is an open-source software development workspace (analogue of JetBrains 
 - **Tests:** Vitest 4 + Testing Library + jsdom; E2E via Playwright 1 (`tests/e2e/`, `playwright.config.ts`)
 - **Git operations:** system Git CLI via execa
 - **Validation:** Zod v4
+- **ORM:** Prisma 7 with SQLite (`@prisma/adapter-libsql` driver adapter)
 - **OpenAPI:** `@asteasolutions/zod-to-openapi`, OpenAPI 3.1
 - **Language:** TypeScript, strict mode, `verbatimModuleSyntax`
 
@@ -39,12 +40,16 @@ npm run test:e2e:ui # Playwright E2E in UI mode
 
 Other useful:
 ```bash
-npm run dev         # Dev server on :3000
-npm run build       # Production build → dist/
+npm run dev         # Dev server on :3000 (runs prisma generate first)
+npm run build       # Production build → dist/ (runs prisma generate first)
 npm run test:coverage  # Unit tests with coverage report
 npm run lint        # Biome lint
 npm run format      # Biome format
 npm run typecheck   # TypeScript type checking
+npm run db:generate # Regenerate Prisma Client after schema changes
+npm run db:migrate  # Create and apply a new Prisma migration
+npm run db:deploy   # Apply pending migrations (for production)
+npm run db:studio   # Launch Prisma Studio GUI
 ```
 
 ## Code Conventions
@@ -99,6 +104,10 @@ npm run typecheck   # TypeScript type checking
 | `src/routes/repositories.$name.pulls.$pullId.index.tsx` | PR Conversation tab (detail + merge controls) |
 | `src/routes/repositories.$name.pulls.$pullId.files.tsx` | PR Files changed tab (diff view) |
 | `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
+| `prisma/schema.prisma` | Prisma ORM data model — all metadata entities |
+| `src/generated/prisma/` | ⚠ Generated Prisma Client — do not edit |
+| `prisma.config.ts` | Prisma configuration (schema path, migrations, datasource URL) |
+| `src/test-db.ts` | Test helper for creating temporary Prisma databases |
 | `src/platform/config/` | AppConfig for storage, Git, auth mode, user path, session secret, and organization mode |
 | `src/routes/api/` | Server routes for REST API and Git HTTP — delegates to module services |
 | `src/routes/api/v1/` | Versioned repository and pull request REST API routes |

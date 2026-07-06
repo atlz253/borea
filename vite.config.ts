@@ -9,7 +9,12 @@ import { defineConfig } from "vite";
 const config = defineConfig({
 	resolve: { tsconfigPaths: true },
 	optimizeDeps: {
-		exclude: ["unicorn-magic"],
+		exclude: [
+			"unicorn-magic",
+			"@prisma/client",
+			"@prisma/adapter-libsql",
+			"@libsql/client",
+		],
 	},
 	server: process.env.DISABLE_HMR_OVERLAY
 		? { hmr: { overlay: false } }

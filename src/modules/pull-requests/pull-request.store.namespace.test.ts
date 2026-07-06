@@ -1,22 +1,55 @@
-import { mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { FileSystemPullRequestStore } from "./pull-request.store";
+import { cleanupAllTestDatabases, createTestDatabase } from "#/test-db";
+import { PrismaPullRequestStore } from "./prisma-pull-request.store";
 
-let directory: string | undefined;
+describe("PrismaPullRequestStore organization namespaces", () => {
+	afterEach(() => {
+		cleanupAllTestDatabases();
+	});
 
-afterEach(async () => {
-	if (directory) {
-		await rm(directory, { recursive: true, force: true });
-		directory = undefined;
-	}
-});
-
-describe("FileSystemPullRequestStore organization namespaces", () => {
 	it("isolates pull requests for identically named repositories", async () => {
-		directory = await mkdtemp(path.join(tmpdir(), "nirvana-pr-org-"));
-		const store = new FileSystemPullRequestStore(directory);
+		const db = createTestDatabase();
+		const c = db.getClient();
+		const now = new Date().toISOString();
+		await c.organization.create({ data: { name: "team-a", createdAt: now } });
+		await c.organization.create({ data: { name: "team-b", createdAt: now } });
+		await c.user.create({
+			data: {
+				id: "00000000-0000-4000-8000-000000000001",
+				name: "a",
+				email: "a@a",
+				createdAt: now,
+				credential: "{}",
+			},
+		});
+		await c.user.create({
+			data: {
+				id: "00000000-0000-4000-8000-000000000002",
+				name: "b",
+				email: "b@b",
+				createdAt: now,
+				credential: "{}",
+			},
+		});
+		await c.repository.create({
+			data: {
+				id: "team-a/shared",
+				organizationName: "team-a",
+				name: "shared",
+				createdAt: now,
+				ownerId: "00000000-0000-4000-8000-000000000001",
+			},
+		});
+		await c.repository.create({
+			data: {
+				id: "team-b/shared",
+				organizationName: "team-b",
+				name: "shared",
+				createdAt: now,
+				ownerId: "00000000-0000-4000-8000-000000000002",
+			},
+		});
+		const store = new PrismaPullRequestStore(db);
 		const common = {
 			repoName: "shared",
 			title: "Change",

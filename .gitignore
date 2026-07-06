@@ -18,3 +18,8 @@ test-results-*/
 blob-report/
 playwright/.cache/
 data
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+src/generated/

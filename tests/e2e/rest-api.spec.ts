@@ -4,11 +4,11 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 import { execa } from "execa";
-import { FileSystemPullRequestStore } from "../../src/modules/pull-requests/pull-request.store";
+import { PrismaPullRequestStore } from "#/modules/pull-requests/prisma-pull-request.store";
+import { PrismaDatabaseProvider } from "#/platform/database";
 
 const ORGANIZATION_NAME = "default";
 const REPOSITORIES_PATH = "./data/repositories/default";
-const PULL_REQUESTS_PATH = "./data/pull-requests";
 const COMMIT_ENV = {
 	GIT_AUTHOR_NAME: "e2e",
 	GIT_AUTHOR_EMAIL: "e2e@test.com",
@@ -67,7 +67,8 @@ async function seedRepository(repoName: string, conflict: boolean) {
 		});
 	}
 
-	const store = new FileSystemPullRequestStore(PULL_REQUESTS_PATH);
+	const db = new PrismaDatabaseProvider();
+	const store = new PrismaPullRequestStore(db);
 	const pullRequest = await store.create({
 		organizationName: ORGANIZATION_NAME,
 		repoName,
@@ -154,9 +155,6 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 		);
 		expect(deleteResponse.status()).toBe(204);
 		expect(existsSync(seeded.barePath)).toBe(false);
-		expect(
-			existsSync(join(PULL_REQUESTS_PATH, ORGANIZATION_NAME, repoName)),
-		).toBe(false);
 
 		const missingResponse = await request.get(
 			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}`,
@@ -165,10 +163,6 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 	} finally {
 		rmSync(seeded.workDir, { recursive: true, force: true });
 		rmSync(seeded.barePath, { recursive: true, force: true });
-		rmSync(join(PULL_REQUESTS_PATH, ORGANIZATION_NAME, repoName), {
-			recursive: true,
-			force: true,
-		});
 	}
 });
 
@@ -215,9 +209,5 @@ test("REST API validates parameters and reports merge conflicts", async ({
 	} finally {
 		rmSync(seeded.workDir, { recursive: true, force: true });
 		rmSync(seeded.barePath, { recursive: true, force: true });
-		rmSync(join(PULL_REQUESTS_PATH, ORGANIZATION_NAME, repoName), {
-			recursive: true,
-			force: true,
-		});
 	}
 });
