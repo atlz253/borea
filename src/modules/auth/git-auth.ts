@@ -1,7 +1,7 @@
 import { createServerOnlyFn } from "@tanstack/react-start";
 import type { User } from "./schemas";
 
-function parseBasicToken(request: Request): string | undefined {
+export function parseBasicToken(request: Request): string | undefined {
 	const authorization = request.headers.get("authorization");
 	if (!authorization) {
 		return undefined;
