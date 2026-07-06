@@ -13,7 +13,7 @@ import { ForbiddenError, NotFoundError } from "#/platform/errors";
 
 const UNAUTHORIZED_RESPONSE = {
 	status: 401,
-	headers: { "WWW-Authenticate": 'Basic realm="Nirvana Git"' },
+	headers: { "WWW-Authenticate": 'Basic realm="Borea Git"' },
 };
 
 async function authorize(

@@ -12,7 +12,7 @@ import {
 	gitTokenIdSchema,
 } from "./schemas";
 
-const TOKEN_PREFIX = "nirvana";
+const TOKEN_PREFIX = "borea";
 const SECRET_BYTES = 32;
 const BASE64URL_SECRET_LENGTH = 43;
 

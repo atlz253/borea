@@ -19,7 +19,7 @@ test("commit diff shows modified and added files", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-diff-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-${uid}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-${uid}-`));
 
 	try {
 		await execa("git", ["init", "--bare", barePath]);
@@ -115,7 +115,7 @@ test("empty commit shows no file changes", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-emptycommit-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-${uid}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-${uid}-`));
 
 	try {
 		await execa("git", ["init", "--bare", barePath]);

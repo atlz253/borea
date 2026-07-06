@@ -54,9 +54,7 @@ async function seedRepository(
 		organizationName,
 		repositoryName,
 	);
-	const workDir = mkdtempSync(
-		join(tmpdir(), `nirvana-git-auth-seed-${suffix}-`),
-	);
+	const workDir = mkdtempSync(join(tmpdir(), `borea-git-auth-seed-${suffix}-`));
 	const { stdout } = await execa("git", [
 		"--git-dir",
 		barePath,
@@ -100,7 +98,7 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 		password: "password123",
 	};
 	const cloneDir = mkdtempSync(
-		join(tmpdir(), `nirvana-git-auth-clone-${suffix}-`),
+		join(tmpdir(), `borea-git-auth-clone-${suffix}-`),
 	);
 
 	await register(page, owner);
@@ -142,7 +140,7 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 	await expect(
 		reader.page.getByText("Copy this token now. It will not be shown again."),
 	).toBeVisible();
-	const readerToken = await reader.page.getByText(/^nirvana_/).textContent();
+	const readerToken = await reader.page.getByText(/^borea_/).textContent();
 	expect(readerToken).toBeTruthy();
 	await reader.page.keyboard.press("Escape");
 	await expect(reader.page.getByText("Git CLI")).toBeVisible();
@@ -164,7 +162,7 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 	const unauthenticated = await page.request.get(infoRefs);
 	expect(unauthenticated.status()).toBe(401);
 	expect(unauthenticated.headers()["www-authenticate"]).toBe(
-		'Basic realm="Nirvana Git"',
+		'Basic realm="Borea Git"',
 	);
 	const invalidToken = await page.request.get(infoRefs, {
 		headers: { Authorization: basicAuthorization("invalid") },

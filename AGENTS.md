@@ -4,10 +4,10 @@ Guidance for AI coding agents (and human contributors) working in this repositor
 
 ## Project Overview
 
-Nirvana is an open-source software development workspace (analogue of JetBrains Space / Yandex SourceCraft). The MVP is a Git hosting service with repositories, pull/merge requests, code review, and a REST API — a modular monolith deployable as a single Docker container. Currently at the pre-MVP scaffolding stage.
+Borea is an open-source software development workspace (analogue of JetBrains Space / Yandex SourceCraft). The MVP is a Git hosting service with repositories, pull/merge requests, code review, and a REST API — a modular monolith deployable as a single Docker container. Currently at the pre-MVP scaffolding stage.
 
 - **Spec:** `docs/MVP.md` — read this before making architectural changes.
-- **Decisions:** `docs/ADR/README.md` — index of all ADRs (0001–0019). Record any new architectural decision as a numbered ADR before implementing it.
+- **Decisions:** `docs/ADR/README.md` — index of all ADRs. Record any new architectural decision as a numbered ADR before implementing it.
 
 ## Tech Stack
 
@@ -84,7 +84,7 @@ npm run db:studio   # Launch Prisma Studio GUI
 | --- | --- |
 | `docs/MVP.md` | Technical specification — source of truth for requirements |
 | `docs/ADR/` | Architecture Decision Records |
-| `docs/ADR/README.md` | ADR index (0001–0019) |
+| `docs/ADR/README.md` | ADR index |
 | `docs/security/authentication.md` | Full authentication, sessions, and ownership documentation |
 | `docs/architecture.md` | Architecture overview for developers |
 | `docs/deployment.md` | Production Docker image and Compose deployment guide |

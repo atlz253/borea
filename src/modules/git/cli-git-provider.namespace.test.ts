@@ -16,7 +16,7 @@ afterEach(async () => {
 
 describe("CliGitProvider organization namespaces", () => {
 	it("isolates repositories with the same name", async () => {
-		directory = await mkdtemp(path.join(tmpdir(), "nirvana-git-org-"));
+		directory = await mkdtemp(path.join(tmpdir(), "borea-git-org-"));
 		const provider = new CliGitProvider(directory);
 		const first = { organizationName: "team-a", repositoryName: "shared" };
 		const second = { organizationName: "team-b", repositoryName: "shared" };

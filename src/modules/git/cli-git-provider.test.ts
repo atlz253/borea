@@ -14,7 +14,7 @@ async function seedCommits(
 	const storagePath = (provider as unknown as { storagePath: string })
 		.storagePath;
 	const barePath = join(storagePath, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), "nirvana-work-"));
+	const workDir = mkdtempSync(join(tmpdir(), "borea-work-"));
 	try {
 		const { stdout: branchRaw } = await execa("git", [
 			"--git-dir",
@@ -62,7 +62,7 @@ describe("CliGitProvider", () => {
 	let provider: CliGitProvider;
 
 	beforeEach(() => {
-		tmpDir = mkdtempSync(join(tmpdir(), "nirvana-test-"));
+		tmpDir = mkdtempSync(join(tmpdir(), "borea-test-"));
 		provider = new CliGitProvider(tmpDir);
 	});
 
@@ -518,7 +518,7 @@ describe("CliGitProvider", () => {
 
 			const repoPath = join(tmpDir, "no-conflict-repo");
 
-			const workDir = mkdtempSync(join(tmpdir(), "nirvana-merge-test-"));
+			const workDir = mkdtempSync(join(tmpdir(), "borea-merge-test-"));
 			try {
 				await execa("git", ["clone", repoPath, workDir], {
 					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
@@ -586,7 +586,7 @@ describe("CliGitProvider", () => {
 
 			const repoPath = join(tmpDir, "conflict-repo");
 
-			const workDir = mkdtempSync(join(tmpdir(), "nirvana-conflict-test-"));
+			const workDir = mkdtempSync(join(tmpdir(), "borea-conflict-test-"));
 			try {
 				await execa("git", ["clone", repoPath, workDir], {
 					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
@@ -692,7 +692,7 @@ describe("CliGitProvider", () => {
 			await provider.createBranch("merge-commit-repo", "feature-mc");
 
 			const repoPath = join(tmpDir, "merge-commit-repo");
-			const workDir = mkdtempSync(join(tmpdir(), "nirvana-mc-test-"));
+			const workDir = mkdtempSync(join(tmpdir(), "borea-mc-test-"));
 			try {
 				await execa("git", ["clone", repoPath, workDir], {
 					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },
@@ -775,7 +775,7 @@ describe("CliGitProvider", () => {
 			await provider.createBranch("conflict-merge-repo", "feature-conflict");
 
 			const repoPath = join(tmpDir, "conflict-merge-repo");
-			const workDir = mkdtempSync(join(tmpdir(), "nirvana-conflict-m-"));
+			const workDir = mkdtempSync(join(tmpdir(), "borea-conflict-m-"));
 			try {
 				await execa("git", ["clone", repoPath, workDir], {
 					env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },

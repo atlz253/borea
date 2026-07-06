@@ -41,7 +41,7 @@ This file-based approach was intentional for the initial scaffolding (ADRs 0006,
 |--------|--------|------------|
 | Deployment | Single file, no separate server process | Requires dedicated server/container |
 | Docker | No second container needed; data stays in `/app/data` volume | Needs a postgres container in compose.yaml |
-| Backup | `cp nirvana.db` | `pg_dump` |
+| Backup | `cp borea.db` | `pg_dump` |
 | MVP fit | R/W concurrency sufficient for single-process Nitro server | Overkill for MVP with ~single user |
 | Migration complexity | Prisma supports both, easy to migrate later if needed | Higher upfront ops cost |
 

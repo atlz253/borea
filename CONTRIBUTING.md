@@ -1,6 +1,6 @@
-# Contributing to Nirvana
+# Contributing to Borea
 
-Thank you for your interest in contributing! Nirvana is an open-source software development workspace.
+Thank you for your interest in contributing! Borea is an open-source software development workspace.
 
 ## Development Process
 

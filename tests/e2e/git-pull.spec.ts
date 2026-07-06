@@ -12,8 +12,8 @@ test("git clone over HTTP downloads repository contents", async () => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-pull-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-work-${uid}-`));
-	const cloneDir = join(tmpdir(), `nirvana-e2e-cloned-${uid}`);
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-work-${uid}-`));
+	const cloneDir = join(tmpdir(), `borea-e2e-cloned-${uid}`);
 
 	try {
 		// Step 1: Seed a bare repository with commits via filesystem
@@ -35,7 +35,7 @@ test("git clone over HTTP downloads repository contents", async () => {
 			cwd: workDir,
 		});
 
-		const testFileContent = "Hello from Nirvana!";
+		const testFileContent = "Hello from Borea!";
 		const nestedDir = join(workDir, "src", "utils");
 		await mkdir(nestedDir, { recursive: true });
 		await writeFile(join(workDir, "README.md"), testFileContent, "utf-8");
@@ -65,7 +65,7 @@ test("git clone over HTTP downloads repository contents", async () => {
 			env: { GIT_TERMINAL_PROMPT: "0" },
 		});
 
-		// Step 2: Clone over HTTP from the Nirvana API
+		// Step 2: Clone over HTTP from the Borea API
 		const cloneUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 
 		await execa("git", ["clone", cloneUrl, cloneDir], {

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This skill helps generate new skills for the Nirvana project by asking for the skill name and description, then creating the necessary files.
+This skill helps generate new skills for the Borea project by asking for the skill name and description, then creating the necessary files.
 
 ## Requirements
 

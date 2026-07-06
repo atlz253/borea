@@ -87,7 +87,7 @@ export function getConfig(): AppConfig {
 	validateAuthenticationConfig(authMode, organizationMode, sessionSecret);
 	cached = {
 		storagePath: process.env[ENV_REPOSITORIES_PATH] ?? "./data/repositories",
-		databaseUrl: process.env[ENV_DATABASE_URL] ?? "file:./data/nirvana.db",
+		databaseUrl: process.env[ENV_DATABASE_URL] ?? "file:./data/borea.db",
 		organizationMode,
 		gitBinPath: process.env[ENV_GIT_BIN_PATH] ?? "git",
 		authMode,

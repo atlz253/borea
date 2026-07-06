@@ -33,7 +33,7 @@ export function createIntegrationContext(
 	const db = createTestDatabase();
 	const store = new PrismaOrganizationStore(db);
 	const storagePath =
-		storageDir ?? mkdtempSync(join(tmpdir(), "nirvana-int-storage-"));
+		storageDir ?? mkdtempSync(join(tmpdir(), "borea-int-storage-"));
 	const gitProvider = new CliGitProvider(storagePath);
 
 	const cleanup = () => {
@@ -73,7 +73,7 @@ export function seedBareRepo(
 	const barePath = join(storagePath, organizationName, repoName);
 	execaSync("git", ["init", "--bare", barePath]);
 
-	const workDir = mkdtempSync(join(tmpdir(), "nirvana-int-seed-"));
+	const workDir = mkdtempSync(join(tmpdir(), "borea-int-seed-"));
 	try {
 		execaSync("git", ["init", workDir]);
 		for (const [filePath, content] of Object.entries(files)) {
@@ -110,7 +110,7 @@ export function seedBranch(
 	files: Record<string, string>,
 ): void {
 	const barePath = join(storagePath, organizationName, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), "nirvana-int-branch-"));
+	const workDir = mkdtempSync(join(tmpdir(), "borea-int-branch-"));
 	try {
 		execaSync("git", ["clone", barePath, workDir]);
 		execaSync("git", ["checkout", "-b", branch], { cwd: workDir });

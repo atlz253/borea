@@ -130,7 +130,7 @@ describe("session", () => {
 
 			expect(useSession).toHaveBeenCalledWith(
 				expect.objectContaining({
-					name: "nirvana-session",
+					name: "borea-session",
 					maxAge: 604800,
 					cookie: expect.objectContaining({
 						httpOnly: true,

@@ -1,11 +1,11 @@
 ---
 name: create-skill
-description: Creates new skills for the Nirvana project based on user requirements
+description: Creates new skills for the Borea project based on user requirements
 ---
 
 # Create Skill
 
-This skill helps generate new skills for the Nirvana project. It can be used in two modes:
+This skill helps generate new skills for the Borea project. It can be used in two modes:
 1. Interactive mode - prompts for the skill name and description
 2. CLI arguments mode - accepts parameters via command line arguments
 

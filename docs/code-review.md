@@ -1,6 +1,6 @@
 # Pull Request Code Review
 
-Nirvana tracks reviewed files on the **Files changed** tab of a pull request.
+Borea tracks reviewed files on the **Files changed** tab of a pull request.
 
 ## Marking a File as Viewed
 

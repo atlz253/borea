@@ -26,7 +26,7 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-pr-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-pr-${uid}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-pr-${uid}-`));
 
 	try {
 		await execa("git", ["init", "--bare", barePath]);
@@ -130,7 +130,7 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 
 		await expect(page.getByText("Merged as")).toBeVisible({ timeout: 15_000 });
 
-		const cloneDir = join(tmpdir(), `nirvana-e2e-cloned-${uid}`);
+		const cloneDir = join(tmpdir(), `borea-e2e-cloned-${uid}`);
 		try {
 			await execa("git", ["clone", pushUrl, cloneDir], {
 				env: { GIT_TERMINAL_PROMPT: "0" },

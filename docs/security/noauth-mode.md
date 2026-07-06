@@ -1,12 +1,12 @@
 # NoAuth Mode
 
-NoAuth mode is a development-time feature of Nirvana that disables authentication entirely. All operations (clone, push, repository creation, code review) are performed on behalf of a fixed user.
+NoAuth mode is a development-time feature of Borea that disables authentication entirely. All operations (clone, push, repository creation, code review) are performed on behalf of a fixed user.
 
 ## When to Use
 
 NoAuth mode is intended **for development and testing only**. It allows you to:
 
-- Quickly try Nirvana without setting up user accounts
+- Quickly try Borea without setting up user accounts
 - Run automated tests without authentication logic
 - Develop and debug features without logging in every time
 
@@ -14,7 +14,7 @@ NoAuth mode is intended **for development and testing only**. It allows you to:
 
 Since NoAuth mode requires no credentials:
 
-- **Anyone** who can reach the Nirvana server can clone any repository.
+- **Anyone** who can reach the Borea server can clone any repository.
 - **Anyone** can push to any repository without permission.
 - **Anyone** can create, modify or delete repositories (if the UI supports it).
 - There is no audit trail tying actions to real users.

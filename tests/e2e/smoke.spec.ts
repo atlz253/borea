@@ -26,7 +26,7 @@ test("sidebar navigation links to repositories page", async ({ page }) => {
 test("header renders logo and theme toggle", async ({ page }) => {
 	await page.goto("/organizations/default");
 
-	await expect(page.getByRole("link", { name: "Nirvana" })).toHaveAttribute(
+	await expect(page.getByRole("link", { name: "Borea" })).toHaveAttribute(
 		"href",
 		"/",
 	);

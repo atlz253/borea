@@ -7,11 +7,11 @@ export default function Footer() {
 		<Container size="lg" py="xl">
 			<Group justify="space-between">
 				<Text size="sm" c="dimmed">
-					&copy; {year} Nirvana. All rights reserved.
+					&copy; {year} Borea. All rights reserved.
 				</Text>
 				<Group gap="md">
 					<Anchor
-						href="https://github.com/nirvana"
+						href="https://github.com/atlz253/borea"
 						target="_blank"
 						rel="noreferrer"
 						size="sm"

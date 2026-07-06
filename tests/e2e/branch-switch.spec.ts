@@ -13,7 +13,7 @@ test("create branch from branch switcher", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-create-branch-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-work-${uid}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-work-${uid}-`));
 
 	try {
 		// Seed bare repo with a single commit on default branch
@@ -93,7 +93,7 @@ test("rename branch from branch switcher", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-rename-branch-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-work-${uid}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-work-${uid}-`));
 
 	try {
 		// Seed bare repo
@@ -201,7 +201,7 @@ test("branch switcher lets user switch between branches", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-branch-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-work-${uid}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-work-${uid}-`));
 
 	try {
 		// Seed bare repo

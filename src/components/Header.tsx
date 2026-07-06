@@ -46,7 +46,7 @@ export default function Header({
 						underline="never"
 						style={{ color: "var(--mantine-color-text)" }}
 					>
-						Nirvana
+						Borea
 					</Anchor>
 				</Title>
 			</Group>

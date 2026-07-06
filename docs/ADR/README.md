@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-This directory contains Architecture Decision Records (ADRs) for Nirvana. Each ADR documents a significant architectural choice, including context, alternatives, decision, and consequences.
+This directory contains Architecture Decision Records (ADRs) for Borea. Each ADR documents a significant architectural choice, including context, alternatives, decision, and consequences.
 
 | # | Title | Description |
 |---|-------|-------------|
@@ -29,6 +29,7 @@ This directory contains Architecture Decision Records (ADRs) for Nirvana. Each A
 | 0023 | [Git Smart-HTTP Authentication](0023-git-smart-http-authentication.md) | Personal access tokens and repository permission enforcement for Git HTTP |
 | 0024 | [Branch Rename](0024-branch-rename.md) | In-UI branch renaming via GitProvider.renameBranch and server function |
 | 0025 | [SQLite + Prisma 7 ORM](0025-sqlite-prisma-orm.md) | Migrating metadata storage from JSON files to SQLite via Prisma 7 with JS driver adapter |
+| 0026 | [Project Rename: Nirvana to Borea](0026-project-rename-nirvana-to-borea.md) | Renaming the project from Nirvana to Borea with aesthetic direction |
 
 ## Adding a New ADR
 

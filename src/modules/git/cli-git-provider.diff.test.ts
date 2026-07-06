@@ -14,7 +14,7 @@ async function seedCommits(
 	const storagePath = (provider as unknown as { storagePath: string })
 		.storagePath;
 	const barePath = join(storagePath, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), "nirvana-work-"));
+	const workDir = mkdtempSync(join(tmpdir(), "borea-work-"));
 	try {
 		const { stdout: branchRaw } = await execa("git", [
 			"--git-dir",
@@ -62,7 +62,7 @@ describe("CliGitProvider — getCommit", () => {
 	let provider: CliGitProvider;
 
 	beforeEach(() => {
-		tmpDir = mkdtempSync(join(tmpdir(), "nirvana-test-"));
+		tmpDir = mkdtempSync(join(tmpdir(), "borea-test-"));
 		provider = new CliGitProvider(tmpDir);
 	});
 
@@ -148,7 +148,7 @@ describe("CliGitProvider — getCommitDiff", () => {
 	let provider: CliGitProvider;
 
 	beforeEach(() => {
-		tmpDir = mkdtempSync(join(tmpdir(), "nirvana-test-"));
+		tmpDir = mkdtempSync(join(tmpdir(), "borea-test-"));
 		provider = new CliGitProvider(tmpDir);
 	});
 
@@ -238,7 +238,7 @@ describe("CliGitProvider — getDiff", () => {
 	let storageDir: string;
 
 	beforeEach(() => {
-		storageDir = mkdtempSync(join(tmpdir(), "nirvana-diff-"));
+		storageDir = mkdtempSync(join(tmpdir(), "borea-diff-"));
 		provider = new CliGitProvider(storageDir);
 	});
 
@@ -259,7 +259,7 @@ describe("CliGitProvider — getDiff", () => {
 		await provider.createBranch("branch-diff-repo", "feature");
 		const storagePath = provider as unknown as { storagePath: string };
 		const barePath = join(storagePath.storagePath, "branch-diff-repo");
-		const workDir = mkdtempSync(join(tmpdir(), "nirvana-work-feat-"));
+		const workDir = mkdtempSync(join(tmpdir(), "borea-work-feat-"));
 		try {
 			await execa("git", ["clone", barePath, workDir], {
 				env: { ...process.env, GIT_TERMINAL_PROMPT: "0" },

@@ -1,6 +1,6 @@
 # Docker Deployment
 
-Nirvana is distributed as a single Linux container containing the Nitro server,
+Borea is distributed as a single Linux container containing the Nitro server,
 static assets, and the Git CLI used by `GitProvider`.
 
 ## Docker Compose
@@ -14,10 +14,10 @@ docker compose up --build -d
 ```
 
 The application is available at <http://localhost:3000>. Application data is
-stored in the `nirvana-data` named volume mounted at `/app/data`.
+stored in the `borea-data` named volume mounted at `/app/data`.
 
 ```bash
-docker compose logs -f nirvana
+docker compose logs -f borea
 docker compose down
 ```
 
@@ -28,13 +28,13 @@ organizations, and pull request metadata stored there.
 ## Build and Run the Image
 
 ```bash
-docker build -t nirvana:local .
+docker build -t borea:local .
 docker run --rm \
-  --name nirvana \
+  --name borea \
   -p 3000:3000 \
   -e SESSION_SECRET=replace-with-at-least-32-characters \
-  -v nirvana-data:/app/data \
-  nirvana:local
+  -v borea-data:/app/data \
+  borea:local
 ```
 
 The image runs as the unprivileged `node` user and exposes port `3000`. Its
@@ -50,7 +50,7 @@ The container sets these runtime defaults:
 | `HOST` | `0.0.0.0` |
 | `PORT` | `3000` |
 | `REPOSITORIES_PATH` | `./data/repositories` |
-| `DATABASE_URL` | `file:./data/nirvana.db` |
+| `DATABASE_URL` | `file:./data/borea.db` |
 
 Full authentication mode is the application default and requires
 `SESSION_SECRET`. All other application variables are documented in

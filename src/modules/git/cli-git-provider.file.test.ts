@@ -14,7 +14,7 @@ async function seedCommit(
 	const storagePath = (provider as unknown as { storagePath: string })
 		.storagePath;
 	const barePath = join(storagePath, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), "nirvana-file-work-"));
+	const workDir = mkdtempSync(join(tmpdir(), "borea-file-work-"));
 	try {
 		const { stdout: branchRaw } = await execa("git", [
 			"--git-dir",
@@ -51,7 +51,7 @@ describe("CliGitProvider getFile", () => {
 	let provider: CliGitProvider;
 
 	beforeEach(() => {
-		tmpDir = mkdtempSync(join(tmpdir(), "nirvana-file-test-"));
+		tmpDir = mkdtempSync(join(tmpdir(), "borea-file-test-"));
 		provider = new CliGitProvider(tmpDir);
 	});
 

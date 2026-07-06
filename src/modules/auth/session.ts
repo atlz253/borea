@@ -23,7 +23,7 @@ function sessionConfig() {
 		throw new Error("Session secret is unavailable");
 	}
 	return {
-		name: "nirvana-session",
+		name: "borea-session",
 		password: config.sessionSecret,
 		maxAge: SESSION_MAX_AGE_SECONDS,
 		cookie: {

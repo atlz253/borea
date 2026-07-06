@@ -1,6 +1,6 @@
 # Using Repository Pages
 
-Nirvana provides a web interface for browsing and managing Git repositories. This guide covers the main pages you'll use.
+Borea provides a web interface for browsing and managing Git repositories. This guide covers the main pages you'll use.
 
 ## Organizations and Repositories
 

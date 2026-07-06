@@ -50,7 +50,7 @@ async function renderHeader() {
 it("renders the logo link", async () => {
 	await renderHeader();
 
-	const link = screen.getByRole("link", { name: "Nirvana" });
+	const link = screen.getByRole("link", { name: "Borea" });
 	expect(link).toBeInTheDocument();
 	expect(link).toHaveAttribute("href", "/");
 });

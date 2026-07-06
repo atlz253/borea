@@ -11,6 +11,6 @@ it("renders the copyright notice", () => {
 
 	const year = new Date().getFullYear();
 	expect(
-		screen.getByText(`© ${year} Nirvana. All rights reserved.`),
+		screen.getByText(`© ${year} Borea. All rights reserved.`),
 	).toBeInTheDocument();
 });

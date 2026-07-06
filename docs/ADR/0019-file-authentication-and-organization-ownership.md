@@ -9,7 +9,7 @@ ADR 0020. The authentication and session decisions remain active.
 
 ## Context
 
-Nirvana currently exposes an empty `AuthProvider` contract and treats every
+Borea currently exposes an empty `AuthProvider` contract and treats every
 request as authenticated. Organizations have no owner, so every user would see
 the same organization list after account support is introduced.
 

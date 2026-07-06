@@ -1,6 +1,6 @@
 # API Reference
 
-Nirvana exposes a versioned REST API and the Git smart-HTTP protocol. REST
+Borea exposes a versioned REST API and the Git smart-HTTP protocol. REST
 resources require a cookie session in the default full authentication mode.
 Registration, login, and the OpenAPI document are public. Current-user and
 token-management endpoints require a cookie session. In NoAuth mode, REST
@@ -275,7 +275,7 @@ lookup. REST cookie sessions and account passwords are not accepted.
 
 `git-upload-pack` requires repository `read`; `git-receive-pack` requires
 `write`. Missing or invalid credentials return `401` with
-`WWW-Authenticate: Basic realm="Nirvana Git"`. Inaccessible repositories
+`WWW-Authenticate: Basic realm="Borea Git"`. Inaccessible repositories
 return `404`, and authenticated readers attempting push receive `403`. NoAuth
 mode remains credential-free.
 

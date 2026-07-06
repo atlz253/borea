@@ -23,7 +23,7 @@ class SkillCreator {
       this.skillPurpose = args.purpose;
       console.log('Using CLI arguments to create skill...');
     } else {
-      console.log('This tool will help you create a new skill for the Nirvana project.\n');
+      console.log('This tool will help you create a new skill for the Borea project.\n');
       console.log('Please provide the following information about your new skill:\n');
       
       await this.getSkillInfo();

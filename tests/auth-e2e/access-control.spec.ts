@@ -58,7 +58,7 @@ async function seedPullRequestBranches(
 		organizationName,
 		repositoryName,
 	);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-auth-pr-${suffix}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-auth-pr-${suffix}-`));
 	const { stdout } = await execa("git", [
 		"--git-dir",
 		barePath,

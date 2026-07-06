@@ -1,6 +1,6 @@
 # Access Control
 
-Nirvana enforces organization and repository permissions in full
+Borea enforces organization and repository permissions in full
 authentication mode. All role values in JSON and REST requests are lowercase.
 
 ## Organization Roles

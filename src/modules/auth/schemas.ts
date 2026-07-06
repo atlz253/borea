@@ -4,7 +4,7 @@ import { z } from "zod";
 const MAX_NAME_LENGTH = 100;
 const MIN_PASSWORD_LENGTH = 8;
 const MAX_PASSWORD_LENGTH = 128;
-const GIT_TOKEN_PREFIX = "nirvana";
+const GIT_TOKEN_PREFIX = "borea";
 const SHA256_HEX_LENGTH = 64;
 
 export const userNameSchema = z

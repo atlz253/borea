@@ -1,6 +1,6 @@
 # Authentication
 
-Nirvana uses file-backed local accounts in its default `full` authentication
+Borea uses file-backed local accounts in its default `full` authentication
 mode. Registration is open and does not require email verification.
 
 ## Configuration

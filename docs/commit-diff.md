@@ -1,6 +1,6 @@
 # Commit Diff Viewer
 
-Nirvana supports side-by-side diff viewing for individual commits in the commit history. This document describes the feature's behavior and limitations.
+Borea supports side-by-side diff viewing for individual commits in the commit history. This document describes the feature's behavior and limitations.
 
 ## Accessing the Diff View
 

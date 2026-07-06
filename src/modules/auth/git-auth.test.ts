@@ -100,14 +100,12 @@ describe("parseBasicToken", () => {
 	});
 
 	it("extracts the token from a valid Basic auth header", () => {
-		const encoded = Buffer.from("git-user:nirvana_abc123_xyz").toString(
-			"base64",
-		);
+		const encoded = Buffer.from("git-user:borea_abc123_xyz").toString("base64");
 		expect(
 			parseBasicToken(
 				makeRequest({ headers: { authorization: `Basic ${encoded}` } }),
 			),
-		).toBe("nirvana_abc123_xyz");
+		).toBe("borea_abc123_xyz");
 	});
 
 	it("treats the Basic scheme as case-insensitive", () => {
@@ -238,7 +236,7 @@ describe("getGitRequestUser", () => {
 
 	it("authenticates the user when a valid git token is provided", async () => {
 		mockModule.authMode = "file";
-		const token = "nirvana_00000000-0000-4000-8000-000000000000_abc123def456";
+		const token = "borea_00000000-0000-4000-8000-000000000000_abc123def456";
 		mockModule.authProvider.authenticateGitToken.mockResolvedValue(sampleUser);
 
 		const encoded = Buffer.from(`git-user:${token}`).toString("base64");

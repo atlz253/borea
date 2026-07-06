@@ -12,8 +12,8 @@ test("git push over HTTP stores repository contents", async () => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-push-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-work-${uid}-`));
-	const cloneDir = join(tmpdir(), `nirvana-e2e-cloned-${uid}`);
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-work-${uid}-`));
+	const cloneDir = join(tmpdir(), `borea-e2e-cloned-${uid}`);
 
 	try {
 		// Step 1: Seed an empty bare repository via filesystem
@@ -46,7 +46,7 @@ test("git push over HTTP stores repository contents", async () => {
 			},
 		});
 
-		// Step 3: Push to the Nirvana HTTP endpoint
+		// Step 3: Push to the Borea HTTP endpoint
 		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
 		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
 		await execa("git", ["push", "-v", "origin", `HEAD:${branch}`], {
@@ -67,7 +67,7 @@ test("git push over HTTP stores repository contents", async () => {
 		);
 		expect(lsRemoteOut).toContain(lsRemoteRef);
 
-		// Step 5: Clone from the Nirvana HTTP endpoint and verify pushed files
+		// Step 5: Clone from the Borea HTTP endpoint and verify pushed files
 		await execa("git", ["clone", pushUrl, cloneDir], {
 			env: { GIT_TERMINAL_PROMPT: "0" },
 			timeout: 30_000,

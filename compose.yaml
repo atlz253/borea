@@ -1,8 +1,8 @@
 services:
-  nirvana:
+  borea:
     build:
       context: .
-    image: nirvana:local
+    image: borea:local
     init: true
     env_file:
       - .env
@@ -14,7 +14,7 @@ services:
       - "3000:3000"
     restart: unless-stopped
     volumes:
-      - nirvana-data:/app/data
+      - borea-data:/app/data
 
 volumes:
-  nirvana-data:
+  borea-data:

@@ -1,13 +1,13 @@
 # Working with Repositories via HTTP
 
-Nirvana supports standard Git operations over HTTP — you can clone repositories and push your changes just like with GitHub, GitLab, or any other Git hosting service.
+Borea supports standard Git operations over HTTP — you can clone repositories and push your changes just like with GitHub, GitLab, or any other Git hosting service.
 
 Full authentication mode requires a Git personal access token. NoAuth mode
 keeps Git operations credential-free for local development.
 
 ## Cloning a Repository
 
-1. Open the repository page in Nirvana (e.g., `http://localhost:3000/organizations/default/repositories/my-project`).
+1. Open the repository page in Borea (e.g., `http://localhost:3000/organizations/default/repositories/my-project`).
 2. Copy the URL from the **"Git pull URL"** field using the copy button on the right.
 3. In full mode, create a token at `/settings/git-tokens`.
 4. In your terminal, run:
@@ -36,13 +36,13 @@ keeps Git operations credential-free for local development.
    ```bash
    git push -u origin main
    ```
-4. Refresh the repository page in Nirvana — your files and commits will appear.
+4. Refresh the repository page in Borea — your files and commits will appear.
 
 ## Requirements
 
 - Git must be installed on your computer ([download](https://git-scm.com/downloads)).
-- The Nirvana server must be running and accessible (default: `http://localhost:3000`).
-- The organization and repository must already exist in Nirvana.
+- The Borea server must be running and accessible (default: `http://localhost:3000`).
+- The organization and repository must already exist in Borea.
 
 ## Authentication
 
@@ -68,5 +68,5 @@ HTTPS outside local development.
 |---------|---------------|
 | `fatal: Repository not found` | The repository name is incorrect or hasn't been created yet. Check it on the repositories page. |
 | `git push` is rejected | Make sure the branch exists locally (`git branch`). For the first push, use `git push -u origin main`. |
-| Connection refused | The Nirvana server may not be running (default: `http://localhost:3000`). |
+| Connection refused | The Borea server may not be running (default: `http://localhost:3000`). |
 | `git clone` hangs or times out | Check network connectivity and firewall settings. |

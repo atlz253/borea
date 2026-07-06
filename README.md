@@ -1,8 +1,8 @@
-# Nirvana
+# Borea
 
 > Open-source software development workspace that unifies development tools in a single space — an analogue of JetBrains Space and Yandex SourceCraft.
 
-Nirvana is a platform project, built as a modular monolith with provider-based abstractions. The MVP delivers organizations with isolated Git repositories, pull/merge requests, code review, and a REST API — deployable as a single Docker container.
+Borea is a platform project, built as a modular monolith with provider-based abstractions. The MVP delivers organizations with isolated Git repositories, pull/merge requests, code review, and a REST API — deployable as a single Docker container.
 
 **Status:** Pre-MVP (active scaffolding). Not production-ready.
 
@@ -84,7 +84,7 @@ usage, and data management.
 ## Project Structure
 
 ```
-nirvana/
+borea/
 ├── Dockerfile                      # Multi-stage production image
 ├── compose.yaml                    # Local single-container deployment
 ├── CONTRIBUTING.md                 # Contributor guide

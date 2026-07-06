@@ -17,7 +17,7 @@ test("view small, large, and binary repository files", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-file-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-${uid}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-e2e-${uid}-`));
 
 	try {
 		await execa("git", ["init", "--bare", barePath]);

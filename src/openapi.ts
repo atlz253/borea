@@ -17,10 +17,10 @@ export function generateOpenApiDocument() {
 	return new OpenApiGeneratorV31(registry.definitions).generateDocument({
 		openapi: "3.1.0",
 		info: {
-			title: "Nirvana REST API",
+			title: "Borea REST API",
 			version: "1.0.0",
 			description:
-				"Authenticated REST API for Nirvana organizations, repositories, and pull requests.",
+				"Authenticated REST API for Borea organizations, repositories, and pull requests.",
 		},
 	});
 }

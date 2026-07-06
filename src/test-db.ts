@@ -12,7 +12,7 @@ export function createTestDatabase(): PrismaDatabaseProvider {
 	const dir = mkdtempSync(
 		join(
 			tmpdir(),
-			`nirvana-test-${randomUUID().slice(0, RANDOM_SUFFIX_LENGTH)}-`,
+			`borea-test-${randomUUID().slice(0, RANDOM_SUFFIX_LENGTH)}-`,
 		),
 	);
 	directories.push(dir);

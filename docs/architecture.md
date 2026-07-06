@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Nirvana is a **modular monolith** — a single deployable process with clear separation between domain modules. The full application (frontend, backend, Git HTTP protocol) runs in one Nitro-powered server process, deployable as a single Docker container.
+Borea is a **modular monolith** — a single deployable process with clear separation between domain modules. The full application (frontend, backend, Git HTTP protocol) runs in one Nitro-powered server process, deployable as a single Docker container.
 
 ## Project Structure
 
@@ -61,7 +61,7 @@ Route files in `src/routes/` are minimal: they define `createFileRoute`, load da
 
 ### Git Smart-HTTP
 
-Nirvana serves the Git smart-HTTP protocol through the `/api/git/<organization>/<repository>.git/` endpoint (see `API.md` for details). Both read (clone/fetch) and write (push) operations are supported. The implementation uses the system Git CLI (`git-upload-pack --stateless-rpc` and `git-receive-pack --stateless-rpc`) via execa, not the CGI-based `git http-backend`.
+Borea serves the Git smart-HTTP protocol through the `/api/git/<organization>/<repository>.git/` endpoint (see `API.md` for details). Both read (clone/fetch) and write (push) operations are supported. The implementation uses the system Git CLI (`git-upload-pack --stateless-rpc` and `git-receive-pack --stateless-rpc`) via execa, not the CGI-based `git http-backend`.
 
 ### Organization Modes
 

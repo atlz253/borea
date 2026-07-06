@@ -9,7 +9,7 @@ describe("CliGitProvider repository deletion", () => {
 	let provider: CliGitProvider;
 
 	beforeEach(() => {
-		tmpDir = mkdtempSync(join(tmpdir(), "nirvana-delete-test-"));
+		tmpDir = mkdtempSync(join(tmpdir(), "borea-delete-test-"));
 		provider = new CliGitProvider(tmpDir);
 	});
 

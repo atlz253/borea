@@ -42,7 +42,7 @@ export default function AuthPage({ redirectTo }: { redirectTo: string }) {
 
 	return (
 		<Container size={420} py={80}>
-			<Title ta="center">Nirvana</Title>
+			<Title ta="center">Borea</Title>
 			<Text c="dimmed" size="sm" ta="center" mt="xs">
 				Sign in or create an account
 			</Text>

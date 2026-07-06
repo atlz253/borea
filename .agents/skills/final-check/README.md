@@ -1,6 +1,6 @@
 # Final Check Skill
 
-This skill verifies that all Definition of Done requirements are met after completing a task in the Nirvana project.
+This skill verifies that all Definition of Done requirements are met after completing a task in the Borea project.
 
 ## What it checks:
 

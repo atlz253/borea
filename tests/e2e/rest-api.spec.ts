@@ -17,7 +17,7 @@ const COMMIT_ENV = {
 
 async function seedRepo(repoName: string, conflict: boolean) {
 	const barePath = resolve(REPOSITORIES_PATH, repoName);
-	const workDir = mkdtempSync(join(tmpdir(), `nirvana-rest-${repoName}-`));
+	const workDir = mkdtempSync(join(tmpdir(), `borea-rest-${repoName}-`));
 	await execa("git", ["init", "--bare", barePath]);
 	const { stdout: branchOutput } = await execa("git", [
 		"--git-dir",
