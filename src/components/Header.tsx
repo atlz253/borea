@@ -30,7 +30,7 @@ export default function Header({
 	};
 
 	return (
-		<Group justify="space-between" h="100%" px="md">
+		<Group justify="space-between" h="100%" px="md" w="100%">
 			<Group>
 				<Burger
 					opened={opened}
