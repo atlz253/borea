@@ -1,10 +1,16 @@
 import { Button, Group, Menu, Modal, Text, TextInput } from "@mantine/core";
 import { useNavigate } from "@tanstack/react-router";
-import { Check, ChevronDown, GitBranch, GitBranchPlus } from "lucide-react";
+import {
+	Check,
+	ChevronDown,
+	GitBranch,
+	GitBranchPlus,
+	Pencil,
+} from "lucide-react";
 import { useState } from "react";
 import type { BranchInfo } from "#/modules/git";
 import { useRepositoryAccess } from "#/modules/organizations";
-import { createBranchFn } from "#/modules/repositories";
+import { createBranchFn, renameBranchFn } from "#/modules/repositories";
 
 interface BranchSwitcherProps {
 	organizationName?: string;
@@ -28,7 +34,9 @@ export default function BranchSwitcher({
 	const access = useRepositoryAccess();
 	const navigate = useNavigate();
 	const [opened, setOpened] = useState(false);
+	const [renameOpened, setRenameOpened] = useState(false);
 	const [newBranchName, setNewBranchName] = useState("");
+	const [renameNewName, setRenameNewName] = useState("");
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 
@@ -109,6 +117,67 @@ export default function BranchSwitcher({
 		}
 	};
 
+	const handleRename = async () => {
+		setError(null);
+		setLoading(true);
+		try {
+			await renameBranchFn({
+				data: {
+					organizationName,
+					name: repoName,
+					oldName: selectedBranch,
+					newName: renameNewName,
+				},
+			});
+			setRenameOpened(false);
+			setRenameNewName("");
+			const encoded = encodeURIComponent(renameNewName);
+			if (toCommits) {
+				void navigate({
+					to: "/organizations/$organization/repositories/$repository/tree/$branch/commits",
+					params: {
+						organization: organizationName,
+						repository: repoName,
+						branch: encoded,
+					},
+				});
+			} else if (currentBlobPath) {
+				void navigate({
+					to: "/organizations/$organization/repositories/$repository/blob/$branch/$",
+					params: {
+						organization: organizationName,
+						repository: repoName,
+						branch: encoded,
+						_splat: currentBlobPath,
+					},
+				});
+			} else if (currentTreePath) {
+				void navigate({
+					to: "/organizations/$organization/repositories/$repository/tree/$branch/$",
+					params: {
+						organization: organizationName,
+						repository: repoName,
+						branch: encoded,
+						_splat: currentTreePath,
+					},
+				});
+			} else {
+				void navigate({
+					to: "/organizations/$organization/repositories/$repository/tree/$branch",
+					params: {
+						organization: organizationName,
+						repository: repoName,
+						branch: encoded,
+					},
+				});
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Failed to rename branch");
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	return (
 		<>
 			<Menu shadow="md" width={220} withinPortal={false}>
@@ -139,6 +208,16 @@ export default function BranchSwitcher({
 					{access.canWrite && (
 						<>
 							<Menu.Divider />
+							<Menu.Item
+								leftSection={<Pencil size={14} />}
+								onClick={() => {
+									setRenameNewName("");
+									setError(null);
+									setRenameOpened(true);
+								}}
+							>
+								<Text size="sm">Rename branch</Text>
+							</Menu.Item>
 							<Menu.Item
 								leftSection={<GitBranchPlus size={14} />}
 								onClick={() => {
@@ -181,6 +260,54 @@ export default function BranchSwitcher({
 					</Button>
 					<Button onClick={handleCreate} loading={loading}>
 						Create
+					</Button>
+				</Group>
+			</Modal>
+
+			<Modal
+				opened={renameOpened}
+				onClose={() => {
+					if (loading) return;
+					setRenameOpened(false);
+					setRenameNewName("");
+					setError(null);
+				}}
+				title="Rename branch"
+				size="sm"
+			>
+				<TextInput
+					label="New branch name"
+					placeholder="e.g. feature/updated"
+					value={renameNewName}
+					onChange={(e) => {
+						setRenameNewName(e.currentTarget.value);
+						setError(null);
+					}}
+					data-autofocus
+					error={error}
+					mb="md"
+				/>
+				<Text size="sm" c="dimmed" mb="md">
+					Renaming <strong>{selectedBranch}</strong>
+				</Text>
+				<Group justify="flex-end">
+					<Button
+						variant="default"
+						onClick={() => {
+							setRenameOpened(false);
+							setRenameNewName("");
+							setError(null);
+						}}
+						disabled={loading}
+					>
+						Cancel
+					</Button>
+					<Button
+						onClick={handleRename}
+						loading={loading}
+						disabled={!renameNewName}
+					>
+						Rename
 					</Button>
 				</Group>
 			</Modal>

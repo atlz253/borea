@@ -195,6 +195,29 @@ can assign only `read` and `write`.
 Revokes an explicit repository grant. Repository moderators cannot revoke a
 `moderator` grant.
 
+#### `POST /api/v1/organizations/{organization}/repositories/{repository}/branches/rename`
+
+Renames a branch. Requires `write` access to the repository.
+
+```json
+{
+  "oldName": "old-branch",
+  "newName": "new-branch"
+}
+```
+
+Returns the updated branch info:
+
+```json
+{
+  "name": "new-branch",
+  "isHead": false
+}
+```
+
+Returns `404` when the repository or the old branch does not exist. Returns
+`409` when a branch with the new name already exists.
+
 ### Pull requests
 
 #### `GET /api/v1/organizations/{organization}/repositories/{repository}/pull-requests`

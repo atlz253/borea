@@ -18,6 +18,7 @@ function createMockGit(): GitProvider {
 		listCommits: vi.fn(),
 		countCommits: vi.fn(),
 		createBranch: vi.fn(),
+		renameBranch: vi.fn(),
 		canMerge: vi.fn(),
 		mergeBranch: vi.fn(),
 		getCommit: vi.fn(),

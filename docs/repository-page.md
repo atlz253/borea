@@ -46,6 +46,12 @@ Branch name rules:
 
 After creation, the page navigates to the new branch's tree view. If creation fails (e.g., the branch already exists), an error message is shown in the modal.
 
+### Renaming a Branch
+
+To rename a branch, open the branch switcher and click **"Rename branch"** at the bottom of the dropdown (below the divider, next to "New branch"). A modal appears with the current branch name pre-filled and a field for the new name. Enter the new branch name and click **"Rename"**.
+
+The same branch name rules apply as for creating a branch. The old branch is removed and you are navigated to the new branch's tree view. If the new name is already taken or the rename fails for another reason, an error message is shown in the modal.
+
 ### Clone URL
 
 You'll find the **"Git pull URL"** field with the address for cloning the repository over HTTP. Click the copy button to copy it, then use it in your terminal:

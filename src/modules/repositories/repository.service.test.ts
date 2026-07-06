@@ -7,6 +7,7 @@ import {
 	getRepositoryFile,
 	listRepositories,
 	listRepositoryFiles,
+	renameRepositoryBranch,
 } from "./repository.service";
 
 function createMockGit(): GitProvider {
@@ -24,6 +25,7 @@ function createMockGit(): GitProvider {
 		listCommits: vi.fn(),
 		countCommits: vi.fn(),
 		createBranch: vi.fn(),
+		renameBranch: vi.fn(),
 		canMerge: vi.fn(),
 		mergeBranch: vi.fn(),
 		getCommit: vi.fn(),
@@ -179,6 +181,39 @@ describe("listRepositoryFiles", () => {
 			/not found/,
 		);
 		expect(mockGit.listFiles).not.toHaveBeenCalled();
+	});
+});
+
+describe("renameRepositoryBranch", () => {
+	it("delegates to gitProvider.renameBranch with old and new names", async () => {
+		const mockGit = createMockGit();
+		const expected = { name: "new-branch", isHead: false };
+		vi.mocked(mockGit.exists).mockResolvedValue(true);
+		vi.mocked(mockGit.renameBranch).mockResolvedValue(expected);
+
+		const result = await renameRepositoryBranch(
+			mockGit,
+			"my-repo",
+			"old-branch",
+			"new-branch",
+		);
+
+		expect(mockGit.renameBranch).toHaveBeenCalledWith(
+			"my-repo",
+			"old-branch",
+			"new-branch",
+		);
+		expect(result).toBe(expected);
+	});
+
+	it("throws not-found when repository does not exist", async () => {
+		const mockGit = createMockGit();
+		vi.mocked(mockGit.exists).mockResolvedValue(false);
+
+		await expect(
+			renameRepositoryBranch(mockGit, "missing", "old", "new"),
+		).rejects.toThrow(/not found/);
+		expect(mockGit.renameBranch).not.toHaveBeenCalled();
 	});
 });
 

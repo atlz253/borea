@@ -1,9 +1,46 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { execa } from "execa";
-import type { DiffFile, GitService, RepositoryLocator } from "../git-provider";
+import { type ExecaError, execa } from "execa";
+import type {
+	BranchInfo,
+	DiffFile,
+	GitService,
+	RepositoryLocator,
+} from "../git-provider";
 import { parseNameStatus, parseUnifiedDiff } from "./cli-git-parsers";
 import { resolvePath, validateName } from "./cli-git-validators";
+
+export async function renameBranch(
+	gitBin: string,
+	repoPath: string,
+	oldName: string,
+	newName: string,
+): Promise<BranchInfo> {
+	try {
+		await execa(gitBin, [
+			"--git-dir",
+			repoPath,
+			"branch",
+			"-m",
+			oldName,
+			newName,
+		]);
+	} catch (error) {
+		if (error instanceof Error && "exitCode" in error) {
+			const e = error as ExecaError;
+			const msg = String(e.stderr ?? "").trim() || e.shortMessage;
+			if (msg.includes("already exists")) {
+				throw new Error(`Branch "${newName}" already exists`);
+			}
+			if (msg.includes("does not exist") || msg.includes("not found")) {
+				throw new Error(`Branch "${oldName}" not found`);
+			}
+			throw new Error(`Failed to rename branch: ${msg}`);
+		}
+		throw error;
+	}
+	return { name: newName, isHead: false };
+}
 
 export async function computeMergeTree(
 	gitBin: string,

@@ -3,6 +3,7 @@ import {
 	branchNameSchema,
 	createBranchSchema,
 	listBranchesSchema,
+	renameBranchSchema,
 } from "../schemas";
 
 describe("repository branch validators", () => {
@@ -193,6 +194,149 @@ describe("repository branch validators", () => {
 				branch: "feature/new-ui",
 				from: "main",
 			});
+		});
+	});
+
+	describe("renameBranchSchema", () => {
+		it("accepts valid rename input", () => {
+			const result = renameBranchSchema.parse({
+				name: "my-repo",
+				oldName: "main",
+				newName: "master",
+			});
+			expect(result).toMatchObject({
+				name: "my-repo",
+				oldName: "main",
+				newName: "master",
+			});
+		});
+
+		it("accepts rename with feature branch names", () => {
+			const result = renameBranchSchema.parse({
+				name: "my-repo",
+				oldName: "feature/old",
+				newName: "feature/new",
+			});
+			expect(result.oldName).toBe("feature/old");
+			expect(result.newName).toBe("feature/new");
+		});
+
+		it("accepts custom organization name", () => {
+			const result = renameBranchSchema.parse({
+				name: "my-repo",
+				organizationName: "team-alpha",
+				oldName: "main",
+				newName: "develop",
+			});
+			expect(result.organizationName).toBe("team-alpha");
+		});
+
+		it("rejects empty new branch name", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "main",
+					newName: "",
+				}),
+			).toThrow();
+		});
+
+		it("rejects invalid old branch name", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "-invalid",
+					newName: "new-branch",
+				}),
+			).toThrow(/hyphen/i);
+		});
+
+		it("rejects invalid new branch name", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "main",
+					newName: "feature~branch",
+				}),
+			).toThrow(/invalid characters/i);
+		});
+
+		it("rejects branch name with spaces", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "main",
+					newName: "new branch",
+				}),
+			).toThrow(/invalid characters/i);
+		});
+
+		it("rejects branch name exceeding maximum length", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "main",
+					newName: "a".repeat(201),
+				}),
+			).toThrow();
+		});
+
+		it("rejects invalid repository name", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "Invalid!",
+					oldName: "main",
+					newName: "new-branch",
+				}),
+			).toThrow();
+		});
+
+		it("rejects missing oldName", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					newName: "new-branch",
+				}),
+			).toThrow();
+		});
+
+		it("rejects missing newName", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "main",
+				}),
+			).toThrow();
+		});
+
+		it("rejects branch name ending with .lock", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "main",
+					newName: "feature.lock",
+				}),
+			).toThrow(/\.lock/);
+		});
+
+		it("rejects branch name containing @{}", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "main",
+					newName: "feature@{invalid}",
+				}),
+			).toThrow(/'@{'/);
+		});
+
+		it("rejects branch name containing ..", () => {
+			expect(() =>
+				renameBranchSchema.parse({
+					name: "my-repo",
+					oldName: "main",
+					newName: "feature/../leak",
+				}),
+			).toThrow(/'\.\.'/);
 		});
 	});
 });

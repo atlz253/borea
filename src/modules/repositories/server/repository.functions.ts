@@ -25,6 +25,7 @@ import {
 	listRepositoryBranches,
 	listRepositoryCommits,
 	listRepositoryFiles,
+	renameRepositoryBranch,
 } from "../repository.service";
 import {
 	countCommitsSchema,
@@ -36,6 +37,7 @@ import {
 	listBranchesSchema,
 	listCommitsSchema,
 	listFilesSchema,
+	renameBranchSchema,
 	repositoryLocatorSchema,
 } from "../schemas";
 
@@ -226,6 +228,19 @@ export const createBranchFn = createServerFn({ method: "POST" })
 			locator(data),
 			data.branch,
 			data.from,
+		);
+	});
+
+export const renameBranchFn = createServerFn({ method: "POST" })
+	.validator((data: unknown) => renameBranchSchema.parse(data))
+	.handler(async ({ data }) => {
+		await assertSameOriginFn();
+		await requireRepository(data.organizationName, data.name, "write");
+		return renameRepositoryBranch(
+			gitProvider,
+			locator(data),
+			data.oldName,
+			data.newName,
 		);
 	});
 

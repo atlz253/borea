@@ -165,4 +165,50 @@ export function registerRepositoryOpenApi(registry: OpenAPIRegistry): void {
 			},
 		},
 	});
+
+	const branchResponseSchema = z.object({
+		name: z.string(),
+		isHead: z.boolean(),
+	});
+	const branchResponse = registry.register("BranchInfo", branchResponseSchema);
+
+	registry.registerPath({
+		method: "post",
+		path: "/api/v1/organizations/{organization}/repositories/{repository}/branches/rename",
+		tags: ["Repositories"],
+		summary: "Rename a repository branch",
+		request: {
+			params,
+			body: {
+				content: jsonContent(
+					z.object({
+						oldName: z.string().min(1),
+						newName: z.string().min(1),
+					}),
+				),
+			},
+		},
+		responses: {
+			200: {
+				description: "Branch renamed",
+				content: jsonContent(branchResponse),
+			},
+			400: {
+				description: "Invalid branch name",
+				content: jsonContent(error),
+			},
+			404: {
+				description: "Repository or branch not found",
+				content: jsonContent(error),
+			},
+			409: {
+				description: "Branch with target name already exists",
+				content: jsonContent(error),
+			},
+			500: {
+				description: "Internal server error",
+				content: jsonContent(error),
+			},
+		},
+	});
 }

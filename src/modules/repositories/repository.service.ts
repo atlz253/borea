@@ -147,6 +147,22 @@ export async function createRepositoryBranch(
 	);
 }
 
+export async function renameRepositoryBranch(
+	gitProvider: GitProvider,
+	locator: RepositoryTarget,
+	oldName: string,
+	newName: string,
+): Promise<BranchInfo> {
+	if (!(await gitProvider.exists(locator as RepositoryLocator))) {
+		throw new Error(`Repository "${repositoryName(locator)}" not found`);
+	}
+	return gitProvider.renameBranch(
+		locator as RepositoryLocator,
+		oldName,
+		newName,
+	);
+}
+
 export async function countRepositoryCommits(
 	gitProvider: GitProvider,
 	locator: RepositoryTarget,

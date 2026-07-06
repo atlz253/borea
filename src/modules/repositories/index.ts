@@ -16,9 +16,12 @@ export {
 	deleteRepository,
 	getRepository,
 	listRepositories,
+	renameRepositoryBranch,
 } from "./repository.service";
 export type { Repository, TreeEntry, TreeEntryType } from "./schemas";
 export {
+	branchNameSchema,
+	renameBranchSchema,
 	repoNameSchema,
 	repositoryResponseSchema,
 	repositorySchema,
@@ -38,4 +41,5 @@ export {
 	listCommitsFn,
 	listRepositoriesFn,
 	listRepositoryFilesFn,
+	renameBranchFn,
 } from "./server/repository.functions";

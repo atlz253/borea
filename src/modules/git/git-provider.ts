@@ -166,6 +166,11 @@ export interface GitProvider {
 		branch: string,
 		fromRef?: string,
 	): Promise<BranchInfo>;
+	renameBranch(
+		locator: RepositoryLocator,
+		oldName: string,
+		newName: string,
+	): Promise<BranchInfo>;
 	listCommits(
 		locator: RepositoryLocator,
 		options?: ListCommitsOptions,

@@ -89,6 +89,114 @@ test("create branch from branch switcher", async ({ page }) => {
 	}
 });
 
+test("rename branch from branch switcher", async ({ page }) => {
+	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+	const repoName = `e2e-rename-branch-${uid}`;
+	const barePath = join(STORAGE_PATH, repoName);
+	const workDir = mkdtempSync(join(tmpdir(), `nirvana-e2e-work-${uid}-`));
+
+	try {
+		// Seed bare repo
+		await execa("git", ["init", "--bare", barePath]);
+
+		const { stdout: branchRaw } = await execa("git", [
+			"--git-dir",
+			barePath,
+			"symbolic-ref",
+			"--short",
+			"HEAD",
+		]);
+		const defaultBranch = branchRaw.trim();
+
+		// Create working dir with content
+		await execa("git", ["init", workDir]);
+		await writeFile(join(workDir, "readme.md"), "hello", "utf-8");
+		await execa("git", ["add", "--all"], { cwd: workDir });
+		await execa("git", ["commit", "--message=init"], {
+			cwd: workDir,
+			env: {
+				GIT_AUTHOR_NAME: "e2e",
+				GIT_AUTHOR_EMAIL: "e2e@test.com",
+				GIT_COMMITTER_NAME: "e2e",
+				GIT_COMMITTER_EMAIL: "e2e@test.com",
+			},
+		});
+
+		// Create a feature branch
+		await execa("git", ["checkout", "-b", "old-name"], { cwd: workDir });
+		await writeFile(join(workDir, "feature.txt"), "content", "utf-8");
+		await execa("git", ["add", "--all"], { cwd: workDir });
+		await execa("git", ["commit", "--message=feature"], {
+			cwd: workDir,
+			env: {
+				GIT_AUTHOR_NAME: "e2e",
+				GIT_AUTHOR_EMAIL: "e2e@test.com",
+				GIT_COMMITTER_NAME: "e2e",
+				GIT_COMMITTER_EMAIL: "e2e@test.com",
+			},
+		});
+
+		// Push both branches
+		const pushUrl = `${BASE_URL}/api/git/default/${repoName}.git`;
+		await execa("git", ["remote", "add", "origin", pushUrl], { cwd: workDir });
+		await execa(
+			"git",
+			["push", "-v", "origin", `${defaultBranch}:${defaultBranch}`],
+			{
+				cwd: workDir,
+				env: { GIT_TERMINAL_PROMPT: "0" },
+				timeout: 30_000,
+			},
+		);
+		await execa("git", ["push", "-v", "origin", "old-name:old-name"], {
+			cwd: workDir,
+			env: { GIT_TERMINAL_PROMPT: "0" },
+			timeout: 30_000,
+		});
+
+		// Navigate to the feature branch
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/tree/old-name`,
+			{ waitUntil: "load" },
+		);
+		await waitForHydration(page);
+
+		await expect(page).toHaveURL(
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/old-name`,
+			),
+		);
+
+		// Open branch switcher and click "Rename branch"
+		await page.getByRole("button", { name: "old-name" }).click();
+		await page.getByRole("menuitem", { name: /Rename branch/ }).click();
+
+		// Fill in new name and confirm
+		const input = page.getByPlaceholder("e.g. feature/updated");
+		await input.fill("new-name");
+		await page.getByRole("button", { name: /Rename/ }).click();
+
+		// Should navigate to the new branch
+		await expect(page).toHaveURL(
+			new RegExp(
+				`/organizations/default/repositories/${repoName}/tree/new-name`,
+			),
+		);
+
+		// Verify the old branch no longer appears in the switcher
+		await page.getByRole("button", { name: "new-name" }).click();
+		await expect(
+			page.getByRole("menuitem", { name: "old-name", exact: true }),
+		).not.toBeVisible();
+		await expect(
+			page.getByRole("menuitem", { name: "new-name", exact: true }),
+		).toBeVisible();
+	} finally {
+		rmSync(workDir, { recursive: true, force: true });
+		rmSync(barePath, { recursive: true, force: true });
+	}
+});
+
 test("branch switcher lets user switch between branches", async ({ page }) => {
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-branch-${uid}`;

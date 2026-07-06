@@ -141,6 +141,14 @@ export const createBranchSchema = repositoryLocatorSchema.extend({
 	from: refSchema.optional(),
 });
 
+export const renameBranchSchema = repositoryLocatorSchema.extend({
+	oldName: branchNameSchema,
+	newName: branchNameSchema.refine(
+		(name) => name !== "",
+		"New branch name cannot be empty",
+	),
+});
+
 export const commitShaSchema = z
 	.string()
 	.regex(/^[0-9a-f]{7,40}$/, "Invalid commit SHA");
