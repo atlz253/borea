@@ -26,6 +26,10 @@ Nirvana is an open-source software development workspace (analogue of JetBrains 
 - **OpenAPI:** `@asteasolutions/zod-to-openapi`, OpenAPI 3.1
 - **Language:** TypeScript, strict mode, `verbatimModuleSyntax`
 
+## Known Dependency Overrides
+
+- **`@hono/node-server`: `^1.19.14`** — overridden in `package.json` to fix GHSA-92pp-h63x-v22m (middleware bypass in `serveStatic`). Vulnerability is transitive via `prisma@7.8.0 → @prisma/dev@0.24.x → @hono/node-server@1.19.11`. When `@prisma/dev` releases a version pinning `@hono/node-server ≥ 1.19.13`, this override can be removed (verify with `npm audit`).
+
 ## Commands
 
 Run these before considering any task complete:
