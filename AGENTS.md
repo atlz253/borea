@@ -124,7 +124,7 @@ npm run db:studio   # Launch Prisma Studio GUI
 
 Respect these when adding features — do not violate them without an ADR:
 
-- **Provider abstractions:** all external dependencies (Git, DB, storage, auth) go through unified interfaces (`GitProvider`, `DatabaseProvider`, `StorageProvider`, `AuthProvider`) with swappable implementations. See `docs/MVP.md` §8.
+- **Provider abstractions:** all external dependencies (Git, DB, auth) go through unified interfaces (`GitProvider`, `DatabaseProvider`, `AuthProvider`) with swappable implementations. See `docs/MVP.md` §8.
 - **NoAuth mode (MVP):** all actions on behalf of a fixed user. Must be blocked in production (`NODE_ENV=production`) unless `ALLOW_NOAUTH_IN_PRODUCTION=true`. See §5.3 and the final recommendations in `docs/MVP.md`.
 - **Modular monolith:** clear boundaries between domain modules (git, auth, repositories, pull-requests). See §7.
 - **Single-container deploy:** the whole app runs in one Nitro process; do not introduce a separate server framework. See ADR 0001.

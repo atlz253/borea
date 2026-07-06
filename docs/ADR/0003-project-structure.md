@@ -15,7 +15,7 @@ Additionally, module boundary enforcement is needed to prevent tight coupling be
 Key questions resolved by this ADR:
 1. Where to place domain modules (naming, location)
 2. How to organize routes (thin routes delegating to module-owned pages)
-3. Where to place cross-domain infrastructure (DatabaseProvider, StorageProvider, config, logger, errors)
+3. Where to place cross-domain infrastructure (DatabaseProvider, config, logger, errors)
 4. How to enforce module boundaries (Biome `noRestrictedImports`)
 
 ## Alternatives Considered
@@ -34,7 +34,7 @@ Key questions resolved by this ADR:
 
 ### 3. Infrastructure location: `platform/` vs `shared/` vs separate domain modules
 
-- **`platform/` module** — DatabaseProvider, StorageProvider, config, logger, errors live together as a dedicated infrastructure concern. Clear separation: domain logic ↔ infrastructure.
+- **`platform/` module** — DatabaseProvider, config, logger, errors live together as a dedicated infrastructure concern. Clear separation: domain logic ↔ infrastructure.
 - **`shared/` flat folder** — All cross-cutting code in one bag, mixing DB, storage, config, and utilities.
 - **Separate domain modules for infra** — Treating `database` and `storage` as peer modules of `git` and `auth`. Inconsistent with their infrastructure nature.
 

@@ -16,7 +16,6 @@ src/
   platform/               Cross-domain infrastructure
     config/               Application configuration (env variables)
     database/             DatabaseProvider interface + PrismaDatabaseProvider (SQLite via Prisma 7)
-    storage/              StorageProvider interface (stub for MVP)
     logger/               Structured logging
     errors/               Shared error types
   routes/                 File-based routing (TanStack Router)
@@ -54,7 +53,6 @@ All external dependencies are accessed through unified interfaces with swappable
 
 - **GitProvider** — repository operations, commit history, file tree, smart-HTTP streaming
 - **DatabaseProvider** — data persistence via SQLite backed by Prisma 7 (`PrismaDatabaseProvider` wraps `PrismaClient` with `@prisma/adapter-libsql`)
-- **StorageProvider** — file storage (local filesystem for MVP — bare Git repositories remain on disk)
 - **AuthProvider** — file-backed local authentication or fixed-user NoAuth
 
 ### Thin Routes

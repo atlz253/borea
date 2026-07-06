@@ -15,7 +15,7 @@ Key technical requirements that constrain framework choice:
 - **Git smart-HTTP protocol** — MVP requires HTTP clone/push (Section 4.2), which means streaming binary protocol handling for `info/refs`, `git-upload-pack`, and `git-receive-pack` endpoints. The framework must provide raw request/response access without buffering.
 - **REST API with OpenAPI** (Section 4.5, 14.1) — auto-generated OpenAPI specification from code-first schemas.
 - **Single Docker container** (Section 12.1) — the full application (frontend, backend, Git HTTP) must run in a single process.
-- **Provider abstractions** (Section 8) — GitProvider, DatabaseProvider, StorageProvider, AuthProvider are core architectural interfaces; the server layer must support a clean dependency injection / provider pattern.
+- **Provider abstractions** (Section 8) — GitProvider, DatabaseProvider, AuthProvider are core architectural interfaces; the server layer must support a clean dependency injection / provider pattern.
 - **Self-hosted + future SaaS** — the framework must be portable across environments (bare metal, VPS, cloud) without vendor lock-in.
 - **React-based** — Section 6.1 requires TanStack ecosystem (Router, Query, Table), which is React-native.
 

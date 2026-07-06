@@ -112,8 +112,7 @@ nirvana/
 │   │   └── pull-requests/          # Pull/merge request services, storage, and UI
 │   ├── platform/                   # Cross-domain infrastructure
 │   │   ├── config/                 # App configuration (env variables)
-│   │   ├── database/               # DatabaseProvider interface (stub)
-│   │   ├── storage/                # StorageProvider interface (stub)
+│   │   ├── database/               # DatabaseProvider interface + Prisma implementation
 │   │   ├── logger/                 # Structured logging
 │   │   └── errors/                 # Shared error types
 │   ├── routes/                     # File-based routes (TanStack Router)
@@ -177,7 +176,7 @@ All ADRs are listed in the [ADR index](docs/ADR/README.md):
 ## Architecture (summary)
 
 - **Modular monolith** with domain-based modules (git, auth, repositories, pull-requests)
-- **Provider abstractions** (GitProvider, DatabaseProvider, StorageProvider, AuthProvider) — all external dependencies accessed through swappable interfaces
+- **Provider abstractions** (GitProvider, DatabaseProvider, AuthProvider) — all external dependencies accessed through swappable interfaces
 - **Thin routes** — route files delegate to page components in module folders
 - **Mantine AppShell layout** — consistent GitHub-like UI with header, sidebar, and end-of-content footer
 - **Git smart-HTTP** — PAT-authenticated clone and push with repository permission enforcement

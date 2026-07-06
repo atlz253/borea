@@ -203,13 +203,7 @@ Implementations (to be chosen at implementation stage):
 **8.2. DatabaseProvider**
 Unified interface for DB operations, abstracted from a specific ORM. Allows migration between ORMs by creating a new implementation.
 
-**8.3. StorageProvider**
-Unified interface for repository file storage:
-
-- Local file system
-- S3-compatible storage (MinIO, AWS S3, etc.)
-
-**8.4. AuthProvider**
+**8.3. AuthProvider**
 Unified interface for authentication:
 
 ```typescript
@@ -383,15 +377,14 @@ ORGANIZATIONS_PATH=./data/organizations
 - [X] User can browse files and commit history
 - [X] User can create a Pull Request
 - [X] User can leave comments on a changed file in a PR
-- [ ] User can leave a comment on a code line in a PR
 - [X] User can merge a PR
 - [X] All actions are performed on behalf of a fixed user (configurable)
 
 **14.2. Technical**
 
-- [ ] All external dependencies are abstracted via interfaces (GitProvider, DatabaseProvider, StorageProvider, AuthProvider)
-- [ ] NoAuth mode is implemented via `NoAuthProvider`
-- [ ] Unit tests cover business logic
+- [X] All external dependencies are abstracted via interfaces (GitProvider, DatabaseProvider, AuthProvider)
+- [X] NoAuth mode is implemented via `NoAuthProvider`
+- [X] Unit tests cover business logic
 - [ ] Integration tests pass
 - [ ] E2E tests for key scenarios pass
 - [X] REST API is documented via OpenAPI
