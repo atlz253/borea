@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { logger } from "#/platform/logger";
 import { getConfig, resetConfigForTests } from "./index";
 
 const originalEnvironment = { ...process.env };
@@ -6,6 +7,7 @@ const originalEnvironment = { ...process.env };
 afterEach(() => {
 	process.env = { ...originalEnvironment };
 	resetConfigForTests();
+	vi.restoreAllMocks();
 });
 
 describe("authentication configuration", () => {
@@ -43,5 +45,33 @@ describe("authentication configuration", () => {
 		resetConfigForTests();
 
 		expect(() => getConfig()).toThrow(/prohibited/);
+	});
+
+	it("warns when launching in NoAuth mode", () => {
+		const warnSpy = vi.spyOn(logger, "warn");
+		process.env.AUTH_MODE = "noauth";
+		process.env.ORGANIZATION_MODE = "single";
+		resetConfigForTests();
+
+		getConfig();
+
+		expect(warnSpy).toHaveBeenCalledWith(
+			"Running in NoAuth mode. Authentication and access control are disabled.",
+		);
+	});
+
+	it("warns when launching in NoAuth mode in production with override", () => {
+		const warnSpy = vi.spyOn(logger, "warn");
+		process.env.AUTH_MODE = "noauth";
+		process.env.NODE_ENV = "production";
+		process.env.ALLOW_NOAUTH_IN_PRODUCTION = "true";
+		process.env.ORGANIZATION_MODE = "single";
+		resetConfigForTests();
+
+		getConfig();
+
+		expect(warnSpy).toHaveBeenCalledWith(
+			"Running in NoAuth mode. Authentication and access control are disabled.",
+		);
 	});
 });

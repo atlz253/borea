@@ -70,13 +70,9 @@ function validateAuthenticationConfig(
 			`${ENV_AUTH_MODE}=noauth is prohibited in production unless ${ENV_ALLOW_NOAUTH_IN_PRODUCTION}=true`,
 		);
 	}
-	if (
-		authMode === "noauth" &&
-		process.env.NODE_ENV === "production" &&
-		process.env[ENV_ALLOW_NOAUTH_IN_PRODUCTION] === "true"
-	) {
+	if (authMode === "noauth") {
 		logger.warn(
-			"Running in NoAuth mode in production. Authentication and access control are disabled.",
+			"Running in NoAuth mode. Authentication and access control are disabled.",
 		);
 	}
 }

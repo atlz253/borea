@@ -394,12 +394,12 @@ ORGANIZATIONS_PATH=./data/organizations
 
 **14.3. Security**
 
-- [ ] Protection against SQL injection
-- [ ] Protection against XSS
-- [ ] Protection against CSRF
-- [ ] Input data validation
-- [ ] Log warnings when launching in NoAuth mode
-- [ ] Blocking of NoAuth mode in production without explicit flag
+- [X] Protection against SQL injection
+- [X] Protection against XSS
+- [X] Protection against CSRF
+- [X] Input data validation
+- [X] Log warnings when launching in NoAuth mode
+- [X] Blocking of NoAuth mode in production without explicit flag
 
 **14.4. Code Quality**
 
