@@ -37,11 +37,14 @@ const USER = {
 	createdAt: new Date(0).toISOString(),
 };
 
-function renderLayout(props: { children?: React.ReactNode } = {}) {
+function renderLayout(
+	props: { children?: React.ReactNode; authMode?: "full" | "noauth" } = {},
+) {
+	const { children, authMode } = { authMode: "full" as const, ...props };
 	return render(
 		<MantineProvider>
-			<AppShellLayout user={USER} authMode="full">
-				{props.children ?? <p>Content</p>}
+			<AppShellLayout user={USER} authMode={authMode}>
+				{children ?? <p>Content</p>}
 			</AppShellLayout>
 		</MantineProvider>,
 	);
@@ -78,5 +81,24 @@ describe("AppShellLayout", () => {
 
 		await user.click(screen.getByTestId("header-burger"));
 		expect(headerOpened.textContent).toBe("false");
+	});
+
+	it("renders noauth banner when authMode is noauth", () => {
+		renderLayout({ authMode: "noauth" });
+		expect(
+			screen.getByText(/NoAuth mode/, { selector: "span" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByText(USER.name, { selector: "span" }),
+		).toBeInTheDocument();
+		expect(screen.getByText(/Do not use in production/)).toBeInTheDocument();
+	});
+
+	it("does not render noauth banner when authMode is full", () => {
+		renderLayout();
+		expect(screen.queryByText(/NoAuth mode/)).not.toBeInTheDocument();
+		expect(
+			screen.queryByText(/Do not use in production/),
+		).not.toBeInTheDocument();
 	});
 });

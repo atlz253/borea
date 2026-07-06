@@ -34,3 +34,9 @@ test("header renders logo and theme toggle", async ({ page }) => {
 		page.getByRole("button", { name: /theme|auto|light|dark/i }),
 	).toBeVisible();
 });
+
+test("NoAuth mode banner is visible on page", async ({ page }) => {
+	await page.goto("/organizations/default");
+	await expect(page.getByText(/NoAuth mode/)).toBeVisible();
+	await expect(page.getByText(/Do not use in production/)).toBeVisible();
+});

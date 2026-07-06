@@ -58,6 +58,18 @@ WARNING: Running in NoAuth mode in production. This is insecure!
 fixed `default` organization. Multi mode exposes every organization because
 NoAuth intentionally bypasses role and grant checks.
 
+## UI Indicator
+
+When NoAuth mode is active, every authenticated page displays a persistent red banner at the top of the header:
+
+> **NoAuth mode** — authentication is disabled, all operations are performed on behalf of `<user.name>`. Do not use in production.
+
+The banner:
+- Uses Mantine `Alert` with `variant="filled"` and `color="red"`, an icon from `ShieldAlert`, and no close button
+- Is always visible while scrolling (part of the fixed AppShell header)
+- Is rendered by the `AppShellLayout` component (`src/components/AppShellLayout.tsx`) when `authMode === "noauth"`
+- Cannot be dismissed — it serves as a persistent reminder of the insecure state
+
 ## Related
 
 - [Git HTTP operations](../git-http.md) — how clone and push work in NoAuth mode
