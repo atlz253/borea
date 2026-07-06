@@ -4,8 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 import { execa } from "execa";
-import { PrismaPullRequestStore } from "#/modules/pull-requests/prisma-pull-request.store";
-import { PrismaDatabaseProvider } from "#/platform/database";
+import { waitForHydration } from "./helpers";
 
 const ORGANIZATION_NAME = "default";
 const REPOSITORIES_PATH = "./data/repositories/default";
@@ -16,7 +15,7 @@ const COMMIT_ENV = {
 	GIT_COMMITTER_EMAIL: "e2e@test.com",
 };
 
-async function seedRepository(repoName: string, conflict: boolean) {
+async function seedRepo(repoName: string, conflict: boolean) {
 	const barePath = resolve(REPOSITORIES_PATH, repoName);
 	const workDir = mkdtempSync(join(tmpdir(), `nirvana-rest-${repoName}-`));
 	await execa("git", ["init", "--bare", barePath]);
@@ -67,26 +66,17 @@ async function seedRepository(repoName: string, conflict: boolean) {
 		});
 	}
 
-	const db = new PrismaDatabaseProvider();
-	const store = new PrismaPullRequestStore(db);
-	const pullRequest = await store.create({
-		organizationName: ORGANIZATION_NAME,
-		repoName,
-		title: conflict ? "Conflicting change" : "Feature change",
-		sourceBranch: "feature",
-		targetBranch,
-		authorName: "e2e",
-	});
-
-	return { barePath, workDir, pullRequest };
+	return { barePath, workDir, targetBranch };
 }
 
 test("REST API lists, reads, merges, and deletes repository data", async ({
+	page,
 	request,
 }) => {
-	test.setTimeout(90000);
+	test.setTimeout(120000);
+	await page.setViewportSize({ width: 1600, height: 900 });
 	const repoName = `rest-api-${Date.now().toString(36)}`;
-	const seeded = await seedRepository(repoName, false);
+	const seeded = await seedRepo(repoName, false);
 
 	try {
 		const organizationsResponse = await request.get("/api/v1/organizations");
@@ -117,23 +107,43 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 			createdAt: expect.any(String),
 		});
 
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/pulls/new`,
+		);
+		await page.waitForLoadState("load");
+		await waitForHydration(page);
+		await page.getByLabel("Title").fill("Feature change");
+		await expect(page.getByLabel("Title")).toHaveValue("Feature change");
+		await page.getByRole("combobox", { name: "Source branch" }).click();
+		await page.getByRole("option", { name: "feature" }).click();
+		await page.getByRole("button", { name: /Create pull request/i }).click();
+		await page.waitForURL(
+			new RegExp(`/organizations/default/repositories/${repoName}/pulls/\\d+`),
+		);
+
 		const pullRequestsResponse = await request.get(
 			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests`,
 		);
 		expect(pullRequestsResponse.ok()).toBe(true);
-		await expect(pullRequestsResponse.json()).resolves.toHaveLength(1);
+		const prs = (await pullRequestsResponse.json()) as Array<{
+			id: string;
+			title: string;
+			status: string;
+		}>;
+		expect(prs).toHaveLength(1);
+		const prId = prs[0].id;
 
 		const pullRequestResponse = await request.get(
-			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${prId}`,
 		);
 		expect(pullRequestResponse.ok()).toBe(true);
 		await expect(pullRequestResponse.json()).resolves.toMatchObject({
-			id: seeded.pullRequest.id,
+			id: prId,
 			status: "open",
 		});
 
 		const mergeResponse = await request.post(
-			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${prId}/merge`,
 			{ data: { fastForward: true } },
 		);
 		expect(mergeResponse.ok()).toBe(true);
@@ -143,7 +153,7 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 		});
 
 		const repeatedMerge = await request.post(
-			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${prId}/merge`,
 		);
 		expect(repeatedMerge.status()).toBe(409);
 		await expect(repeatedMerge.json()).resolves.toMatchObject({
@@ -167,11 +177,13 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 });
 
 test("REST API validates parameters and reports merge conflicts", async ({
+	page,
 	request,
 }) => {
-	test.setTimeout(90000);
+	test.setTimeout(120000);
+	await page.setViewportSize({ width: 1600, height: 900 });
 	const repoName = `rest-conflict-${Date.now().toString(36)}`;
-	const seeded = await seedRepository(repoName, true);
+	const seeded = await seedRepo(repoName, true);
 
 	try {
 		const invalidResponse = await request.get(
@@ -184,8 +196,23 @@ test("REST API validates parameters and reports merge conflicts", async ({
 		);
 		expect(missingResponse.status()).toBe(404);
 
+		await page.goto(
+			`/organizations/default/repositories/${repoName}/pulls/new`,
+		);
+		await page.waitForLoadState("load");
+		await waitForHydration(page);
+		await page.getByLabel("Title").fill("Conflicting change");
+		await expect(page.getByLabel("Title")).toHaveValue("Conflicting change");
+		await page.getByRole("combobox", { name: "Source branch" }).click();
+		await page.getByRole("option", { name: "feature" }).click();
+		await page.getByRole("button", { name: /Create pull request/i }).click();
+		await page.waitForURL(
+			new RegExp(`/organizations/default/repositories/${repoName}/pulls/\\d+`),
+		);
+
+		const prNumber = page.url().split("/pulls/").pop()?.split("/")[0] ?? "";
 		const conflictResponse = await request.post(
-			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${seeded.pullRequest.id}/merge`,
+			`/api/v1/organizations/${ORGANIZATION_NAME}/repositories/${repoName}/pull-requests/${prNumber}/merge`,
 		);
 		expect(conflictResponse.status()).toBe(409);
 		await expect(conflictResponse.json()).resolves.toMatchObject({

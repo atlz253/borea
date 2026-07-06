@@ -388,9 +388,9 @@ ORGANIZATIONS_PATH=./data/organizations
 - [ ] Integration tests pass
 - [ ] E2E tests for key scenarios pass
 - [X] REST API is documented via OpenAPI
-- [ ] Project deploys with a single `docker compose up` command
-- [ ] All documentation is in place
-- [ ] NoAuth mode cannot be accidentally enabled in production (`NODE_ENV` check)
+- [X] Project deploys with a single `docker compose up` command
+- [X] All documentation is in place
+- [X] NoAuth mode cannot be accidentally enabled in production (`NODE_ENV` check)
 
 **14.3. Security**
 

@@ -1,14 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { assertSameOriginFn, requireCurrentUserFn } from "#/modules/auth";
 import { gitProvider } from "#/modules/git";
-import { requireRepositoryPermissionFn } from "#/modules/organizations";
+import {
+	PrismaOrganizationStore,
+	requireRepositoryPermissionFn,
+} from "#/modules/organizations";
 import { PrismaDatabaseProvider } from "#/platform/database";
 import { PrismaPullRequestStore } from "../prisma-pull-request.store";
 import { createPullRequestService } from "../pull-request.service";
 
-const pullRequestStore = new PrismaPullRequestStore(
-	new PrismaDatabaseProvider(),
-);
+const prismaDb = new PrismaDatabaseProvider();
+const pullRequestStore = new PrismaPullRequestStore(prismaDb);
+const orgStore = new PrismaOrganizationStore(prismaDb);
 
 import {
 	addPullRequestFileCommentSchema,
@@ -39,6 +42,21 @@ export const createPullRequestFn = createServerFn({ method: "POST" })
 		await assertSameOriginFn();
 		await requireRepository(data.organizationName, data.repoName, "write");
 		const user = await requireCurrentUserFn();
+		try {
+			await orgStore.createRepositoryAccess(
+				data.organizationName,
+				data.repoName,
+				user.id,
+			);
+		} catch (error) {
+			if (
+				typeof error !== "object" ||
+				error === null ||
+				(error as { code?: string }).code !== "P2002"
+			) {
+				throw error;
+			}
+		}
 		return service.createPullRequest({ ...data, authorName: user.name });
 	});
 

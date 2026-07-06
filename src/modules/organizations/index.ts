@@ -10,6 +10,7 @@ export {
 } from "./organization.service";
 export { default as OrganizationPage } from "./pages/OrganizationPage";
 export { default as OrganizationsPage } from "./pages/OrganizationsPage";
+export { PrismaOrganizationStore } from "./prisma-organization.store";
 export {
 	RepositoryAccessProvider,
 	useRepositoryAccess,
