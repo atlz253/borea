@@ -52,6 +52,15 @@ The container sets these runtime defaults:
 | `REPOSITORIES_PATH` | `./data/repositories` |
 | `DATABASE_URL` | `file:./data/borea.db` |
 
+When `DATABASE_URL` uses the `file:` scheme, the application and Prisma CLI
+automatically create the parent directory on startup. A fresh checkout does not
+require a manual `mkdir`.
+
+Pending database migrations are applied automatically on every container start
+via the `ENTRYPOINT` (`prisma migrate deploy` before the Nitro server). The
+Dockerfile includes the Prisma CLI, schema, and migration files in the runtime
+image so that migration remains available without the build toolchain.
+
 Full authentication mode is the application default and requires
 `SESSION_SECRET`. All other application variables are documented in
 [Authentication](security/authentication.md) and

@@ -31,6 +31,9 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
+The first start auto-applies pending database migrations. No manual
+`db:migrate` step is needed.
+
 Default development settings are stored in `.env`. Override them locally in
 `.env.local`, which is ignored by Git. Set a private `SESSION_SECRET` containing
 at least 32 characters outside local development. Use `AUTH_MODE=noauth` for an
@@ -46,7 +49,7 @@ explicit development-only fixed-user mode.
 
 | Script                    | Description                                    |
 | ------------------------- | ---------------------------------------------- |
-| `npm run dev`             | Start the dev server on port 3000              |
+| `npm run dev`             | Start the dev server (applies pending migrations) |
 | `npm run build`           | Build for production (outputs to `dist/`)      |
 | `npm run preview`         | Preview the production build                   |
 | `npm run generate-routes` | Regenerate the TanStack Router route tree      |

@@ -46,7 +46,7 @@ npm run test:e2e:ui # Playwright E2E in UI mode
 
 Other useful:
 ```bash
-npm run dev         # Dev server on :3000 (runs prisma generate first)
+npm run dev         # Dev server on :3000 (generates client + applies pending migrations)
 npm run build       # Production build → dist/ (runs prisma generate first)
 npm run test:coverage  # Unit tests with coverage report
 npm run lint        # Biome lint

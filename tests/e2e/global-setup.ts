@@ -1,6 +1,5 @@
-import { existsSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
 import { execaSync } from "execa";
+import { ensureFileDatabaseDir } from "#/platform/paths";
 
 const NOAUTH_USER_ID = "00000000-0000-4000-8000-000000000000";
 
@@ -10,11 +9,7 @@ async function globalSetup() {
 		throw new Error("E2E_DATABASE_URL not set by Playwright config");
 	}
 
-	const absPath = url.replace("file:", "");
-	const dir = dirname(absPath);
-	if (!existsSync(dir)) {
-		mkdirSync(dir, { recursive: true });
-	}
+	ensureFileDatabaseDir(url);
 
 	execaSync(
 		"node",

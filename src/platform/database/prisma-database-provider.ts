@@ -5,6 +5,7 @@ import {
 	PrismaClient as PrismaClientClass,
 } from "#/generated/prisma/client";
 import { getConfig } from "#/platform/config";
+import { ensureFileDatabaseDir } from "#/platform/paths";
 import type { DatabaseProvider } from "./database-provider";
 
 type TxClient = Omit<
@@ -17,6 +18,7 @@ export class PrismaDatabaseProvider implements DatabaseProvider {
 
 	constructor(databaseUrl?: string) {
 		const url = databaseUrl ?? getConfig().databaseUrl;
+		ensureFileDatabaseDir(url);
 		const adapter = new PrismaLibSql({ url } satisfies Config);
 		this.client = new PrismaClientClass({ adapter });
 	}
