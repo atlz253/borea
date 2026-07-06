@@ -34,6 +34,7 @@ Run these before considering any task complete:
 npm run check       # Biome lint + format (must pass clean)
 npx tsc --noEmit    # Typecheck (strict; must pass with no errors)
 npm run test        # Vitest unit tests (must pass)
+npm run test:integration  # Integration tests (must pass)
 npm run generate-routes  # Regenerate route tree after adding/removing routes
 npm run test:e2e    # Playwright E2E tests (must pass)
 npm run test:e2e:ui # Playwright E2E in UI mode

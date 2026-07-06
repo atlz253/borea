@@ -385,8 +385,8 @@ ORGANIZATIONS_PATH=./data/organizations
 - [X] All external dependencies are abstracted via interfaces (GitProvider, DatabaseProvider, AuthProvider)
 - [X] NoAuth mode is implemented via `NoAuthProvider`
 - [X] Unit tests cover business logic
-- [ ] Integration tests pass
-- [ ] E2E tests for key scenarios pass
+- [X] Integration tests pass
+- [X] E2E tests for key scenarios pass
 - [X] REST API is documented via OpenAPI
 - [X] Project deploys with a single `docker compose up` command
 - [X] All documentation is in place
