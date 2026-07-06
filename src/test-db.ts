@@ -18,9 +18,20 @@ export function createTestDatabase(): PrismaDatabaseProvider {
 	directories.push(dir);
 	const dbPath = join(dir, "test.db");
 	const url = `file:${dbPath}`;
-	execaSync("node", ["node_modules/prisma/build/index.js", "db", "push", "--accept-data-loss", "--url", url], {
-		env: { ...process.env, DATABASE_URL: url },
-	});
+	execaSync(
+		"node",
+		[
+			"node_modules/prisma/build/index.js",
+			"db",
+			"push",
+			"--accept-data-loss",
+			"--url",
+			url,
+		],
+		{
+			env: { ...process.env, DATABASE_URL: url },
+		},
+	);
 	return new PrismaDatabaseProvider(url);
 }
 

@@ -1,5 +1,6 @@
 import "@mantine/core/styles.css";
 import "@mantine/code-highlight/styles.css";
+import "@mantine/notifications/styles.css";
 import "../styles/code-highlight.css";
 import {
 	CodeHighlightAdapterProvider,
@@ -10,10 +11,12 @@ import {
 	MantineProvider,
 	mantineHtmlProps,
 } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import hljs from "highlight.js";
+import PrototypeNotice from "../components/PrototypeNotice";
 import { theme } from "../theme";
 
 const codeHighlightAdapter = createHighlightJsAdapter(hljs);
@@ -60,6 +63,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					<CodeHighlightAdapterProvider adapter={codeHighlightAdapter}>
 						{children}
 					</CodeHighlightAdapterProvider>
+					<Notifications
+						position="bottom-right"
+						zIndex={300}
+						autoClose={false}
+					/>
+					<PrototypeNotice />
 				</MantineProvider>
 				<TanStackDevtools
 					config={{ position: "bottom-right" }}

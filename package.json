@@ -33,6 +33,7 @@
     "@mantine/code-highlight": "^9.4.1",
     "@mantine/core": "^9.4.1",
     "@mantine/hooks": "^9.4.1",
+    "@mantine/notifications": "^9.4.1",
     "@prisma/adapter-libsql": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@tanstack/react-devtools": "latest",

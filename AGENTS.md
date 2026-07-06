@@ -14,6 +14,7 @@ Nirvana is an open-source software development workspace (analogue of JetBrains 
 - **Full-stack framework:** TanStack Start (RC) on Nitro
 - **Routing:** TanStack Router, file-based (`src/routes/`)
 - **UI:** React 19 + Mantine v9
+- **Notifications:** @mantine/notifications
 - **Icons:** lucide-react
 - **Build:** Vite 8
 - **Styling:** Mantine (CSS layers, style props, CSS variables) — no Tailwind
@@ -66,7 +67,7 @@ npm run db:studio   # Launch Prisma Studio GUI
   - `useExhaustiveDependencies` — React hook deps must be complete
   - `noConfusingVoidType` — `void` only in return/type param positions
   - `noEmptyInterface` — empty interfaces are forbidden
-- **Mantine imports:** import Mantine components from `@mantine/core`, hooks from `@mantine/hooks`, code highlighting from `@mantine/code-highlight`. Import Mantine CSS via side-effect: `import '@mantine/core/styles.css'` in root layout.
+- **Mantine imports:** import Mantine components from `@mantine/core`, hooks from `@mantine/hooks`, code highlighting from `@mantine/code-highlight`, notifications from `@mantine/notifications`. Import Mantine CSS via side-effect: `import '@mantine/core/styles.css'` in root layout.
 - **No comments** unless explicitly requested by the user.
 - **Routing:** file-based — add a new route by creating a file in `src/routes/`; the route tree is auto-generated into `src/routeTree.gen.ts` (never edit by hand).
 - **Routes are thin:** route files in `src/routes/` should only contain `createFileRoute`, a loader, and rendering of a page component imported from `src/modules/<domain>/pages/`. Domain logic belongs in modules, not routes.
