@@ -27,7 +27,7 @@ This file-based approach was intentional for the initial scaffolding (ADRs 0006,
 
 ### Prerequisites
 
-- `DATABASE_URL` is listed in `docs/MVP.md` §12.2 as a reserved environment variable.
+- `DATABASE_URL` is listed in `docs/archive/MVP.md` §12.2 as a reserved environment variable.
 - ADR 0006 explicitly deferred the database decision: "When `DatabaseProvider` is implemented (future ADR), should `Repository` metadata be migrated from FS to DB? Decision deferred."
 - ADR 0012 considered SQLite via `DatabaseProvider` but rejected it for the initial PR slice: "requires choosing a DBMS and ORM (§15 #1, #4) and a real `DatabaseProvider` implementation — a large separate ADR."
 

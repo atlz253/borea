@@ -2,7 +2,7 @@
 
 ## Core Idea
 
-Borea is a research station for software engineering.
+Borea is a open-source research station for software engineering.
 
 Outside — chaos:
 

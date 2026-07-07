@@ -75,4 +75,4 @@ The banner:
 - [Git HTTP operations](../git-http.md) — how clone and push work in NoAuth mode
 - [Authentication](authentication.md) — full authentication configuration and limitations
 - [Access Control](access-control.md) — role enforcement used outside NoAuth
-- Technical Specification (`docs/MVP.md` §5.3, §8.4) — architecture of NoAuth mode and `NoAuthProvider`
+- Technical Specification (`docs/archive/MVP.md` §5.3, §8.4) — architecture of NoAuth mode and `NoAuthProvider`

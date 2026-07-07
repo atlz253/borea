@@ -2,6 +2,24 @@
 
 Borea is a **modular monolith** — a single deployable process with clear separation between domain modules. The full application (frontend, backend, Git HTTP protocol) runs in one Nitro-powered server process, deployable as a single Docker container.
 
+## Tech Stack
+
+| Area                 | Choice                                                                 |
+| -------------------- | ---------------------------------------------------------------------- |
+| Full-stack framework | [TanStack Start](https://tanstack.com/start) (RC) on Nitro             |
+| Routing              | [TanStack Router](https://tanstack.com/router) — file-based, type-safe |
+| UI runtime           | React 19                                                               |
+| UI components        | [Mantine](https://mantine.dev) v9 (`@mantine/core`, `@mantine/hooks`, `@mantine/code-highlight`) |
+| Icons                | [lucide-react](https://lucide.dev)                                     |
+| Build tool           | Vite 8                                                                 |
+| Styling              | Mantine CSS layers + CSS variables (no Tailwind)                       |
+| Validation           | [Zod](https://zod.dev) v4                                              |
+| Lint & format        | Biome 2 (tabs, double quotes)                                          |
+| Testing              | Vitest 4 + Testing Library + jsdom; Playwright 1 (E2E)                 |
+| Git operations       | System Git CLI via [execa](https://github.com/sindresorhus/execa)      |
+| Package manager      | npm                                                                    |
+| Language             | TypeScript (strict)                                                    |
+
 ## Project Structure
 
 ```

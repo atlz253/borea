@@ -8,7 +8,7 @@
 
 The project (working title: Nirvana) is an open-source software development workspace — an analogue of JetBrains Space and Yandex SourceCraft. The MVP requires a Git hosting service with basic functionality implemented as a modular monolith, deployable as a single Docker container.
 
-The Technical Specification ([docs/MVP.md](../../docs/MVP.md)) explicitly lists the TanStack ecosystem as the preferred full-stack foundation (Section 6.1) but leaves the final framework choice open for validation before implementation begins.
+The Technical Specification ([docs/archive/MVP.md](../../docs/archive/MVP.md)) explicitly lists the TanStack ecosystem as the preferred full-stack foundation (Section 6.1) but leaves the final framework choice open for validation before implementation begins.
 
 Key technical requirements that constrain framework choice:
 
@@ -19,7 +19,7 @@ Key technical requirements that constrain framework choice:
 - **Self-hosted + future SaaS** — the framework must be portable across environments (bare metal, VPS, cloud) without vendor lock-in.
 - **React-based** — Section 6.1 requires TanStack ecosystem (Router, Query, Table), which is React-native.
 
-At the time of this decision, the repository is at the greenfield stage — only `docs/MVP.md` exists, no prior code decisions constrain the choice.
+At the time of this decision, the repository is at the greenfield stage — only `docs/archive/MVP.md` exists, no prior code decisions constrain the choice.
 
 ## Alternatives Considered
 

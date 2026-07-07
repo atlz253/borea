@@ -6,7 +6,6 @@ Guidance for AI coding agents (and human contributors) working in this repositor
 
 Borea is an open-source software development workspace (analogue of JetBrains Space / Yandex SourceCraft). The MVP is a Git hosting service with repositories, pull/merge requests, code review, and a REST API — a modular monolith deployable as a single Docker container. Currently at the pre-MVP scaffolding stage.
 
-- **Spec:** `docs/MVP.md` — read this before making architectural changes.
 - **Decisions:** `docs/ADR/README.md` — index of all ADRs. Record any new architectural decision as a numbered ADR before implementing it.
 
 ## Tech Stack
@@ -83,7 +82,7 @@ npm run db:studio   # Launch Prisma Studio GUI
 
 | Path | Purpose |
 | --- | --- |
-| `docs/MVP.md` | Technical specification — source of truth for requirements |
+| `docs/archive/MVP.md` | Technical specification — source of truth for requirements (archived) |
 | `docs/ADR/` | Architecture Decision Records |
 | `docs/ADR/README.md` | ADR index |
 | `docs/security/authentication.md` | Full authentication, sessions, and ownership documentation |
@@ -130,8 +129,8 @@ npm run db:studio   # Launch Prisma Studio GUI
 
 Respect these when adding features — do not violate them without an ADR:
 
-- **Provider abstractions:** all external dependencies (Git, DB, auth) go through unified interfaces (`GitProvider`, `DatabaseProvider`, `AuthProvider`) with swappable implementations. See `docs/MVP.md` §8.
-- **NoAuth mode (MVP):** all actions on behalf of a fixed user. Must be blocked in production (`NODE_ENV=production`) unless `ALLOW_NOAUTH_IN_PRODUCTION=true`. See §5.3 and the final recommendations in `docs/MVP.md`.
+- **Provider abstractions:** all external dependencies (Git, DB, auth) go through unified interfaces (`GitProvider`, `DatabaseProvider`, `AuthProvider`) with swappable implementations. See `docs/archive/MVP.md` §8.
+- **NoAuth mode (MVP):** all actions on behalf of a fixed user. Must be blocked in production (`NODE_ENV=production`) unless `ALLOW_NOAUTH_IN_PRODUCTION=true`. See §5.3 and the final recommendations in `docs/archive/MVP.md`.
 - **Modular monolith:** clear boundaries between domain modules (git, auth, repositories, pull-requests). See §7.
 - **Single-container deploy:** the whole app runs in one Nitro process; do not introduce a separate server framework. See ADR 0001.
 - **Git smart-HTTP protocol:** served via `/api/git/<name>.git/` endpoints delegating to `GitProvider`. See ADR 0007 and ADR 0008.

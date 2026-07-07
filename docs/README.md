@@ -2,7 +2,6 @@
 
 ## Project Specification
 
-- [MVP Technical Specification](MVP.md) — full requirements, architecture, acceptance criteria
 - [Project Aesthetics](AESTHETICS.md) — design philosophy, visual style, and brand identity
 
 ## Architecture
