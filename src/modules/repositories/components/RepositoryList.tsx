@@ -1,6 +1,7 @@
 import { Group, Stack, Text } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { GitBranch } from "lucide-react";
+import * as m from "#/paraglide/messages";
 import type { Repository } from "../schemas";
 
 const LINK_STYLE = {
@@ -14,7 +15,7 @@ export default function RepositoryList({
 	repositories: Repository[];
 }) {
 	if (repositories.length === 0) {
-		return <Text c="dimmed">No repositories yet.</Text>;
+		return <Text c="dimmed">{m.repositories_repositoryList_empty()}</Text>;
 	}
 
 	return (

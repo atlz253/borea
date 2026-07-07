@@ -1,6 +1,7 @@
 import { Button, Group, Select, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
 import type { BranchInfo } from "#/modules/git";
+import * as m from "#/paraglide/messages";
 
 interface CreatePullRequestFormProps {
 	branches: BranchInfo[];
@@ -33,19 +34,19 @@ export default function CreatePullRequestForm({
 	const handleSubmit = async () => {
 		setError(null);
 		if (!title.trim()) {
-			setError("Title is required");
+			setError(m.pullRequests_createPullRequestForm_error_titleRequired());
 			return;
 		}
 		if (!sourceBranch) {
-			setError("Source branch is required");
+			setError(m.pullRequests_createPullRequestForm_error_sourceRequired());
 			return;
 		}
 		if (!targetBranch) {
-			setError("Target branch is required");
+			setError(m.pullRequests_createPullRequestForm_error_targetRequired());
 			return;
 		}
 		if (sourceBranch === targetBranch) {
-			setError("Source and target branches must be different");
+			setError(m.pullRequests_createPullRequestForm_error_branchesDifferent());
 			return;
 		}
 		try {
@@ -55,15 +56,19 @@ export default function CreatePullRequestForm({
 				targetBranch,
 			});
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to create PR");
+			setError(
+				err instanceof Error
+					? err.message
+					: m.pullRequests_createPullRequestForm_error_createFailed(),
+			);
 		}
 	};
 
 	return (
 		<Stack maw={500} gap="md">
 			<TextInput
-				label="Title"
-				placeholder="e.g. Add new feature"
+				label={m.pullRequests_createPullRequestForm_title_label()}
+				placeholder={m.pullRequests_createPullRequestForm_title_placeholder()}
 				value={title}
 				onChange={(e) => {
 					setTitle(e.currentTarget.value);
@@ -74,8 +79,8 @@ export default function CreatePullRequestForm({
 			/>
 
 			<Select
-				label="Source branch"
-				placeholder="Select source branch"
+				label={m.pullRequests_createPullRequestForm_sourceBranch_label()}
+				placeholder={m.pullRequests_createPullRequestForm_sourceBranch_placeholder()}
 				data={branchOptions}
 				value={sourceBranch}
 				onChange={(val) => {
@@ -87,8 +92,8 @@ export default function CreatePullRequestForm({
 			/>
 
 			<Select
-				label="Target branch"
-				placeholder="Select target branch"
+				label={m.pullRequests_createPullRequestForm_targetBranch_label()}
+				placeholder={m.pullRequests_createPullRequestForm_targetBranch_placeholder()}
 				data={branchOptions}
 				value={targetBranch}
 				onChange={(val) => {
@@ -107,7 +112,7 @@ export default function CreatePullRequestForm({
 
 			<Group justify="flex-end">
 				<Button onClick={handleSubmit} loading={submitting}>
-					Create pull request
+					{m.pullRequests_createPullRequestForm_create_button()}
 				</Button>
 			</Group>
 		</Stack>

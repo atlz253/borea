@@ -11,7 +11,15 @@ import {
 import { AlertCircle, Check, GitMerge, GitPullRequest } from "lucide-react";
 import type { MergeStatus } from "#/modules/git";
 import { useRepositoryAccess } from "#/modules/organizations";
+import * as m from "#/paraglide/messages";
+import { getLocale } from "#/paraglide/runtime";
 import type { PullRequest, PullRequestStatus } from "../schemas";
+
+const STATUS_LABELS: Record<PullRequestStatus, string> = {
+	open: m.pullRequests_pr_status_open(),
+	merged: m.pullRequests_pr_status_merged(),
+	closed: m.pullRequests_pr_status_closed(),
+};
 
 const STATUS_COLORS: Record<PullRequestStatus, string> = {
 	open: "green",
@@ -55,16 +63,18 @@ export default function PullRequestDetail({
 						variant="light"
 						size="lg"
 					>
-						{pullRequest.status}
+						{STATUS_LABELS[pullRequest.status]}
 					</Badge>
 				</Group>
 
 				<Text size="sm" c="dimmed">
-					#{pullRequest.id} opened by{" "}
-					<Text component="span" fw={500} c="var(--mantine-color-text)">
-						{pullRequest.authorName}
-					</Text>{" "}
-					on {new Date(pullRequest.createdAt).toLocaleDateString()}
+					{m.pullRequests_pullRequestDetail_openedBy({
+						id: pullRequest.id,
+						author: pullRequest.authorName,
+						date: pullRequest.createdAt
+							? new Date(pullRequest.createdAt).toLocaleDateString(getLocale())
+							: "",
+					})}
 				</Text>
 
 				<Group gap="xs">
@@ -79,27 +89,27 @@ export default function PullRequestDetail({
 
 				{pullRequest.mergeCommitSha && (
 					<Text size="sm">
-						Merged as{" "}
-						<Text component="span" ff="monospace" size="sm">
-							{pullRequest.mergeCommitSha.slice(0, SHORT_SHA_LENGTH)}
-						</Text>
+						{m.pullRequests_pullRequestDetail_mergedAs({
+							sha: pullRequest.mergeCommitSha.slice(0, SHORT_SHA_LENGTH),
+						})}
 					</Text>
 				)}
 
 				{hasConflict && (
 					<Alert
 						icon={<AlertCircle size={16} />}
-						title="Merge conflicts"
+						title={m.pullRequests_pullRequestDetail_mergeConflicts_title()}
 						color="red"
 					>
 						{mergeStatus?.conflictingFiles.length > 0 ? (
 							<Text size="sm">
-								Conflicts in: {mergeStatus?.conflictingFiles.join(", ")}
+								{m.pullRequests_pullRequestDetail_mergeConflicts_body({
+									files: mergeStatus?.conflictingFiles.join(", "),
+								})}
 							</Text>
 						) : (
 							<Text size="sm">
-								This pull request has conflicts that must be resolved before
-								merging.
+								{m.pullRequests_pullRequestDetail_mergeConflicts_resolve()}
 							</Text>
 						)}
 					</Alert>
@@ -108,7 +118,7 @@ export default function PullRequestDetail({
 				{mergeError && (
 					<Alert
 						icon={<AlertCircle size={16} />}
-						title="Merge failed"
+						title={m.pullRequests_pullRequestDetail_mergeFailed_title()}
 						color="red"
 					>
 						<Text size="sm">{mergeError}</Text>
@@ -123,7 +133,9 @@ export default function PullRequestDetail({
 							loading={merging}
 							disabled={!canMerge}
 						>
-							{canFF ? "Merge (fast-forward)" : "Merge"}
+							{canFF
+								? m.pullRequests_pullRequestDetail_mergeFastForward_button()
+								: m.pullRequests_pullRequestDetail_merge_button()}
 						</Button>
 						{canFF && (
 							<Button
@@ -132,12 +144,13 @@ export default function PullRequestDetail({
 								onClick={() => onMerge(false)}
 								loading={merging}
 							>
-								Create merge commit
+								{m.pullRequests_pullRequestDetail_mergeCommit_button()}
 							</Button>
 						)}
 						{canMerge && (
 							<Text size="xs" c="dimmed">
-								<Check size={12} style={{ display: "inline" }} /> No conflicts
+								<Check size={12} style={{ display: "inline" }} />{" "}
+								{m.pullRequests_pullRequestDetail_noConflicts()}
 							</Text>
 						)}
 					</Group>

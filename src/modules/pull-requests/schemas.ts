@@ -1,6 +1,7 @@
 import "#/platform/http/openapi-zod";
 import { z } from "zod";
 import { organizationNameSchema } from "#/modules/organizations";
+import * as m from "#/paraglide/messages";
 
 const MAX_REPO_NAME_LENGTH = 100;
 const MAX_BRANCH_NAME_LENGTH = 200;
@@ -11,18 +12,21 @@ const MAX_PR_ID = Number.MAX_SAFE_INTEGER;
 
 export const repoNameSchema = z
 	.string()
-	.min(1, "Repository name is required")
-	.max(MAX_REPO_NAME_LENGTH, "Repository name is too long")
-	.regex(
-		/^[a-zA-Z0-9._-]+$/,
-		"Only letters, numbers, dots, hyphens, and underscores allowed",
+	.min(1, m.pullRequests_schemas_nameRequired())
+	.max(MAX_REPO_NAME_LENGTH, m.pullRequests_schemas_nameTooLong())
+	.regex(/^[a-zA-Z0-9._-]+$/, m.pullRequests_schemas_nameInvalidChars())
+	.refine(
+		(name) => !name.startsWith("."),
+		m.pullRequests_schemas_nameDotStart(),
 	)
-	.refine((name) => !name.startsWith("."), "Name cannot start with a dot")
 	.refine(
 		(name) => !name.toLowerCase().endsWith(".git"),
-		"Name cannot end with .git",
+		m.pullRequests_schemas_nameGitSuffix(),
 	)
-	.refine((name) => name !== "." && name !== "..", "Invalid name");
+	.refine(
+		(name) => name !== "." && name !== "..",
+		m.pullRequests_schemas_nameInvalid(),
+	);
 
 export const branchRefSchema = z
 	.string()
@@ -38,13 +42,16 @@ export const branchRefSchema = z
 		(name) => !name.endsWith(".lock"),
 		"Branch name cannot end with .lock",
 	)
-	.refine((name) => !name.includes("@{"), "Branch name cannot contain '@{'");
+	.refine(
+		(name) => !name.includes("@{"),
+		m.pullRequests_schemas_branchNameAtCurly(),
+	);
 
 export const prTitleSchema = z
 	.string()
 	.trim()
-	.min(1, "Title is required")
-	.max(MAX_TITLE_LENGTH, "Title is too long");
+	.min(1, m.pullRequests_schemas_titleRequired())
+	.max(MAX_TITLE_LENGTH, m.pullRequests_schemas_titleTooLong());
 
 export const createPullRequestSchema = z.object({
 	organizationName: organizationNameSchema,
@@ -64,7 +71,7 @@ export const getPullRequestSchema = listPullRequestsSchema.extend({
 		.number()
 		.int()
 		.positive()
-		.max(MAX_PR_ID, "Pull request id is too large"),
+		.max(MAX_PR_ID, m.pullRequests_schemas_prIdTooLarge()),
 });
 
 export const mergePullRequestBodySchema = z.object({
@@ -108,8 +115,8 @@ export const addPullRequestFileCommentSchema = getPullRequestSchema.extend({
 	body: z
 		.string()
 		.trim()
-		.min(1, "Comment is required")
-		.max(MAX_COMMENT_LENGTH, "Comment is too long"),
+		.min(1, m.pullRequests_schemas_commentRequired())
+		.max(MAX_COMMENT_LENGTH, m.pullRequests_schemas_commentTooLong()),
 });
 
 export const pullRequestStatusSchema = z.enum(["open", "merged", "closed"]);

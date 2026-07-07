@@ -1,5 +1,6 @@
 import { Button, useMantineColorScheme } from "@mantine/core";
 import { useCallback, useEffect, useState } from "react";
+import * as m from "#/paraglide/messages";
 
 type Scheme = "auto" | "light" | "dark";
 
@@ -26,12 +27,12 @@ export default function ThemeToggle() {
 	if (!mounted) {
 		return (
 			<Button variant="default" size="compact-sm" disabled>
-				Auto
+				{m.shared_themeToggle_auto()}
 			</Button>
 		);
 	}
 
-	const label = `Theme: ${scheme}`;
+	const label = m.shared_themeToggle_theme({ scheme });
 
 	return (
 		<Button
@@ -41,7 +42,11 @@ export default function ThemeToggle() {
 			aria-label={label}
 			title={label}
 		>
-			{scheme === "auto" ? "Auto" : scheme === "dark" ? "Dark" : "Light"}
+			{scheme === "auto"
+				? m.shared_themeToggle_auto()
+				: scheme === "dark"
+					? m.shared_themeToggle_dark()
+					: m.shared_themeToggle_light()}
 		</Button>
 	);
 }

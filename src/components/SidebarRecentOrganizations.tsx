@@ -6,6 +6,7 @@ import {
 	listOrganizationsFn,
 	type Organization,
 } from "#/modules/organizations";
+import * as m from "#/paraglide/messages";
 
 interface Props {
 	opened: boolean;
@@ -40,7 +41,7 @@ export default function SidebarRecentOrganizations({ opened }: Props) {
 				setError(
 					caught instanceof Error
 						? caught.message
-						: "Failed to load organizations",
+						: m.shared_sidebar_failedOrganizations(),
 				);
 				setLoading(false);
 			});
@@ -49,7 +50,7 @@ export default function SidebarRecentOrganizations({ opened }: Props) {
 	if (loading) {
 		return (
 			<Text size="sm" c="dimmed">
-				Loading...
+				{m.shared_sidebar_loading()}
 			</Text>
 		);
 	}
@@ -94,11 +95,11 @@ export default function SidebarRecentOrganizations({ opened }: Props) {
 				>
 					{showAll ? (
 						<>
-							<ChevronUp size={14} /> Show less
+							<ChevronUp size={14} /> {m.shared_sidebar_showLess()}
 						</>
 					) : (
 						<>
-							<ChevronDown size={14} /> Show more
+							<ChevronDown size={14} /> {m.shared_sidebar_showMore()}
 						</>
 					)}
 				</Text>

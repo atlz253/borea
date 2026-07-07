@@ -1,5 +1,6 @@
 import { Container, Stack, Title } from "@mantine/core";
 import type { BranchInfo } from "#/modules/git";
+import * as m from "#/paraglide/messages";
 import CreatePullRequestForm from "../components/CreatePullRequestForm";
 
 interface CreatePullRequestPageProps {
@@ -20,7 +21,7 @@ export default function CreatePullRequestPage({
 	return (
 		<Container size="lg" py="xl">
 			<Stack gap="md">
-				<Title order={2}>New pull request</Title>
+				<Title order={2}>{m.pullRequests_createPullRequestPage_title()}</Title>
 				<CreatePullRequestForm
 					branches={branches}
 					onSubmit={onSubmit}

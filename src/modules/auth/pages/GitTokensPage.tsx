@@ -13,6 +13,7 @@ import {
 } from "@mantine/core";
 import { Check, Copy, KeyRound, Trash2 } from "lucide-react";
 import { useState } from "react";
+import * as m from "#/paraglide/messages";
 import type { CreatedGitToken, GitToken } from "../schemas";
 import { createGitTokenFn, revokeGitTokenFn } from "../server/auth.functions";
 
@@ -23,7 +24,7 @@ const ISO_TIME_END = 16;
 function formatCreatedAt(createdAt: string): string {
 	const date = createdAt.slice(0, ISO_DATE_END);
 	const time = createdAt.slice(ISO_TIME_START, ISO_TIME_END);
-	return `${date} ${time} UTC`;
+	return `${m.auth_gitTokens_created_label()}${date} ${time} UTC`;
 }
 
 export default function GitTokensPage({
@@ -58,7 +59,9 @@ export default function GitTokensPage({
 			setName("");
 		} catch (caught) {
 			setError(
-				caught instanceof Error ? caught.message : "Could not create token",
+				caught instanceof Error
+					? caught.message
+					: m.auth_gitTokens_error_create(),
 			);
 		} finally {
 			setCreating(false);
@@ -73,7 +76,9 @@ export default function GitTokensPage({
 			setTokens((current) => current.filter((token) => token.id !== tokenId));
 		} catch (caught) {
 			setError(
-				caught instanceof Error ? caught.message : "Could not revoke token",
+				caught instanceof Error
+					? caught.message
+					: m.auth_gitTokens_error_revoke(),
 			);
 		} finally {
 			setRevokingId(null);
@@ -83,19 +88,17 @@ export default function GitTokensPage({
 	return (
 		<Stack maw={800}>
 			<div>
-				<Title order={1}>Git personal access tokens</Title>
-				<Text c="dimmed">
-					Use a token as the password for Git clone, fetch, and push over HTTPS.
-				</Text>
+				<Title order={1}>{m.auth_gitTokens_title()}</Title>
+				<Text c="dimmed">{m.auth_gitTokens_description()}</Text>
 			</div>
 
 			<Card withBorder>
 				<form onSubmit={(event) => void createToken(event)}>
 					<Stack>
 						<TextInput
-							label="Token name"
-							description="Choose a name that identifies the device or client."
-							placeholder="Work laptop"
+							label={m.auth_gitTokens_tokenName_label()}
+							description={m.auth_gitTokens_tokenName_description()}
+							placeholder={m.auth_gitTokens_tokenName_placeholder()}
 							value={name}
 							onChange={(event) => setName(event.currentTarget.value)}
 							maxLength={100}
@@ -107,7 +110,7 @@ export default function GitTokensPage({
 							loading={creating}
 							style={{ alignSelf: "flex-start" }}
 						>
-							Create token
+							{m.auth_gitTokens_create_button()}
 						</Button>
 					</Stack>
 				</form>
@@ -117,10 +120,10 @@ export default function GitTokensPage({
 
 			<Stack gap="sm">
 				<Title order={2} size="h3">
-					Active tokens
+					{m.auth_gitTokens_activeTokens_heading()}
 				</Title>
 				{tokens.length === 0 ? (
-					<Text c="dimmed">No Git tokens have been created.</Text>
+					<Text c="dimmed">{m.auth_gitTokens_empty()}</Text>
 				) : (
 					tokens.map((token) => (
 						<Card withBorder key={token.id}>
@@ -128,7 +131,7 @@ export default function GitTokensPage({
 								<div>
 									<Text fw={600}>{token.name}</Text>
 									<Text size="sm" c="dimmed">
-										Created {formatCreatedAt(token.createdAt)}
+										{formatCreatedAt(token.createdAt)}
 									</Text>
 								</div>
 								<Button
@@ -138,7 +141,7 @@ export default function GitTokensPage({
 									loading={revokingId === token.id}
 									onClick={() => void revokeToken(token.id)}
 								>
-									Revoke
+									{m.auth_gitTokens_revoke_button()}
 								</Button>
 							</Group>
 						</Card>
@@ -149,13 +152,11 @@ export default function GitTokensPage({
 			<Modal
 				opened={createdToken !== null}
 				onClose={() => setCreatedToken(null)}
-				title="Git token created"
+				title={m.auth_gitTokens_createdModal_title()}
 				centered
 			>
 				<Stack>
-					<Alert color="yellow">
-						Copy this token now. It will not be shown again.
-					</Alert>
+					<Alert color="yellow">{m.auth_gitTokens_createdModal_alert()}</Alert>
 					<Code block>{createdToken?.token}</Code>
 					{createdToken && (
 						<CopyButton value={createdToken.token}>
@@ -166,7 +167,9 @@ export default function GitTokensPage({
 										copied ? <Check size={16} /> : <Copy size={16} />
 									}
 								>
-									{copied ? "Copied" : "Copy token"}
+									{copied
+										? m.auth_gitTokens_copied_button()
+										: m.auth_gitTokens_copy_button()}
 								</Button>
 							)}
 						</CopyButton>

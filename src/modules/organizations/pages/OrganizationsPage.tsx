@@ -12,6 +12,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { Building2, Plus } from "lucide-react";
 import { useState } from "react";
+import * as m from "#/paraglide/messages";
 import type { Organization } from "../schemas";
 import { createOrganizationFn } from "../server/organization.functions";
 
@@ -39,7 +40,7 @@ export default function OrganizationsPage({
 			setError(
 				caught instanceof Error
 					? caught.message
-					: "Failed to create organization",
+					: m.organizations_organizationsPage_error(),
 			);
 			setLoading(false);
 		}
@@ -48,17 +49,17 @@ export default function OrganizationsPage({
 	return (
 		<Container size="lg" py="xl">
 			<Group justify="space-between" mb="md">
-				<Title order={1}>Organizations</Title>
+				<Title order={1}>{m.organizations_organizationsPage_title()}</Title>
 				<Button
 					leftSection={<Plus size={16} />}
 					onClick={() => setShowForm(true)}
 				>
-					New organization
+					{m.organizations_organizationsPage_new_button()}
 				</Button>
 			</Group>
 
 			{organizations.length === 0 ? (
-				<Text c="dimmed">No organizations yet.</Text>
+				<Text c="dimmed">{m.organizations_organizationsPage_empty()}</Text>
 			) : (
 				<Stack gap="xs">
 					{organizations.map((organization) => (
@@ -95,14 +96,14 @@ export default function OrganizationsPage({
 				>
 					<form onSubmit={handleSubmit}>
 						<TextInput
-							label="Organization name"
-							placeholder="my-team"
+							label={m.organizations_organizationsPage_name_label()}
+							placeholder={m.organizations_organizationsPage_name_placeholder()}
 							required
 							value={name}
 							onChange={(event) => setName(event.currentTarget.value)}
 						/>
 						<Textarea
-							label="Description (optional)"
+							label={m.organizations_organizationsPage_description_label()}
 							mt="md"
 							value={description}
 							onChange={(event) => setDescription(event.currentTarget.value)}
@@ -113,7 +114,7 @@ export default function OrganizationsPage({
 							</Text>
 						)}
 						<Button type="submit" mt="lg" loading={loading}>
-							Create organization
+							{m.organizations_organizationsPage_create_button()}
 						</Button>
 					</form>
 				</Box>

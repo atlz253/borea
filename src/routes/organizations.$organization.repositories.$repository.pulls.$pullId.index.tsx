@@ -6,6 +6,7 @@ import {
 	mergePullRequestFn,
 	PullRequestDetailPage,
 } from "#/modules/pull-requests";
+import * as m from "#/paraglide/messages";
 
 export const Route = createFileRoute(
 	"/organizations/$organization/repositories/$repository/pulls/$pullId/",
@@ -69,7 +70,9 @@ function PullRequestConversation() {
 			setPr(result.pullRequest);
 			setMs({ conflicts: false, fastForward: false, conflictingFiles: [] });
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to merge");
+			setError(
+				err instanceof Error ? err.message : m.routes_repository_mergeFailed(),
+			);
 		} finally {
 			setMerging(false);
 		}

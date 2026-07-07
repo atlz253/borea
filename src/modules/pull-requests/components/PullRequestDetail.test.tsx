@@ -66,7 +66,7 @@ describe("PullRequestDetail", () => {
 
 	it("renders author name", () => {
 		renderDetail({ pullRequest: makePR({ authorName: "bob" }) });
-		expect(screen.getByText("bob")).toBeInTheDocument();
+		expect(screen.getByText(/bob/)).toBeInTheDocument();
 	});
 
 	it("renders source and target branch badges", () => {
@@ -89,24 +89,23 @@ describe("PullRequestDetail", () => {
 				mergeCommitSha: "abcdef1234567890",
 			}),
 		});
-		expect(screen.getByText(/Merged as/i)).toBeInTheDocument();
-		expect(screen.getByText("abcdef1")).toBeInTheDocument();
+		expect(screen.getByText(/Merged as abcdef1/i)).toBeInTheDocument();
 	});
 
 	describe("status badge", () => {
 		it("shows open status", () => {
 			renderDetail({ pullRequest: makePR({ status: "open" }) });
-			expect(screen.getByText("open")).toBeInTheDocument();
+			expect(screen.getByText("Open")).toBeInTheDocument();
 		});
 
 		it("shows merged status", () => {
 			renderDetail({ pullRequest: makePR({ status: "merged" }) });
-			expect(screen.getByText("merged")).toBeInTheDocument();
+			expect(screen.getByText("Merged")).toBeInTheDocument();
 		});
 
 		it("shows closed status", () => {
 			renderDetail({ pullRequest: makePR({ status: "closed" }) });
-			expect(screen.getByText("closed")).toBeInTheDocument();
+			expect(screen.getByText("Closed")).toBeInTheDocument();
 		});
 	});
 

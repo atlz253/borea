@@ -11,6 +11,8 @@ import {
 import { Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, GitCommitHorizontal } from "lucide-react";
 import type { BranchInfo, CommitInfo } from "#/modules/git";
+import * as m from "#/paraglide/messages";
+import { getLocale } from "#/paraglide/runtime";
 import BranchSwitcher from "../components/BranchSwitcher";
 
 interface CommitHistoryPageProps {
@@ -22,7 +24,7 @@ interface CommitHistoryPageProps {
 }
 
 function formatDate(date: Date): string {
-	return new Intl.DateTimeFormat("en-US", {
+	return new Intl.DateTimeFormat(getLocale(), {
 		year: "numeric",
 		month: "short",
 		day: "numeric",
@@ -58,14 +60,14 @@ export default function CommitHistoryPage({
 				>
 					<Group gap={4}>
 						<ArrowLeft size={16} />
-						<Text size="sm">Back to repository</Text>
+						<Text size="sm">{m.repositories_commitHistory_back()}</Text>
 					</Group>
 				</Link>
 			</Group>
 
 			<Stack gap={0} mb="lg">
 				<Group justify="space-between" align="flex-end">
-					<Title order={1}>Commits</Title>
+					<Title order={1}>{m.repositories_commitHistory_title()}</Title>
 					<BranchSwitcher
 						organizationName={organizationName}
 						repoName={name}
@@ -75,7 +77,8 @@ export default function CommitHistoryPage({
 					/>
 				</Group>
 				<Text size="sm" c="dimmed">
-					in {selectedBranch}
+					{m.repositories_commitHistory_in()}
+					{selectedBranch}
 				</Text>
 			</Stack>
 
@@ -89,20 +92,26 @@ export default function CommitHistoryPage({
 					}}
 				>
 					<Group justify="center" mb="xs">
-						<Text fw={600}>No commits yet</Text>
+						<Text fw={600}>{m.repositories_commitHistory_empty_heading()}</Text>
 					</Group>
 					<Text size="sm" c="dimmed">
-						This branch has no commits.
+						{m.repositories_commitHistory_empty_body()}
 					</Text>
 				</Box>
 			) : (
 				<Table highlightOnHover withRowBorders>
 					<Table.Thead>
 						<Table.Tr>
-							<Table.Th>Commit</Table.Th>
-							<Table.Th>Author</Table.Th>
-							<Table.Th>Date</Table.Th>
-							<Table.Th>Message</Table.Th>
+							<Table.Th>
+								{m.repositories_commitHistory_header_commit()}
+							</Table.Th>
+							<Table.Th>
+								{m.repositories_commitHistory_header_author()}
+							</Table.Th>
+							<Table.Th>{m.repositories_commitHistory_header_date()}</Table.Th>
+							<Table.Th>
+								{m.repositories_commitHistory_header_message()}
+							</Table.Th>
 						</Table.Tr>
 					</Table.Thead>
 					<Table.Tbody>

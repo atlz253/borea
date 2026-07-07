@@ -11,6 +11,7 @@ import {
 	Title,
 } from "@mantine/core";
 import { useState } from "react";
+import * as m from "#/paraglide/messages";
 import { loginFn, registerFn } from "../server/auth.functions";
 
 export default function AuthPage({ redirectTo }: { redirectTo: string }) {
@@ -34,7 +35,9 @@ export default function AuthPage({ redirectTo }: { redirectTo: string }) {
 			window.location.assign(redirectTo);
 		} catch (caught) {
 			setError(
-				caught instanceof Error ? caught.message : "Authentication failed",
+				caught instanceof Error
+					? caught.message
+					: m.auth_authPage_error_fallback(),
 			);
 			setLoading(false);
 		}
@@ -42,9 +45,9 @@ export default function AuthPage({ redirectTo }: { redirectTo: string }) {
 
 	return (
 		<Container size={420} py={80}>
-			<Title ta="center">Borea</Title>
+			<Title ta="center">{m.auth_authPage_title()}</Title>
 			<Text c="dimmed" size="sm" ta="center" mt="xs">
-				Sign in or create an account
+				{m.auth_authPage_subtitle()}
 			</Text>
 			<Paper withBorder shadow="sm" p="xl" mt="xl" radius="md">
 				<Tabs
@@ -55,36 +58,40 @@ export default function AuthPage({ redirectTo }: { redirectTo: string }) {
 					}}
 				>
 					<Tabs.List grow>
-						<Tabs.Tab value="login">Sign in</Tabs.Tab>
-						<Tabs.Tab value="register">Register</Tabs.Tab>
+						<Tabs.Tab value="login">{m.auth_authPage_signIn_tab()}</Tabs.Tab>
+						<Tabs.Tab value="register">
+							{m.auth_authPage_register_tab()}
+						</Tabs.Tab>
 					</Tabs.List>
 				</Tabs>
 				<form onSubmit={(event) => void submit(event)}>
 					<Stack mt="lg">
 						{tab === "register" && (
 							<TextInput
-								label="Name"
+								label={m.auth_authPage_name_label()}
 								required
 								value={name}
 								onChange={(event) => setName(event.currentTarget.value)}
 							/>
 						)}
 						<TextInput
-							label="Email"
+							label={m.auth_authPage_email_label()}
 							type="email"
 							required
 							value={email}
 							onChange={(event) => setEmail(event.currentTarget.value)}
 						/>
 						<PasswordInput
-							label="Password"
+							label={m.auth_authPage_password_label()}
 							required
 							value={password}
 							onChange={(event) => setPassword(event.currentTarget.value)}
 						/>
 						{error && <Alert color="red">{error}</Alert>}
 						<Button type="submit" loading={loading}>
-							{tab === "register" ? "Create account" : "Sign in"}
+							{tab === "register"
+								? m.auth_authPage_register_button()
+								: m.auth_authPage_signIn_button()}
 						</Button>
 					</Stack>
 				</form>

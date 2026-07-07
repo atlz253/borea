@@ -1,6 +1,7 @@
 import "#/platform/http/openapi-zod";
 import { z } from "zod";
 import { organizationNameSchema } from "#/modules/organizations";
+import * as m from "#/paraglide/messages";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESC_LENGTH = 500;
@@ -9,18 +10,21 @@ const MAX_BRANCH_NAME_LENGTH = 200;
 
 export const repoNameSchema = z
 	.string()
-	.min(1, "Repository name is required")
-	.max(MAX_NAME_LENGTH, "Repository name is too long")
-	.regex(
-		/^[a-zA-Z0-9._-]+$/,
-		"Only letters, numbers, dots, hyphens, and underscores allowed",
+	.min(1, m.repositories_schemas_nameRequired())
+	.max(MAX_NAME_LENGTH, m.repositories_schemas_nameTooLong())
+	.regex(/^[a-zA-Z0-9._-]+$/, m.repositories_schemas_nameInvalidChars())
+	.refine(
+		(name) => !name.startsWith("."),
+		m.repositories_schemas_nameDotStart(),
 	)
-	.refine((name) => !name.startsWith("."), "Name cannot start with a dot")
 	.refine(
 		(name) => !name.toLowerCase().endsWith(".git"),
-		"Name cannot end with .git",
+		m.repositories_schemas_nameGitSuffix(),
 	)
-	.refine((name) => name !== "." && name !== "..", "Invalid name");
+	.refine(
+		(name) => name !== "." && name !== "..",
+		m.repositories_schemas_nameInvalid(),
+	);
 
 export const createRepositorySchema = z.object({
 	organizationName: organizationNameSchema.default("default"),
@@ -28,7 +32,7 @@ export const createRepositorySchema = z.object({
 	description: z
 		.string()
 		.trim()
-		.max(MAX_DESC_LENGTH, "Description is too long")
+		.max(MAX_DESC_LENGTH, m.repositories_schemas_descriptionTooLong())
 		.optional()
 		.default(""),
 });
@@ -40,7 +44,7 @@ export const deleteRepositorySchema = z
 		confirmation: z.string(),
 	})
 	.refine((data) => data.confirmation === data.name, {
-		message: "Repository name confirmation does not match",
+		message: m.repositories_schemas_nameConfirmMismatch(),
 		path: ["confirmation"],
 	});
 
@@ -67,21 +71,21 @@ export const treeEntrySchema = z.object({
 
 export const repoPathSchema = z
 	.string()
-	.max(MAX_PATH_LENGTH, "Path is too long")
-	.refine((p) => !p.includes("\0"), "Path cannot contain null bytes")
+	.max(MAX_PATH_LENGTH, m.repositories_schemas_pathTooLong())
+	.refine((p) => !p.includes("\0"), m.repositories_schemas_pathNullByte())
 	.refine(
 		(p) => p.split("/").every((seg) => seg !== ".."),
-		"Path cannot contain parent-directory segments",
+		m.repositories_schemas_pathParentSegment(),
 	)
 	.refine(
 		(p) => !p.startsWith("/") && !p.endsWith("/"),
-		"Path must be relative without leading or trailing slashes",
+		m.repositories_schemas_pathFormat(),
 	);
 
 export const refSchema = z
 	.string()
 	.max(MAX_PATH_LENGTH)
-	.refine((p) => !p.includes("\0"), "Ref cannot contain null bytes");
+	.refine((p) => !p.includes("\0"), m.repositories_schemas_refNullByte());
 
 export const repositoryLocatorSchema = z.object({
 	organizationName: organizationNameSchema.default("default"),
@@ -96,7 +100,7 @@ export const listFilesSchema = repositoryLocatorSchema.extend({
 export const getFileSchema = repositoryLocatorSchema.extend({
 	path: repoPathSchema.refine(
 		(path) => path.length > 0,
-		"File path is required",
+		m.repositories_schemas_filePathRequired(),
 	),
 	ref: refSchema.optional(),
 	loadLarge: z.boolean().optional().default(false),
@@ -122,19 +126,25 @@ export const listBranchesSchema = repositoryLocatorSchema;
 
 export const branchNameSchema = z
 	.string()
-	.min(1, "Branch name is required")
-	.max(MAX_BRANCH_NAME_LENGTH, "Branch name is too long")
-	.regex(/^[^\s~^:?*[\\]+$/, "Branch name contains invalid characters")
-	.refine((name) => !name.includes(".."), "Branch name cannot contain '..'")
+	.min(1, m.repositories_schemas_branchNameRequired())
+	.max(MAX_BRANCH_NAME_LENGTH, m.repositories_schemas_branchNameTooLong())
+	.regex(/^[^\s~^:?*[\\]+$/, m.repositories_schemas_branchNameInvalidChars())
+	.refine(
+		(name) => !name.includes(".."),
+		m.repositories_schemas_branchNameDoubleDot(),
+	)
 	.refine(
 		(name) => !name.startsWith("-"),
-		"Branch name cannot start with a hyphen",
+		m.repositories_schemas_branchNameHyphenStart(),
 	)
 	.refine(
 		(name) => !name.endsWith(".lock"),
-		"Branch name cannot end with .lock",
+		m.repositories_schemas_branchNameLockSuffix(),
 	)
-	.refine((name) => !name.includes("@{"), "Branch name cannot contain '@{'");
+	.refine(
+		(name) => !name.includes("@{"),
+		m.repositories_schemas_branchNameAtCurly(),
+	);
 
 export const createBranchSchema = repositoryLocatorSchema.extend({
 	branch: branchNameSchema,
@@ -145,13 +155,13 @@ export const renameBranchSchema = repositoryLocatorSchema.extend({
 	oldName: branchNameSchema,
 	newName: branchNameSchema.refine(
 		(name) => name !== "",
-		"New branch name cannot be empty",
+		m.repositories_schemas_newBranchNameEmpty(),
 	),
 });
 
 export const commitShaSchema = z
 	.string()
-	.regex(/^[0-9a-f]{7,40}$/, "Invalid commit SHA");
+	.regex(/^[0-9a-f]{7,40}$/, m.repositories_schemas_invalidSha());
 
 export const getCommitDiffSchema = repositoryLocatorSchema.extend({
 	sha: commitShaSchema,

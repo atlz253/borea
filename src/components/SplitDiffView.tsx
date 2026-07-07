@@ -2,6 +2,7 @@ import { Badge, Code, Collapse, Group, Paper, Text } from "@mantine/core";
 import hljs from "highlight.js";
 import type { ReactNode } from "react";
 import type { DiffFile, DiffHunk, DiffLine } from "#/modules/git";
+import * as m from "#/paraglide/messages";
 import { detectLanguage } from "#/utils/code-language";
 
 interface SplitDiffViewProps {
@@ -38,11 +39,11 @@ export default function SplitDiffView({
 			<Collapse expanded={!collapsed}>
 				{file.isBinary ? (
 					<Text size="sm" c="dimmed" fs="italic">
-						Binary file not shown
+						{m.shared_splitDiff_binaryNotShown()}
 					</Text>
 				) : file.hunks.length === 0 ? (
 					<Text size="sm" c="dimmed" fs="italic">
-						No inline diff available for this file
+						{m.shared_splitDiff_noDiff()}
 					</Text>
 				) : (
 					file.hunks.map((hunk) => (
@@ -360,13 +361,13 @@ function statusColor(
 function statusLabel(status: string): string {
 	switch (status) {
 		case "added":
-			return "ADDED";
+			return m.shared_splitDiff_added();
 		case "modified":
-			return "MODIFIED";
+			return m.shared_splitDiff_modified();
 		case "deleted":
-			return "DELETED";
+			return m.shared_splitDiff_deleted();
 		case "renamed":
-			return "RENAMED";
+			return m.shared_splitDiff_renamed();
 		default:
 			return status.toUpperCase();
 	}

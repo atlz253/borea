@@ -14,6 +14,7 @@ import {
 import { Trash2, UserPlus } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
+import * as m from "#/paraglide/messages";
 import type { OrganizationAccessSummary } from "../access-control.types";
 import type { OrganizationMember, OrganizationRole } from "../schemas";
 import {
@@ -34,10 +35,10 @@ interface OrganizationPageProps {
 }
 
 const roleLabels: Record<OrganizationRole, string> = {
-	owner: "Owner",
-	administrator: "Administrator",
-	moderator: "Moderator",
-	member: "Member",
+	owner: m.organizations_organizationPage_owner_label(),
+	administrator: m.organizations_organizationPage_administrator_label(),
+	moderator: m.organizations_organizationPage_moderator_label(),
+	member: m.organizations_organizationPage_member_label(),
 };
 
 function assignableRoles(
@@ -95,7 +96,9 @@ function OrganizationMembers({
 			setEmail("");
 		} catch (caught) {
 			setError(
-				caught instanceof Error ? caught.message : "Failed to invite member",
+				caught instanceof Error
+					? caught.message
+					: m.organizations_organizationPage_error_invite(),
 			);
 		} finally {
 			setLoading(false);
@@ -111,7 +114,11 @@ function OrganizationMembers({
 		}
 		if (
 			role === "owner" &&
-			!window.confirm(`Transfer organization ownership to ${member.name}?`)
+			!window.confirm(
+				m.organizations_organizationPage_transfer_confirm({
+					name: member.name,
+				}),
+			)
 		) {
 			return;
 		}
@@ -136,13 +143,21 @@ function OrganizationMembers({
 			}
 		} catch (caught) {
 			setError(
-				caught instanceof Error ? caught.message : "Failed to update role",
+				caught instanceof Error
+					? caught.message
+					: m.organizations_organizationPage_error_updateRole(),
 			);
 		}
 	};
 
 	const removeMember = async (member: OrganizationMember) => {
-		if (!window.confirm(`Remove ${member.name} from the organization?`)) {
+		if (
+			!window.confirm(
+				m.organizations_organizationPage_remove_confirm({
+					name: member.name,
+				}),
+			)
+		) {
 			return;
 		}
 		setError(null);
@@ -153,7 +168,9 @@ function OrganizationMembers({
 			setMembers((current) => current.filter((item) => item.id !== member.id));
 		} catch (caught) {
 			setError(
-				caught instanceof Error ? caught.message : "Failed to remove member",
+				caught instanceof Error
+					? caught.message
+					: m.organizations_organizationPage_error_removeMember(),
 			);
 		}
 	};
@@ -167,7 +184,7 @@ function OrganizationMembers({
 			}}
 		>
 			<Title order={2} size="h3" mb="md">
-				Members
+				{m.organizations_organizationPage_members_heading()}
 			</Title>
 			<Stack gap="sm">
 				{members.map((member) => {
@@ -205,7 +222,7 @@ function OrganizationMembers({
 										size="xs"
 										onClick={() => void removeMember(member)}
 									>
-										Remove
+										{m.organizations_organizationPage_remove_button()}
 									</Button>
 								)}
 							</Group>
@@ -217,8 +234,8 @@ function OrganizationMembers({
 				<form onSubmit={handleInvite}>
 					<Group align="end" mt="lg">
 						<TextInput
-							label="Invite member by email"
-							placeholder="user@example.com"
+							label={m.organizations_organizationPage_invite_email_label()}
+							placeholder={m.organizations_organizationPage_invite_email_placeholder()}
 							required
 							type="email"
 							value={email}
@@ -230,7 +247,7 @@ function OrganizationMembers({
 							leftSection={<UserPlus size={16} />}
 							loading={loading}
 						>
-							Invite member
+							{m.organizations_organizationPage_invite_button()}
 						</Button>
 					</Group>
 				</form>
@@ -271,7 +288,7 @@ function OrganizationSettings({
 			setError(
 				caught instanceof Error
 					? caught.message
-					: "Failed to update organization",
+					: m.organizations_organizationPage_error_updateOrg(),
 			);
 		} finally {
 			setLoading(false);
@@ -288,7 +305,7 @@ function OrganizationSettings({
 			setError(
 				caught instanceof Error
 					? caught.message
-					: "Failed to delete organization",
+					: m.organizations_organizationPage_error_deleteOrg(),
 			);
 			setLoading(false);
 		}
@@ -305,11 +322,11 @@ function OrganizationSettings({
 					}}
 				>
 					<Title order={2} size="h3" mb="md">
-						Organization settings
+						{m.organizations_organizationPage_settings_heading()}
 					</Title>
 					<form onSubmit={save}>
 						<Textarea
-							label="Description"
+							label={m.organizations_organizationPage_description_label()}
 							value={description}
 							onChange={(event) => setDescription(event.currentTarget.value)}
 							maxLength={500}
@@ -317,7 +334,7 @@ function OrganizationSettings({
 							minRows={2}
 						/>
 						<Button type="submit" mt="md" loading={loading}>
-							Save settings
+							{m.organizations_organizationPage_save_button()}
 						</Button>
 					</form>
 				</Box>
@@ -332,9 +349,11 @@ function OrganizationSettings({
 				>
 					<Group justify="space-between">
 						<div>
-							<Text fw={700}>Delete organization</Text>
+							<Text fw={700}>
+								{m.organizations_organizationPage_delete_heading()}
+							</Text>
 							<Text size="sm" c="dimmed">
-								Permanently deletes all repositories and pull requests.
+								{m.organizations_organizationPage_delete_description()}
 							</Text>
 						</div>
 						<Button
@@ -342,7 +361,7 @@ function OrganizationSettings({
 							leftSection={<Trash2 size={16} />}
 							onClick={() => setDeleteOpened(true)}
 						>
-							Delete organization
+							{m.organizations_organizationPage_delete_button()}
 						</Button>
 					</Group>
 				</Box>
@@ -355,15 +374,17 @@ function OrganizationSettings({
 			<Modal
 				opened={deleteOpened}
 				onClose={() => setDeleteOpened(false)}
-				title="Delete organization"
+				title={m.organizations_organizationPage_deleteModal_title()}
 				centered
 			>
 				<Stack>
 					<Text size="sm">
-						Enter <strong>{organizationName}</strong> to confirm.
+						{m.organizations_organizationPage_deleteModal_body({
+							name: organizationName,
+						})}
 					</Text>
 					<TextInput
-						label="Organization name"
+						label={m.organizations_organizationPage_deleteModal_name_label()}
 						value={confirmation}
 						onChange={(event) => setConfirmation(event.currentTarget.value)}
 					/>
@@ -373,7 +394,7 @@ function OrganizationSettings({
 						disabled={confirmation !== organizationName}
 						onClick={() => void deleteOrganization()}
 					>
-						Delete organization
+						{m.organizations_organizationPage_deleteModal_confirm_button()}
 					</Button>
 				</Stack>
 			</Modal>

@@ -2,6 +2,7 @@ import { AppShell, Box, NavLink, ScrollArea } from "@mantine/core";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { Building2, ChevronDown, ChevronUp, GitBranch } from "lucide-react";
 import { useState } from "react";
+import * as m from "#/paraglide/messages";
 import SidebarRecentOrganizations from "./SidebarRecentOrganizations";
 import SidebarRecentRepositories from "./SidebarRecentRepositories";
 
@@ -12,7 +13,9 @@ export default function Sidebar() {
 	const organizationName = /^\/organizations\/([^/]+)(?:\/|$)/.exec(
 		location.pathname,
 	)?.[1];
-	const label = organizationName ? "Repositories" : "Organizations";
+	const label = organizationName
+		? m.shared_sidebar_repositories()
+		: m.shared_sidebar_organizations();
 
 	const handleNavigate = () => {
 		if (organizationName) {

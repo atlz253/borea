@@ -16,6 +16,7 @@ import { TanStackDevtools } from "@tanstack/react-devtools";
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import hljs from "highlight.js";
+import { getLocale } from "#/paraglide/runtime";
 import PrototypeNotice from "../components/PrototypeNotice";
 import { theme } from "../theme";
 
@@ -54,7 +55,7 @@ export const Route = createRootRoute({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" {...mantineHtmlProps}>
+		<html lang={getLocale()} {...mantineHtmlProps}>
 			<head>
 				<ColorSchemeScript defaultColorScheme="auto" />
 				<HeadContent />

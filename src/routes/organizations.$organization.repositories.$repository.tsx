@@ -10,6 +10,7 @@ import {
 	getRepositoryAccessFn,
 	RepositoryAccessProvider,
 } from "#/modules/organizations";
+import * as m from "#/paraglide/messages";
 
 export const Route = createFileRoute(
 	"/organizations/$organization/repositories/$repository",
@@ -71,7 +72,7 @@ function RepositoryLayout() {
 								})
 							}
 						>
-							Code
+							{m.routes_repository_tabs_code()}
 						</Tabs.Tab>
 						<Tabs.Tab
 							value="pulls"
@@ -82,7 +83,7 @@ function RepositoryLayout() {
 								})
 							}
 						>
-							Pull requests
+							{m.routes_repository_tabs_pullRequests()}
 						</Tabs.Tab>
 						{(access.canManageAccess || access.canDelete) && (
 							<Tabs.Tab
@@ -94,7 +95,7 @@ function RepositoryLayout() {
 									})
 								}
 							>
-								Settings
+								{m.routes_repository_tabs_settings()}
 							</Tabs.Tab>
 						)}
 					</Tabs.List>

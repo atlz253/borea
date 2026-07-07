@@ -25,6 +25,7 @@ Borea is an open-source software development workspace (analogue of JetBrains Sp
 - **ORM:** Prisma 7 with SQLite (`@prisma/adapter-libsql` driver adapter)
 - **OpenAPI:** `@asteasolutions/zod-to-openapi`, OpenAPI 3.1
 - **Language:** TypeScript, strict mode, `verbatimModuleSyntax`
+- **i18n:** Paraglide JS (`@inlang/paraglide-js`) — compiler-based, tree-shakable. Messages in `messages/{locale}.json`. `src/paraglide/` is generated (gitignored). Import messages as `import * as m from "#/paraglide/messages"`. Use `getLocale()`/`setLocale()` from `#/paraglide/runtime`.
 
 ## Known Dependency Overrides
 
@@ -61,7 +62,7 @@ npm run db:studio   # Launch Prisma Studio GUI
 ## Code Conventions
 
 - **Formatting:** tabs for indentation, double quotes for strings (enforced by Biome). Do not reformat files outside the Biome `files.includes` set.
-- **Files Biome ignores:** `src/routeTree.gen.ts` (generated).
+- **Files Biome ignores:** `src/routeTree.gen.ts`, `src/paraglide/` (both generated).
 - **Imports:** use the path aliases `#/*` or `@/*` (both map to `./src/*`). Run "organize imports" on save.
 - **Module boundaries:** cross-module imports must go through the barrel (`index.ts`). Deep imports into internal module subpaths are forbidden by Biome `style/noRestrictedImports`. See ADR 0003.
 - **Biome linter rules:** additional non-recommended rules enforced:

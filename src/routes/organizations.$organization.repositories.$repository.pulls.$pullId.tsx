@@ -7,6 +7,7 @@ import {
 	useRouterState,
 } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
+import * as m from "#/paraglide/messages";
 
 export const Route = createFileRoute(
 	"/organizations/$organization/repositories/$repository/pulls/$pullId",
@@ -37,7 +38,7 @@ function PullRequestDetailLayout() {
 				>
 					<Group gap={4}>
 						<ArrowLeft size={16} />
-						<Text size="sm">Back to pull requests</Text>
+						<Text size="sm">{m.routes_repository_backToPullRequests()}</Text>
 					</Group>
 				</Link>
 			</Group>
@@ -53,7 +54,7 @@ function PullRequestDetailLayout() {
 							})
 						}
 					>
-						Conversation
+						{m.routes_repository_tabs_conversation()}
 					</Tabs.Tab>
 					<Tabs.Tab
 						value="files"
@@ -64,7 +65,7 @@ function PullRequestDetailLayout() {
 							})
 						}
 					>
-						Files changed
+						{m.routes_repository_tabs_filesChanged()}
 					</Tabs.Tab>
 				</Tabs.List>
 			</Tabs>

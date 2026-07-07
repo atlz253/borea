@@ -10,7 +10,9 @@ import {
 import { Link } from "@tanstack/react-router";
 import { LogOut, Settings } from "lucide-react";
 import { logoutFn, type User } from "#/modules/auth";
+import * as m from "#/paraglide/messages";
 import type { AuthMode } from "#/platform/config";
+import LanguageToggle from "./LanguageToggle";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Header({
@@ -37,7 +39,7 @@ export default function Header({
 					onClick={onBurgerClick}
 					hiddenFrom="sm"
 					size="sm"
-					aria-label="Toggle navigation"
+					aria-label={m.shared_header_toggleNav()}
 				/>
 				<Title order={2} style={{ fontSize: "1rem" }}>
 					<Anchor
@@ -46,7 +48,7 @@ export default function Header({
 						underline="never"
 						style={{ color: "var(--mantine-color-text)" }}
 					>
-						Borea
+						{m.shared_header_brand()}
 					</Anchor>
 				</Title>
 			</Group>
@@ -68,7 +70,7 @@ export default function Header({
 							size="compact-sm"
 							leftSection={<Settings size={14} />}
 						>
-							Settings
+							{m.shared_header_settings()}
 						</Button>
 						<Button
 							variant="subtle"
@@ -76,10 +78,11 @@ export default function Header({
 							leftSection={<LogOut size={14} />}
 							onClick={() => void handleLogout()}
 						>
-							Log out
+							{m.shared_header_logOut()}
 						</Button>
 					</>
 				)}
+				<LanguageToggle />
 				<ThemeToggle />
 			</Group>
 		</Group>

@@ -1,27 +1,31 @@
 import "#/platform/http/openapi-zod";
 import { z } from "zod";
 import { emailSchema, userSchema } from "#/modules/auth";
+import * as m from "#/paraglide/messages";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 500;
 
 export const organizationNameSchema = z
 	.string()
-	.min(1, "Organization name is required")
-	.max(MAX_NAME_LENGTH, "Organization name is too long")
-	.regex(
-		/^[a-z0-9._-]+$/,
-		"Only lowercase letters, numbers, dots, hyphens, and underscores allowed",
+	.min(1, m.organizations_schemas_nameRequired())
+	.max(MAX_NAME_LENGTH, m.organizations_schemas_nameTooLong())
+	.regex(/^[a-z0-9._-]+$/, m.organizations_schemas_nameInvalidChars())
+	.refine(
+		(name) => !name.startsWith("."),
+		m.organizations_schemas_nameDotStart(),
 	)
-	.refine((name) => !name.startsWith("."), "Name cannot start with a dot")
-	.refine((name) => name !== "." && name !== "..", "Invalid name");
+	.refine(
+		(name) => name !== "." && name !== "..",
+		m.organizations_schemas_nameInvalid(),
+	);
 
 export const createOrganizationSchema = z.object({
 	name: organizationNameSchema,
 	description: z
 		.string()
 		.trim()
-		.max(MAX_DESCRIPTION_LENGTH, "Description is too long")
+		.max(MAX_DESCRIPTION_LENGTH, m.organizations_schemas_descriptionTooLong())
 		.optional()
 		.default(""),
 });
@@ -30,7 +34,7 @@ export const updateOrganizationSchema = z.object({
 	description: z
 		.string()
 		.trim()
-		.max(MAX_DESCRIPTION_LENGTH, "Description is too long"),
+		.max(MAX_DESCRIPTION_LENGTH, m.organizations_schemas_descriptionTooLong()),
 });
 
 export const organizationRoleSchema = z.enum([

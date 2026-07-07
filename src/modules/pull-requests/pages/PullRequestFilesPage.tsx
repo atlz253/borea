@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import SplitDiffView from "#/components/SplitDiffView";
 import type { DiffFile } from "#/modules/git";
 import { useRepositoryAccess } from "#/modules/organizations";
+import * as m from "#/paraglide/messages";
 import FileComments from "../components/FileComments";
 import type {
 	PullRequest,
@@ -106,7 +107,9 @@ export default function PullRequestFilesPage({
 				return next;
 			});
 			setError(
-				cause instanceof Error ? cause.message : "Failed to update file review",
+				cause instanceof Error
+					? cause.message
+					: m.pullRequests_pullRequestFilesPage_error_updateReview(),
 			);
 		} finally {
 			setSavingFilePath(null);
@@ -143,7 +146,7 @@ export default function PullRequestFilesPage({
 			{error && (
 				<Alert
 					icon={<AlertCircle size={16} />}
-					title="Failed to update file review"
+					title={m.pullRequests_pullRequestFilesPage_error_updateReview_alertTitle()}
 					color="red"
 				>
 					{error}
@@ -152,11 +155,13 @@ export default function PullRequestFilesPage({
 
 			{files.length === 0 ? (
 				<Text c="dimmed" fs="italic">
-					No file changes in this pull request.
+					{m.pullRequests_pullRequestFilesPage_empty()}
 				</Text>
 			) : (
 				<Text size="sm" c="dimmed" mb="xs">
-					{files.length} file{files.length !== 1 ? "s" : ""} changed
+					{m.pullRequests_pullRequestFilesPage_filesChanged({
+						count: files.length,
+					})}
 				</Text>
 			)}
 
@@ -174,8 +179,10 @@ export default function PullRequestFilesPage({
 						headerAction={
 							access.canWrite ? (
 								<Checkbox
-									label="Viewed"
-									aria-label={`Mark ${filePath} as viewed`}
+									label={m.pullRequests_pullRequestFilesPage_viewed_label()}
+									aria-label={m.pullRequests_pullRequestFilesPage_viewed_aria({
+										filePath,
+									})}
 									checked={viewed}
 									disabled={savingFilePath !== null}
 									onChange={(event) => {
@@ -204,7 +211,7 @@ export default function PullRequestFilesPage({
 						{filePath}
 					</Text>
 					<Text size="xs" c="dimmed">
-						File is no longer in the current diff
+						{m.pullRequests_pullRequestFilesPage_fileNotInDiff()}
 					</Text>
 					<FileComments
 						pullRequest={pullRequest}

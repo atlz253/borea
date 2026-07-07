@@ -22,6 +22,7 @@ import {
 	removeRepositoryMemberFn,
 	setRepositoryMemberRoleFn,
 } from "#/modules/organizations";
+import * as m from "#/paraglide/messages";
 import { deleteRepositoryFn } from "../server/repository.functions";
 
 interface RepositorySettingsPageProps {
@@ -34,9 +35,9 @@ interface RepositorySettingsPageProps {
 }
 
 const roleLabels: Record<RepositoryRole, string> = {
-	read: "Read",
-	write: "Write",
-	moderator: "Moderator",
+	read: m.repositories_repositorySettings_read_label(),
+	write: m.repositories_repositorySettings_write_label(),
+	moderator: m.repositories_repositorySettings_moderator_label(),
 };
 
 const defaultAccess: RepositoryAccessSummary = {
@@ -111,7 +112,7 @@ function RepositoryAccessManager({
 			setError(
 				caught instanceof Error
 					? caught.message
-					: "Failed to update repository access",
+					: m.repositories_repositorySettings_error_access(),
 			);
 		} finally {
 			setLoading(false);
@@ -136,7 +137,7 @@ function RepositoryAccessManager({
 			setError(
 				caught instanceof Error
 					? caught.message
-					: "Failed to remove repository access",
+					: m.repositories_repositorySettings_error_removeAccess(),
 			);
 		} finally {
 			setLoading(false);
@@ -152,11 +153,11 @@ function RepositoryAccessManager({
 			}}
 		>
 			<Title order={2} size="h3" mb="md">
-				Repository access
+				{m.repositories_repositorySettings_access_heading()}
 			</Title>
 			{access.ownerId && (
 				<Text size="sm" c="dimmed" mb="md">
-					Owner:{" "}
+					{m.repositories_repositorySettings_owner_label()}
 					{organizationMembers.find((member) => member.id === access.ownerId)
 						?.email ?? access.ownerId}
 				</Text>
@@ -195,7 +196,7 @@ function RepositoryAccessManager({
 										disabled={loading}
 										onClick={() => void remove(member)}
 									>
-										Remove
+										{m.repositories_repositorySettings_remove_button()}
 									</Button>
 								)}
 							</Group>
@@ -205,8 +206,8 @@ function RepositoryAccessManager({
 			</Stack>
 			<Group align="end" mt="lg">
 				<Select
-					label="Organization member"
-					placeholder="Select member"
+					label={m.repositories_repositorySettings_member_label()}
+					placeholder={m.repositories_repositorySettings_member_placeholder()}
 					searchable
 					data={candidates.map((member) => ({
 						value: member.id,
@@ -214,11 +215,11 @@ function RepositoryAccessManager({
 					}))}
 					value={selectedUserId}
 					onChange={setSelectedUserId}
-					nothingFoundMessage="No eligible members"
+					nothingFoundMessage={m.repositories_repositorySettings_noEligibleMembers()}
 					style={{ flex: 1 }}
 				/>
 				<Select
-					label="Role"
+					label={m.repositories_repositorySettings_role_label()}
 					data={roleOptions}
 					value={selectedRole}
 					allowDeselect={false}
@@ -239,7 +240,7 @@ function RepositoryAccessManager({
 						}
 					}}
 				>
-					Add
+					{m.repositories_repositorySettings_add_button()}
 				</Button>
 			</Group>
 			{error && (
@@ -288,7 +289,7 @@ export default function RepositorySettingsPage({
 			setError(
 				caught instanceof Error
 					? caught.message
-					: "Failed to delete repository",
+					: m.repositories_repositorySettings_error_delete(),
 			);
 			setLoading(false);
 		}
@@ -297,7 +298,7 @@ export default function RepositorySettingsPage({
 	return (
 		<Container size="lg" py="xl">
 			<Title order={1} mb="lg">
-				Repository settings
+				{m.repositories_repositorySettings_title()}
 			</Title>
 
 			<Stack>
@@ -321,9 +322,11 @@ export default function RepositorySettingsPage({
 					>
 						<Group justify="space-between" align="center">
 							<div>
-								<Text fw={700}>Delete repository</Text>
+								<Text fw={700}>
+									{m.repositories_repositorySettings_delete_heading()}
+								</Text>
 								<Text size="sm" c="dimmed">
-									Permanently delete this repository and all pull requests.
+									{m.repositories_repositorySettings_delete_description()}
 								</Text>
 							</div>
 							<Button
@@ -331,21 +334,21 @@ export default function RepositorySettingsPage({
 								leftSection={<Trash2 size={16} />}
 								onClick={() => setOpened(true)}
 							>
-								Delete repository
+								{m.repositories_repositorySettings_delete_button()}
 							</Button>
 						</Group>
 					</Box>
 				)}
 
 				{!access.canManageAccess && !access.canDelete && (
-					<Text c="dimmed">No repository settings are available.</Text>
+					<Text c="dimmed">{m.repositories_repositorySettings_empty()}</Text>
 				)}
 			</Stack>
 
 			<Modal
 				opened={opened}
 				onClose={closeModal}
-				title="Delete repository"
+				title={m.repositories_repositorySettings_deleteModal_title()}
 				centered
 				closeOnClickOutside={!loading}
 				closeOnEscape={!loading}
@@ -353,12 +356,13 @@ export default function RepositorySettingsPage({
 				<form onSubmit={handleDelete}>
 					<Stack>
 						<Text size="sm">
-							This action cannot be undone. Enter <strong>{name}</strong> to
-							confirm.
+							{m.repositories_repositorySettings_deleteModal_body({
+								name,
+							})}
 						</Text>
 						<TextInput
 							data-autofocus
-							label="Repository name"
+							label={m.repositories_repositorySettings_deleteModal_name_label()}
 							value={confirmation}
 							onChange={(event) => setConfirmation(event.currentTarget.value)}
 							disabled={loading}
@@ -371,7 +375,7 @@ export default function RepositorySettingsPage({
 						)}
 						<Group justify="flex-end">
 							<Button variant="default" onClick={closeModal} disabled={loading}>
-								Cancel
+								{m.repositories_repositorySettings_cancel_button()}
 							</Button>
 							<Button
 								type="submit"
@@ -379,7 +383,7 @@ export default function RepositorySettingsPage({
 								loading={loading}
 								disabled={confirmation !== name}
 							>
-								Delete repository
+								{m.repositories_repositorySettings_deleteModal_confirm_button()}
 							</Button>
 						</Group>
 					</Stack>

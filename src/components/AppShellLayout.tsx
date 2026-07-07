@@ -2,6 +2,7 @@ import { Alert, AppShell, Box, Stack, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { ShieldAlert } from "lucide-react";
 import type { User } from "#/modules/auth";
+import * as m from "#/paraglide/messages";
 import type { AuthMode } from "#/platform/config";
 import Footer from "./Footer";
 import Header from "./Header";
@@ -44,14 +45,9 @@ export default function AppShellLayout({
 						>
 							<Text span size="xs">
 								<Text component="span" fw={600}>
-									NoAuth mode
+									{m.shared_noauthBanner_label()}
 								</Text>
-								{" — "}authentication is disabled, all operations are performed
-								on behalf of{" "}
-								<Text component="span" fw={600}>
-									{user.name}
-								</Text>
-								. Do not use in production.
+								{m.shared_noauthBanner({ name: user.name })}
 							</Text>
 						</Alert>
 					)}

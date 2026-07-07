@@ -1,6 +1,8 @@
 import { Badge, Group, Table, Text } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { GitPullRequest } from "lucide-react";
+import * as m from "#/paraglide/messages";
+import { getLocale } from "#/paraglide/runtime";
 import type { PullRequest } from "../schemas";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -33,7 +35,7 @@ export default function PullRequestList({
 				<Text c="dimmed" size="sm">
 					<Group gap="xs" justify="center">
 						<GitPullRequest size={20} />
-						<span>No pull requests yet.</span>
+						<span>{m.pullRequests_pullRequestList_empty()}</span>
 					</Group>
 				</Text>
 			</Group>
@@ -64,7 +66,11 @@ export default function PullRequestList({
 			</Table.Td>
 			<Table.Td>
 				<Badge color={STATUS_COLORS[pr.status]} variant="light" size="sm">
-					{pr.status}
+					{pr.status === "open"
+						? m.pullRequests_pr_status_open()
+						: pr.status === "merged"
+							? m.pullRequests_pr_status_merged()
+							: m.pullRequests_pr_status_closed()}
 				</Badge>
 			</Table.Td>
 			<Table.Td>
@@ -76,7 +82,9 @@ export default function PullRequestList({
 				<Text size="sm">{pr.authorName}</Text>
 			</Table.Td>
 			<Table.Td>
-				<Text size="sm">{new Date(pr.createdAt).toLocaleDateString()}</Text>
+				<Text size="sm">
+					{new Date(pr.createdAt).toLocaleDateString(getLocale())}
+				</Text>
 			</Table.Td>
 		</Table.Tr>
 	));
@@ -85,11 +93,13 @@ export default function PullRequestList({
 		<Table highlightOnHover>
 			<Table.Thead>
 				<Table.Tr>
-					<Table.Th>Title</Table.Th>
-					<Table.Th>Status</Table.Th>
-					<Table.Th>Branches</Table.Th>
-					<Table.Th>Author</Table.Th>
-					<Table.Th>Created</Table.Th>
+					<Table.Th>{m.pullRequests_pullRequestList_header_title()}</Table.Th>
+					<Table.Th>{m.pullRequests_pullRequestList_header_status()}</Table.Th>
+					<Table.Th>
+						{m.pullRequests_pullRequestList_header_branches()}
+					</Table.Th>
+					<Table.Th>{m.pullRequests_pullRequestList_header_author()}</Table.Th>
+					<Table.Th>{m.pullRequests_pullRequestList_header_created()}</Table.Th>
 				</Table.Tr>
 			</Table.Thead>
 			<Table.Tbody>{rows}</Table.Tbody>

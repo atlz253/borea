@@ -85,20 +85,19 @@ describe("AppShellLayout", () => {
 
 	it("renders noauth banner when authMode is noauth", () => {
 		renderLayout({ authMode: "noauth" });
-		expect(
-			screen.getByText(/NoAuth mode/, { selector: "span" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText(USER.name, { selector: "span" }),
-		).toBeInTheDocument();
-		expect(screen.getByText(/Do not use in production/)).toBeInTheDocument();
+		const alert = screen.getByRole("alert");
+		expect(alert).toHaveTextContent(/NoAuth mode/);
+		expect(alert).toHaveTextContent(USER.name);
+		expect(alert).toHaveTextContent(/Do not use in production/);
 	});
 
 	it("does not render noauth banner when authMode is full", () => {
 		renderLayout();
 		expect(screen.queryByText(/NoAuth mode/)).not.toBeInTheDocument();
 		expect(
-			screen.queryByText(/Do not use in production/),
+			screen.queryByText(
+				/authentication is disabled, all operations are performed on behalf of/,
+			),
 		).not.toBeInTheDocument();
 	});
 });

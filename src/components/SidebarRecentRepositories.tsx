@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Repository } from "#/modules/repositories";
 import { listRepositoriesFn } from "#/modules/repositories";
+import * as m from "#/paraglide/messages";
 
 interface Props {
 	opened: boolean;
@@ -47,7 +48,9 @@ export default function SidebarRecentRepositories({
 			.catch((err) => {
 				if (request !== requestRef.current) return;
 				setError(
-					err instanceof Error ? err.message : "Failed to load repositories",
+					err instanceof Error
+						? err.message
+						: m.shared_sidebar_failedRepositories(),
 				);
 				setLoading(false);
 			});
@@ -56,7 +59,7 @@ export default function SidebarRecentRepositories({
 	if (loading) {
 		return (
 			<Text size="sm" c="dimmed">
-				Loading...
+				{m.shared_sidebar_loading()}
 			</Text>
 		);
 	}
@@ -108,11 +111,11 @@ export default function SidebarRecentRepositories({
 				>
 					{showAll ? (
 						<>
-							<ChevronUp size={14} /> Show less
+							<ChevronUp size={14} /> {m.shared_sidebar_showLess()}
 						</>
 					) : (
 						<>
-							<ChevronDown size={14} /> Show more
+							<ChevronDown size={14} /> {m.shared_sidebar_showMore()}
 						</>
 					)}
 				</Text>

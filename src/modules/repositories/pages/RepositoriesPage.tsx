@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import * as m from "#/paraglide/messages";
 import RepositoryList from "../components/RepositoryList";
 import type { Repository } from "../schemas";
 import { createRepositoryFn } from "../server/repository.functions";
@@ -46,7 +47,9 @@ export default function RepositoriesPage({
 			window.location.reload();
 		} catch (err) {
 			setError(
-				err instanceof Error ? err.message : "Failed to create repository",
+				err instanceof Error
+					? err.message
+					: m.repositories_repositoriesPage_error(),
 			);
 		} finally {
 			setLoading(false);
@@ -58,7 +61,7 @@ export default function RepositoriesPage({
 			<Group justify="space-between" mb="md">
 				<div>
 					<Text size="xs" tt="uppercase" fw={700} c="dimmed" mb="xs">
-						Organization
+						{m.repositories_repositoriesPage_organization_label()}
 					</Text>
 					<Title order={1}>{organizationName}</Title>
 				</div>
@@ -67,7 +70,7 @@ export default function RepositoriesPage({
 						leftSection={<Plus size={16} />}
 						onClick={() => setShowForm(true)}
 					>
-						New repository
+						{m.repositories_repositoriesPage_new_button()}
 					</Button>
 				)}
 			</Group>
@@ -84,19 +87,19 @@ export default function RepositoriesPage({
 					}}
 				>
 					<Text fw={600} mb="sm">
-						Create repository
+						{m.repositories_repositoriesPage_create_heading()}
 					</Text>
 					<form onSubmit={handleSubmit}>
 						<TextInput
-							label="Repository name"
-							placeholder="my-repository"
+							label={m.repositories_repositoriesPage_name_label()}
+							placeholder={m.repositories_repositoriesPage_name_placeholder()}
 							required
 							value={name}
 							onChange={(e) => setName(e.currentTarget.value)}
 						/>
 						<Textarea
-							label="Description (optional)"
-							placeholder="A short description of the repository"
+							label={m.repositories_repositoriesPage_description_label()}
+							placeholder={m.repositories_repositoriesPage_description_placeholder()}
 							mt="md"
 							value={description}
 							onChange={(e) => setDescription(e.currentTarget.value)}
@@ -110,7 +113,7 @@ export default function RepositoriesPage({
 							</Text>
 						)}
 						<Button type="submit" fullWidth mt="lg" loading={loading}>
-							Create repository
+							{m.repositories_repositoriesPage_create_button()}
 						</Button>
 					</form>
 				</Box>

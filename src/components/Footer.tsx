@@ -1,4 +1,5 @@
 import { Anchor, Container, Group, Text } from "@mantine/core";
+import * as m from "#/paraglide/messages";
 
 export default function Footer() {
 	const year = new Date().getFullYear();
@@ -7,7 +8,7 @@ export default function Footer() {
 		<Container size="lg" py="xl">
 			<Group justify="space-between">
 				<Text size="sm" c="dimmed">
-					&copy; {year} Borea. All rights reserved.
+					{m.shared_footer_copyright({ year })}
 				</Text>
 				<Group gap="md">
 					<Anchor
@@ -16,7 +17,7 @@ export default function Footer() {
 						rel="noreferrer"
 						size="sm"
 					>
-						GitHub
+						{m.shared_footer_github()}
 					</Anchor>
 				</Group>
 			</Group>

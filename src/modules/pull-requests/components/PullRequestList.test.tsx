@@ -83,17 +83,17 @@ describe("PullRequestList", () => {
 
 	it("renders status badge for open PR", () => {
 		renderList({ pullRequests: [makePR({ status: "open" })] });
-		expect(screen.getByText("open")).toBeInTheDocument();
+		expect(screen.getByText("Open")).toBeInTheDocument();
 	});
 
 	it("renders status badge for merged PR", () => {
 		renderList({ pullRequests: [makePR({ status: "merged" })] });
-		expect(screen.getByText("merged")).toBeInTheDocument();
+		expect(screen.getByText("Merged")).toBeInTheDocument();
 	});
 
 	it("renders status badge for closed PR", () => {
 		renderList({ pullRequests: [makePR({ status: "closed" })] });
-		expect(screen.getByText("closed")).toBeInTheDocument();
+		expect(screen.getByText("Closed")).toBeInTheDocument();
 	});
 
 	it("renders branch transition text", () => {

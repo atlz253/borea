@@ -10,6 +10,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { BranchInfo } from "#/modules/git";
+import * as m from "#/paraglide/messages";
 import BranchSwitcher from "../components/BranchSwitcher";
 import CommitCountLink from "../components/CommitCountLink";
 import FileList from "../components/FileList";
@@ -130,10 +131,12 @@ export default function RepositoryPage({
 					}}
 				>
 					<Group justify="center" mb="xs">
-						<Text fw={600}>This repository is empty</Text>
+						<Text fw={600}>
+							{m.repositories_repositoryPage_empty_heading()}
+						</Text>
 					</Group>
 					<Text size="sm" c="dimmed">
-						Make your first commit to see files here.
+						{m.repositories_repositoryPage_empty_description()}
 					</Text>
 				</Box>
 			) : (

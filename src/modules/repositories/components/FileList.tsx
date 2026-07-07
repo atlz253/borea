@@ -1,6 +1,7 @@
 import { Box, Group, Table, Text } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { File, Folder } from "lucide-react";
+import * as m from "#/paraglide/messages";
 import type { TreeEntry } from "../schemas";
 
 interface FileListProps {
@@ -21,12 +22,16 @@ const LINK_STYLE = {
 
 function formatSize(bytes: number): string {
 	if (bytes < BYTES_PER_KB) {
-		return `${bytes} B`;
+		return m.repositories_fileList_sizeFormat({ size: bytes });
 	}
 	if (bytes < BYTES_PER_MB) {
-		return `${(bytes / BYTES_PER_KB).toFixed(1)} KB`;
+		return m.repositories_fileList_sizeFormatKB({
+			size: (bytes / BYTES_PER_KB).toFixed(1),
+		});
 	}
-	return `${(bytes / BYTES_PER_MB).toFixed(1)} MB`;
+	return m.repositories_fileList_sizeFormatMB({
+		size: (bytes / BYTES_PER_MB).toFixed(1),
+	});
 }
 
 function childPath(currentPath: string, name: string): string {
@@ -178,8 +183,10 @@ export default function FileList({
 		<Table highlightOnHover withRowBorders>
 			<Table.Thead>
 				<Table.Tr>
-					<Table.Th>Name</Table.Th>
-					<Table.Th style={{ textAlign: "right" }}>Size</Table.Th>
+					<Table.Th>{m.repositories_fileList_header_name()}</Table.Th>
+					<Table.Th style={{ textAlign: "right" }}>
+						{m.repositories_fileList_header_size()}
+					</Table.Th>
 				</Table.Tr>
 			</Table.Thead>
 			<Table.Tbody>{rows}</Table.Tbody>

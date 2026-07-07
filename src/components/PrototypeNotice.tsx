@@ -1,6 +1,7 @@
 import { notifications } from "@mantine/notifications";
 import { ShieldAlert } from "lucide-react";
 import { useEffect } from "react";
+import * as m from "#/paraglide/messages";
 
 const NOTIFICATION_ID = "prototype-notice";
 
@@ -10,9 +11,8 @@ export default function PrototypeNotice() {
 
 		notifications.show({
 			id,
-			title: "Prototype",
-			message:
-				"This project is at the prototype stage. Data preservation is not guaranteed — back up your data or do not use for production repositories.",
+			title: m.shared_prototypeNotice_title(),
+			message: m.shared_prototypeNotice_message(),
 			color: "orange",
 			icon: <ShieldAlert size={18} />,
 			position: "bottom-right",

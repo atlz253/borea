@@ -31,6 +31,7 @@ This directory contains Architecture Decision Records (ADRs) for Borea. Each ADR
 | 0025 | [SQLite + Prisma 7 ORM](0025-sqlite-prisma-orm.md) | Migrating metadata storage from JSON files to SQLite via Prisma 7 with JS driver adapter |
 | 0026 | [Project Rename: Nirvana to Borea](0026-project-rename-nirvana-to-borea.md) | Renaming the project from Nirvana to Borea with aesthetic direction |
 | 0027 | [Auto-Apply Pending Migrations on Startup](0027-auto-apply-migrations-on-startup.md) | Applying pending Prisma migrations automatically before dev server and Docker container start |
+| 0028 | [Internationalization with Paraglide JS](0028-i18n-paraglide.md) | Cookie-based i18n with Paraglide JS, English base + Russian translation, deferred service-layer errors |
 
 ## Adding a New ADR
 

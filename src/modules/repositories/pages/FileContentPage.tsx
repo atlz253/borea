@@ -13,6 +13,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronRight, FileWarning } from "lucide-react";
 import { useState } from "react";
 import type { BranchInfo, FileContent } from "#/modules/git";
+import * as m from "#/paraglide/messages";
 import { detectLanguage } from "#/utils/code-language";
 import BranchSwitcher from "../components/BranchSwitcher";
 import CommitCountLink from "../components/CommitCountLink";
@@ -41,12 +42,16 @@ const BYTES_PER_MEBIBYTE = BYTES_PER_KIBIBYTE * KIBIBYTES_PER_MEBIBYTE;
 
 function formatSize(bytes: number): string {
 	if (bytes < BYTES_PER_KIBIBYTE) {
-		return `${bytes} B`;
+		return m.repositories_fileContent_sizeFormat({ size: bytes });
 	}
 	if (bytes < BYTES_PER_MEBIBYTE) {
-		return `${(bytes / BYTES_PER_KIBIBYTE).toFixed(1)} KiB`;
+		return m.repositories_fileContent_sizeFormatKiB({
+			size: (bytes / BYTES_PER_KIBIBYTE).toFixed(1),
+		});
 	}
-	return `${(bytes / BYTES_PER_MEBIBYTE).toFixed(1)} MiB`;
+	return m.repositories_fileContent_sizeFormatMiB({
+		size: (bytes / BYTES_PER_MEBIBYTE).toFixed(1),
+	});
 }
 
 export default function FileContentPage({
@@ -82,7 +87,9 @@ export default function FileContentPage({
 			setDisplayedFile(result);
 		} catch (error) {
 			setLoadError(
-				error instanceof Error ? error.message : "Failed to open file",
+				error instanceof Error
+					? error.message
+					: m.repositories_fileContent_error(),
 			);
 		} finally {
 			setLoading(false);
@@ -211,8 +218,11 @@ function FileViewer({
 
 	if (file.status === "binary") {
 		return (
-			<Alert icon={<FileWarning size={18} />} title="Binary file">
-				Binary files cannot be displayed.
+			<Alert
+				icon={<FileWarning size={18} />}
+				title={m.repositories_fileContent_binary_title()}
+			>
+				{m.repositories_fileContent_binary_body()}
 			</Alert>
 		);
 	}
@@ -221,22 +231,23 @@ function FileViewer({
 		return (
 			<Alert
 				icon={<FileWarning size={18} />}
-				title="File is too large"
+				title={m.repositories_fileContent_tooLarge_title()}
 				color="yellow"
 			>
-				Files larger than 25 MiB cannot be displayed.
+				{m.repositories_fileContent_tooLarge_body()}
 			</Alert>
 		);
 	}
 
 	return (
-		<Alert icon={<FileWarning size={18} />} title="Large file" color="yellow">
-			<Text mb="md">
-				This file is larger than 1 MiB. Syntax highlighting will be disabled
-				when it is opened.
-			</Text>
+		<Alert
+			icon={<FileWarning size={18} />}
+			title={m.repositories_fileContent_largeFile_title()}
+			color="yellow"
+		>
+			<Text mb="md">{m.repositories_fileContent_largeFile_body()}</Text>
 			<Button onClick={() => void onOpen()} loading={loading}>
-				Open file
+				{m.repositories_fileContent_open_button()}
 			</Button>
 			{loadError && (
 				<Text c="red" size="sm" mt="sm">

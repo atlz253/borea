@@ -2,6 +2,7 @@ import { Button, Container, Group, Stack, Text, Title } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { GitPullRequest, Plus } from "lucide-react";
 import { useRepositoryAccess } from "#/modules/organizations";
+import * as m from "#/paraglide/messages";
 import PullRequestList from "../components/PullRequestList";
 import type { PullRequest } from "../schemas";
 
@@ -23,10 +24,12 @@ export default function PullRequestsListPage({
 		<Container size="lg" py="xl">
 			<Group justify="space-between" mb="md">
 				<Stack gap={0}>
-					<Title order={2}>Pull requests</Title>
+					<Title order={2}>{m.pullRequests_pullRequestsListPage_title()}</Title>
 					{openCount > 0 && (
 						<Text size="sm" c="dimmed">
-							{openCount} open
+							{m.pullRequests_pullRequestsListPage_open_count({
+								count: openCount,
+							})}
 						</Text>
 					)}
 				</Stack>
@@ -38,7 +41,9 @@ export default function PullRequestsListPage({
 							repository: repoName,
 						}}
 					>
-						<Button leftSection={<Plus size={16} />}>New pull request</Button>
+						<Button leftSection={<Plus size={16} />}>
+							{m.pullRequests_pullRequestsListPage_new_button()}
+						</Button>
 					</Link>
 				)}
 			</Group>
@@ -55,7 +60,7 @@ export default function PullRequestsListPage({
 					<Group gap="xs" justify="center" c="dimmed">
 						<GitPullRequest size={20} />
 						<Text size="sm" span c="dimmed">
-							No pull requests yet.
+							{m.pullRequests_pullRequestsListPage_empty()}
 						</Text>
 					</Group>
 				</Group>

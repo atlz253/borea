@@ -1,5 +1,6 @@
 import "#/platform/http/openapi-zod";
 import { z } from "zod";
+import * as m from "#/paraglide/messages";
 
 const MAX_NAME_LENGTH = 100;
 const MIN_PASSWORD_LENGTH = 8;
@@ -10,18 +11,18 @@ const SHA256_HEX_LENGTH = 64;
 export const userNameSchema = z
 	.string()
 	.trim()
-	.min(1, "Name is required")
-	.max(MAX_NAME_LENGTH, "Name is too long");
+	.min(1, m.auth_schemas_nameRequired())
+	.max(MAX_NAME_LENGTH, m.auth_schemas_nameTooLong());
 
 export const emailSchema = z
-	.email("Enter a valid email address")
+	.email(m.auth_schemas_emailInvalid())
 	.trim()
 	.toLowerCase();
 
 export const passwordSchema = z
 	.string()
-	.min(MIN_PASSWORD_LENGTH, "Password must contain at least 8 characters")
-	.max(MAX_PASSWORD_LENGTH, "Password is too long");
+	.min(MIN_PASSWORD_LENGTH, m.auth_schemas_passwordMinLength())
+	.max(MAX_PASSWORD_LENGTH, m.auth_schemas_passwordTooLong());
 
 export const registerSchema = z.object({
 	name: userNameSchema,
@@ -59,8 +60,8 @@ export const storedUserSchema = userSchema.extend({
 export const gitTokenNameSchema = z
 	.string()
 	.trim()
-	.min(1, "Token name is required")
-	.max(MAX_NAME_LENGTH, "Token name is too long");
+	.min(1, m.auth_schemas_tokenNameRequired())
+	.max(MAX_NAME_LENGTH, m.auth_schemas_tokenNameTooLong());
 
 export const createGitTokenSchema = z.object({
 	name: gitTokenNameSchema,

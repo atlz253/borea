@@ -11,6 +11,7 @@ import { useRouter } from "@tanstack/react-router";
 import { AlertCircle } from "lucide-react";
 import type { FormEvent } from "react";
 import { useEffect, useState } from "react";
+import * as m from "#/paraglide/messages";
 import type { PullRequest, PullRequestComment } from "../schemas";
 import { addPullRequestFileCommentFn } from "../server/pull-request.functions";
 
@@ -60,7 +61,9 @@ export default function FileComments({
 			await router.invalidate();
 		} catch (cause) {
 			setError(
-				cause instanceof Error ? cause.message : "Failed to add comment",
+				cause instanceof Error
+					? cause.message
+					: m.pullRequests_fileComments_error_add(),
 			);
 		} finally {
 			setSubmitting(false);
@@ -71,11 +74,13 @@ export default function FileComments({
 		<Stack gap="sm" mt="md">
 			<Divider />
 			<Text size="sm" fw={600}>
-				Comments ({visibleComments.length})
+				{m.pullRequests_fileComments_heading({
+					count: visibleComments.length,
+				})}
 			</Text>
 			{visibleComments.length === 0 ? (
 				<Text size="sm" c="dimmed">
-					No comments yet.
+					{m.pullRequests_fileComments_empty()}
 				</Text>
 			) : (
 				<Stack gap="xs">
@@ -102,7 +107,7 @@ export default function FileComments({
 			{error && (
 				<Alert
 					icon={<AlertCircle size={16} />}
-					title="Failed to add comment"
+					title={m.pullRequests_fileComments_error_title()}
 					color="red"
 				>
 					{error}
@@ -112,7 +117,9 @@ export default function FileComments({
 				<form onSubmit={(event) => void handleSubmit(event)}>
 					<Stack gap="xs">
 						<Textarea
-							label={`Comment on ${filePath}`}
+							label={m.pullRequests_fileComments_commentOn_label({
+								filePath,
+							})}
 							autosize
 							minRows={2}
 							maxRows={8}
@@ -128,7 +135,7 @@ export default function FileComments({
 							disabled={body.trim().length === 0}
 							style={{ alignSelf: "flex-end" }}
 						>
-							Add comment
+							{m.pullRequests_fileComments_addComment_button()}
 						</Button>
 					</Stack>
 				</form>
@@ -138,5 +145,6 @@ export default function FileComments({
 }
 
 function formatCommentDate(createdAt: string): string {
-	return `${createdAt.slice(0, ISO_MINUTE_LENGTH).replace("T", " ")} UTC`;
+	const date = createdAt.slice(0, ISO_MINUTE_LENGTH).replace("T", " ");
+	return `${date} UTC`;
 }

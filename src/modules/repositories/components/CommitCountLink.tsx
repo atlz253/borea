@@ -1,6 +1,7 @@
 import { Group, Text } from "@mantine/core";
 import { Link } from "@tanstack/react-router";
 import { GitCommitHorizontal } from "lucide-react";
+import * as m from "#/paraglide/messages";
 
 const LINK_STYLE = {
 	color: "var(--mantine-color-anchor-color)",
@@ -20,7 +21,10 @@ export default function CommitCountLink({
 	count,
 	branchName,
 }: CommitCountLinkProps) {
-	const label = count === 1 ? "1 commit" : `${count} commits`;
+	const label =
+		count === 1
+			? m.repositories_commitCount_one()
+			: m.repositories_commitCount_other({ count });
 	const encodedBranch = encodeURIComponent(branchName);
 
 	return (

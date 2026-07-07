@@ -11,6 +11,7 @@ import { useState } from "react";
 import type { BranchInfo } from "#/modules/git";
 import { useRepositoryAccess } from "#/modules/organizations";
 import { createBranchFn, renameBranchFn } from "#/modules/repositories";
+import * as m from "#/paraglide/messages";
 
 interface BranchSwitcherProps {
 	organizationName?: string;
@@ -111,7 +112,11 @@ export default function BranchSwitcher({
 				},
 			});
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to create branch");
+			setError(
+				err instanceof Error
+					? err.message
+					: m.repositories_branchSwitcher_error_create(),
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -172,7 +177,11 @@ export default function BranchSwitcher({
 				});
 			}
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to rename branch");
+			setError(
+				err instanceof Error
+					? err.message
+					: m.repositories_branchSwitcher_error_rename(),
+			);
 		} finally {
 			setLoading(false);
 		}
@@ -216,7 +225,9 @@ export default function BranchSwitcher({
 									setRenameOpened(true);
 								}}
 							>
-								<Text size="sm">Rename branch</Text>
+								<Text size="sm">
+									{m.repositories_branchSwitcher_rename_menu()}
+								</Text>
 							</Menu.Item>
 							<Menu.Item
 								leftSection={<GitBranchPlus size={14} />}
@@ -226,7 +237,9 @@ export default function BranchSwitcher({
 									setOpened(true);
 								}}
 							>
-								<Text size="sm">New branch</Text>
+								<Text size="sm">
+									{m.repositories_branchSwitcher_create_menu()}
+								</Text>
 							</Menu.Item>
 						</>
 					)}
@@ -236,12 +249,12 @@ export default function BranchSwitcher({
 			<Modal
 				opened={opened}
 				onClose={() => setOpened(false)}
-				title="Create branch"
+				title={m.repositories_branchSwitcher_create_title()}
 				size="sm"
 			>
 				<TextInput
-					label="Branch name"
-					placeholder="e.g. feature/awesome"
+					label={m.repositories_branchSwitcher_name_label()}
+					placeholder={m.repositories_branchSwitcher_placeholder()}
 					value={newBranchName}
 					onChange={(e) => {
 						setNewBranchName(e.currentTarget.value);
@@ -252,14 +265,15 @@ export default function BranchSwitcher({
 					mb="md"
 				/>
 				<Text size="sm" c="dimmed" mb="md">
-					From <strong>{selectedBranch}</strong>
+					{m.repositories_branchSwitcher_from_prefix()}
+					<strong>{selectedBranch}</strong>
 				</Text>
 				<Group justify="flex-end">
 					<Button variant="default" onClick={() => setOpened(false)}>
-						Cancel
+						{m.repositories_branchSwitcher_cancel_button()}
 					</Button>
 					<Button onClick={handleCreate} loading={loading}>
-						Create
+						{m.repositories_branchSwitcher_create_button()}
 					</Button>
 				</Group>
 			</Modal>
@@ -272,12 +286,12 @@ export default function BranchSwitcher({
 					setRenameNewName("");
 					setError(null);
 				}}
-				title="Rename branch"
+				title={m.repositories_branchSwitcher_rename_title()}
 				size="sm"
 			>
 				<TextInput
-					label="New branch name"
-					placeholder="e.g. feature/updated"
+					label={m.repositories_branchSwitcher_newName_label()}
+					placeholder={m.repositories_branchSwitcher_rename_placeholder()}
 					value={renameNewName}
 					onChange={(e) => {
 						setRenameNewName(e.currentTarget.value);
@@ -288,7 +302,8 @@ export default function BranchSwitcher({
 					mb="md"
 				/>
 				<Text size="sm" c="dimmed" mb="md">
-					Renaming <strong>{selectedBranch}</strong>
+					{m.repositories_branchSwitcher_renaming_prefix()}
+					<strong>{selectedBranch}</strong>
 				</Text>
 				<Group justify="flex-end">
 					<Button
@@ -300,14 +315,14 @@ export default function BranchSwitcher({
 						}}
 						disabled={loading}
 					>
-						Cancel
+						{m.repositories_branchSwitcher_cancel_button()}
 					</Button>
 					<Button
 						onClick={handleRename}
 						loading={loading}
 						disabled={!renameNewName}
 					>
-						Rename
+						{m.repositories_branchSwitcher_rename_button()}
 					</Button>
 				</Group>
 			</Modal>

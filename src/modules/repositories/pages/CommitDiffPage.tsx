@@ -11,6 +11,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, GitCommitHorizontal, Info } from "lucide-react";
 import SplitDiffView from "#/components/SplitDiffView";
 import type { BranchInfo, GetCommitDiffResult } from "#/modules/git";
+import * as m from "#/paraglide/messages";
+import { getLocale } from "#/paraglide/runtime";
 import BranchSwitcher from "../components/BranchSwitcher";
 
 interface CommitDiffPageProps {
@@ -22,7 +24,7 @@ interface CommitDiffPageProps {
 }
 
 function formatDate(date: Date): string {
-	return new Intl.DateTimeFormat("en-US", {
+	return new Intl.DateTimeFormat(getLocale(), {
 		year: "numeric",
 		month: "short",
 		day: "numeric",
@@ -62,7 +64,7 @@ export default function CommitDiffPage({
 				>
 					<Group gap={4}>
 						<ArrowLeft size={16} />
-						<Text size="sm">Back to commits</Text>
+						<Text size="sm">{m.repositories_commitDiff_back()}</Text>
 					</Group>
 				</Link>
 			</Group>
@@ -91,20 +93,21 @@ export default function CommitDiffPage({
 						{commit.authorName}
 					</Text>
 					<Text size="sm" c="dimmed">
-						authored {formatDate(commit.authoredAt)}
+						{m.repositories_commitDiff_authored()}
+						{formatDate(commit.authoredAt)}
 					</Text>
 				</Group>
 			</Stack>
 
 			{isMerge && (
 				<Alert icon={<Info size={16} />} color="blue" mb="md">
-					This is a merge commit. Inline diff is not shown for combined changes.
+					{m.repositories_commitDiff_mergeAlert()}
 				</Alert>
 			)}
 
 			{files.length === 0 ? (
 				<Text c="dimmed" fs="italic">
-					No file changes in this commit.
+					{m.repositories_commitDiff_empty()}
 				</Text>
 			) : (
 				files.map((file) => {
