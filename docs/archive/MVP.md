@@ -287,7 +287,7 @@ Markdown in the repository at the initial stage.
 - **README.md** — project description, features, screenshots
 - **INSTALL.md** — installation and setup instructions
 - **CONTRIBUTING.md** — contributor guide
-- **API.md** or auto-generated documentation from OpenAPI
+- **docs/API.md** or auto-generated documentation from OpenAPI
 - **ADR/** — Architecture Decision Records
 - **docs/** — user and developer documentation
 - **docs/security/noauth-mode.md** — description of NoAuth mode and its risks

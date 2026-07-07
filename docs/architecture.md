@@ -79,7 +79,7 @@ Route files in `src/routes/` are minimal: they define `createFileRoute`, load da
 
 ### Git Smart-HTTP
 
-Borea serves the Git smart-HTTP protocol through the `/api/git/<organization>/<repository>.git/` endpoint (see `API.md` for details). Both read (clone/fetch) and write (push) operations are supported. The implementation uses the system Git CLI (`git-upload-pack --stateless-rpc` and `git-receive-pack --stateless-rpc`) via execa, not the CGI-based `git http-backend`.
+Borea serves the Git smart-HTTP protocol through the `/api/git/<organization>/<repository>.git/` endpoint (see `docs/API.md` for details). Both read (clone/fetch) and write (push) operations are supported. The implementation uses the system Git CLI (`git-upload-pack --stateless-rpc` and `git-receive-pack --stateless-rpc`) via execa, not the CGI-based `git http-backend`.
 
 ### Organization Modes
 

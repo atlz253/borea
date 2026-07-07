@@ -93,7 +93,7 @@ npm run db:studio   # Launch Prisma Studio GUI
 | `docs/commit-diff.md` | User guide for commit diff viewing |
 | `docs/security/noauth-mode.md` | NoAuth mode documentation |
 | `CONTRIBUTING.md` | Contributor guide |
-| `API.md` | REST API v1 and Git smart-HTTP reference |
+| `docs/API.md` | REST API v1 and Git smart-HTTP reference |
 | `src/routes/__root.tsx` | Root document shell (HTML, head, header/footer, devtools) |
 | `src/routes/` | File-based route definitions |
 | `src/router.tsx` | Router factory + router type registration (`declare module`) |
@@ -142,7 +142,7 @@ Every new feature or architectural change must be documented. Follow these rules
 - **Architectural changes** — create a new ADR in `docs/ADR/` before implementing. Update `docs/ADR/README.md` with the new entry.
 - **New features** — if the change affects architecture, create an ADR. If it is a user-facing feature, add or update a document in `docs/` (e.g., `docs/git-http.md`, `docs/repository-page.md`).
 - **Stack/structure changes** — update `README.md` and `AGENTS.md`.
-- **API changes** — update `API.md` when endpoints are added or modified.
+- **API changes** — update `docs/API.md` when endpoints are added or modified.
 - **Check links** — verify all cross-document references before committing.
 
 ## Definition of Done for Code Changes
@@ -154,7 +154,7 @@ Before marking a change complete:
 4. `npm run test` passes (add or update unit tests per the spec's TDD requirement, §10).
 5. Integration/E2E tests covering the affected logic pass (run the relevant targeted Playwright tests; the full `npm run test:e2e` suite is not required).
 6. If routes were added/removed, `src/routeTree.gen.ts` is regenerated.
-7. **Documentation is updated** — ADR for architectural changes; section in `docs/` for new features; `README.md`/`AGENTS.md` for stack/structure changes; `API.md` for new endpoints.
+7. **Documentation is updated** — ADR for architectural changes; section in `docs/` for new features; `README.md`/`AGENTS.md` for stack/structure changes; `docs/API.md` for new endpoints.
 8. No secrets, keys, or credentials committed.
 
 <!-- mantine -->

@@ -51,7 +51,7 @@ usage, and data management.
 - [Documentation Index](docs/README.md) — overview of all documentation
 - [Architecture Overview](docs/architecture.md) — project structure, modules, providers
 - [Docker Deployment](docs/deployment.md) — production image and Compose usage
-- [API Reference](API.md) — REST API v1 and Git smart-HTTP endpoints
+- [API Reference](docs/API.md) — REST API v1 and Git smart-HTTP endpoints
 - [Contributing Guide](CONTRIBUTING.md) — how to contribute
 
 ## License

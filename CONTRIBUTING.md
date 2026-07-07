@@ -46,7 +46,7 @@ borea/
 ├── Dockerfile                      # Multi-stage production image
 ├── compose.yaml                    # Local single-container deployment
 ├── CONTRIBUTING.md                 # Contributor guide
-├── API.md                          # REST API and Git smart-HTTP reference
+├── docs/API.md                     # REST API and Git smart-HTTP reference
 ├── docs/
 │   ├── README.md                   # Documentation index
 │   ├── archive/MVP.md             # Technical specification (archived)
@@ -125,7 +125,7 @@ New features and user-facing changes must be documented:
 - Architectural decisions go in `docs/ADR/`.
 - Feature documentation goes in `docs/`.
 - Update `README.md` if the stack, structure, or commands change.
-- Update `API.md` if endpoints are added or changed.
+- Update `docs/API.md` if endpoints are added or changed.
 - Update `docs/repository-page.md` if repository UI pages are extended.
 - Update `docs/ADR/README.md` when adding a new ADR.
 
