@@ -2,6 +2,8 @@ FROM node:22-bookworm-slim AS build
 
 WORKDIR /app
 
+ENV DATABASE_URL="file:./data/borea.db"
+
 COPY package.json package-lock.json ./
 RUN npm install --global npm@11.6.2 && npm ci
 
