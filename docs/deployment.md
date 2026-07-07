@@ -42,6 +42,11 @@ health check requests the application root every 30 seconds.
 
 ## Configuration
 
+If the application is served over plain HTTP (no TLS), set
+`SESSION_COOKIE_SECURE=false` so the browser accepts the session cookie.
+See [Authentication](security/authentication.md#session-cookie-security) for
+details.
+
 The container sets these runtime defaults:
 
 | Variable | Default |
@@ -51,6 +56,7 @@ The container sets these runtime defaults:
 | `PORT` | `3000` |
 | `REPOSITORIES_PATH` | `./data/repositories` |
 | `DATABASE_URL` | `file:./data/borea.db` |
+| `SESSION_COOKIE_SECURE` | `true` when `NODE_ENV=production`, otherwise `false` |
 
 When `DATABASE_URL` uses the `file:` scheme, the application and Prisma CLI
 automatically create the parent directory on startup. A fresh checkout does not

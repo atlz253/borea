@@ -29,7 +29,7 @@ function sessionConfig() {
 		cookie: {
 			httpOnly: true,
 			sameSite: "lax" as const,
-			secure: process.env.NODE_ENV === "production",
+			secure: config.sessionCookieSecure,
 			path: "/",
 			maxAge: SESSION_MAX_AGE_SECONDS,
 		},

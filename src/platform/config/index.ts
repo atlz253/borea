@@ -6,6 +6,7 @@ const ENV_ORGANIZATION_MODE = "ORGANIZATION_MODE";
 const ENV_GIT_BIN_PATH = "GIT_BIN_PATH";
 const ENV_AUTH_MODE = "AUTH_MODE";
 const ENV_SESSION_SECRET = "SESSION_SECRET";
+const ENV_SESSION_COOKIE_SECURE = "SESSION_COOKIE_SECURE";
 const ENV_DEFAULT_USER_NAME = "DEFAULT_USER_NAME";
 const ENV_ALLOW_NOAUTH_IN_PRODUCTION = "ALLOW_NOAUTH_IN_PRODUCTION";
 const MIN_SESSION_SECRET_LENGTH = 32;
@@ -20,6 +21,7 @@ export interface AppConfig {
 	gitBinPath: string;
 	authMode: AuthMode;
 	sessionSecret?: string;
+	sessionCookieSecure: boolean;
 	defaultUserName: string;
 }
 
@@ -41,6 +43,25 @@ function readAuthMode(): AuthMode {
 		throw new Error(`${ENV_AUTH_MODE} must be either "full" or "noauth"`);
 	}
 	return authMode;
+}
+
+function readSessionCookieSecure(): boolean {
+	const raw = process.env[ENV_SESSION_COOKIE_SECURE];
+	if (raw === undefined) {
+		return process.env.NODE_ENV === "production";
+	}
+	switch (raw.toLowerCase()) {
+		case "true":
+		case "1":
+			return true;
+		case "false":
+		case "0":
+			return false;
+		default:
+			throw new Error(
+				`${ENV_SESSION_COOKIE_SECURE} must be "true", "false", "1", or "0", got "${raw}"`,
+			);
+	}
 }
 
 function validateAuthenticationConfig(
@@ -92,6 +113,7 @@ export function getConfig(): AppConfig {
 		gitBinPath: process.env[ENV_GIT_BIN_PATH] ?? "git",
 		authMode,
 		sessionSecret,
+		sessionCookieSecure: readSessionCookieSecure(),
 		defaultUserName: process.env[ENV_DEFAULT_USER_NAME] ?? "anonymous",
 	};
 	return cached;

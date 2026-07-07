@@ -8,6 +8,7 @@ mode. Registration is open and does not require email verification.
 ```bash
 AUTH_MODE=full
 SESSION_SECRET=replace-with-at-least-32-characters
+SESSION_COOKIE_SECURE=false
 USERS_PATH=./data/users
 ORGANIZATION_MODE=multi
 ```
@@ -18,6 +19,17 @@ scrypt credentials and are never returned by the UI or API.
 
 Full authentication cannot be combined with `ORGANIZATION_MODE=single`.
 
+### Session Cookie Security
+
+The session cookie's `Secure` flag is controlled by the `SESSION_COOKIE_SECURE`
+environment variable. Valid values are `true`, `false`, `1`, or `0`. When
+unset, the default is `true` in production (`NODE_ENV=production`) and `false`
+in development.
+
+Set `SESSION_COOKIE_SECURE=false` when the application serves HTTP without a
+TLS-terminating reverse proxy. Leaving it as the production default (`true`)
+causes browsers to silently reject the session cookie on HTTP sites.
+
 ## Registration and Sessions
 
 Open `/auth` to sign in or register with a name, email, and password. Email
@@ -25,8 +37,9 @@ addresses are normalized to lowercase and must be unique. Passwords must
 contain between 8 and 128 characters.
 
 Registration immediately creates a seven-day encrypted cookie session. The
-cookie is HTTP-only, uses `SameSite=Lax`, and is marked `Secure` in production.
-Signing out clears it.
+cookie is HTTP-only, uses `SameSite=Lax`, and is marked `Secure` when
+`SESSION_COOKIE_SECURE` is `true` (the production default). Signing out clears
+it.
 
 ## Git Personal Access Tokens
 

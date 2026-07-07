@@ -69,4 +69,38 @@ describe("configuration mode wiring", () => {
 		const config = getConfig();
 		expect(config.organizationMode).toBe("multi");
 	});
+
+	describe("sessionCookieSecure", () => {
+		it("defaults to false in development (NODE_ENV undefined)", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			delete process.env.SESSION_COOKIE_SECURE;
+			resetConfigForTests();
+
+			expect(getConfig().sessionCookieSecure).toBe(false);
+		});
+
+		it("defaults to true in production", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			process.env.NODE_ENV = "production";
+			delete process.env.SESSION_COOKIE_SECURE;
+			resetConfigForTests();
+
+			expect(getConfig().sessionCookieSecure).toBe(true);
+		});
+
+		it("respects explicit false override", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			process.env.NODE_ENV = "production";
+			process.env.SESSION_COOKIE_SECURE = "false";
+			resetConfigForTests();
+
+			expect(getConfig().sessionCookieSecure).toBe(false);
+		});
+	});
 });

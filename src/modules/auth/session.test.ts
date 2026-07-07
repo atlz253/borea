@@ -10,6 +10,7 @@ vi.mock("@tanstack/react-start/server", () => ({
 vi.mock("#/platform/config", () => ({
 	getConfig: vi.fn().mockReturnValue({
 		sessionSecret: "test-secret-key-that-is-at-least-32-chars-long",
+		sessionCookieSecure: false,
 	}),
 }));
 
@@ -136,6 +137,28 @@ describe("session", () => {
 						httpOnly: true,
 						sameSite: "lax",
 						path: "/",
+						secure: false,
+					}),
+				}),
+			);
+		});
+
+		it("drives cookie.secure from config.sessionCookieSecure", async () => {
+			const { getConfig } = await import("#/platform/config");
+			vi.mocked(getConfig).mockReturnValue({
+				sessionSecret: "test-secret-key-that-is-at-least-32-chars-long",
+				sessionCookieSecure: true,
+			} as ReturnType<typeof getConfig>);
+
+			const mockSession = createMockSession();
+			vi.mocked(useSession).mockResolvedValue(mockSession);
+
+			await cookieAuthSession.getUserId();
+
+			expect(useSession).toHaveBeenCalledWith(
+				expect.objectContaining({
+					cookie: expect.objectContaining({
+						secure: true,
 					}),
 				}),
 			);

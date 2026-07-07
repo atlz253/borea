@@ -74,4 +74,84 @@ describe("authentication configuration", () => {
 			"Running in NoAuth mode. Authentication and access control are disabled.",
 		);
 	});
+
+	describe("session cookie secure configuration", () => {
+		it("defaults to false in non-production environment", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			delete process.env.SESSION_COOKIE_SECURE;
+			resetConfigForTests();
+
+			const config = getConfig();
+			expect(config.sessionCookieSecure).toBe(false);
+		});
+
+		it("defaults to true in production environment", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			process.env.NODE_ENV = "production";
+			delete process.env.SESSION_COOKIE_SECURE;
+			resetConfigForTests();
+
+			const config = getConfig();
+			expect(config.sessionCookieSecure).toBe(true);
+		});
+
+		it("accepts SESSION_COOKIE_SECURE=false explicitly", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			process.env.NODE_ENV = "production";
+			process.env.SESSION_COOKIE_SECURE = "false";
+			resetConfigForTests();
+
+			const config = getConfig();
+			expect(config.sessionCookieSecure).toBe(false);
+		});
+
+		it("accepts SESSION_COOKIE_SECURE=true explicitly", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			process.env.SESSION_COOKIE_SECURE = "true";
+			resetConfigForTests();
+
+			const config = getConfig();
+			expect(config.sessionCookieSecure).toBe(true);
+		});
+
+		it("accepts SESSION_COOKIE_SECURE=1 as true", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			process.env.SESSION_COOKIE_SECURE = "1";
+			resetConfigForTests();
+
+			const config = getConfig();
+			expect(config.sessionCookieSecure).toBe(true);
+		});
+
+		it("accepts SESSION_COOKIE_SECURE=0 as false", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			process.env.SESSION_COOKIE_SECURE = "0";
+			resetConfigForTests();
+
+			const config = getConfig();
+			expect(config.sessionCookieSecure).toBe(false);
+		});
+
+		it("throws on invalid SESSION_COOKIE_SECURE value", () => {
+			process.env.AUTH_MODE = "full";
+			process.env.ORGANIZATION_MODE = "multi";
+			process.env.SESSION_SECRET = "a".repeat(32);
+			process.env.SESSION_COOKIE_SECURE = "invalid";
+			resetConfigForTests();
+
+			expect(() => getConfig()).toThrow(/SESSION_COOKIE_SECURE/);
+		});
+	});
 });
