@@ -14,6 +14,7 @@
 	"shared_sidebar_loading": "Loading...",
 	"shared_sidebar_failedOrganizations": "Failed to load organizations",
 	"shared_sidebar_failedRepositories": "Failed to load repositories",
+	"shared_sidebar_failedTaskBoards": "Failed to load task boards",
 	"shared_themeToggle_theme": "Theme: {scheme}",
 	"shared_themeToggle_auto": "Auto",
 	"shared_themeToggle_dark": "Dark",

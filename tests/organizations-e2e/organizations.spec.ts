@@ -106,6 +106,36 @@ test("sidebar switches from organizations to the current organization repositori
 	).toBeVisible();
 });
 
+test("sidebar shows task boards for the current organization", async ({
+	page,
+	request,
+}) => {
+	const suffix = Date.now().toString(36);
+	const organization = `sidebar-tasks-${suffix}`;
+	const boardName = `Planning ${suffix}`;
+
+	const organizationResponse = await request.post("/api/v1/organizations", {
+		data: { name: organization },
+	});
+	expect(organizationResponse.ok()).toBe(true);
+	const boardResponse = await request.post(
+		`/api/v1/organizations/${organization}/task-boards`,
+		{
+			data: { key: "TASK", name: boardName },
+		},
+	);
+	expect(boardResponse.ok()).toBe(true);
+
+	await page.goto(`/organizations/${organization}`);
+	await waitForHydration(page);
+	const sidebar = page.getByRole("navigation").first();
+	await expect(sidebar.getByRole("button", { name: "Tasks" })).toBeVisible();
+	await expect(sidebar.getByRole("button", { name: boardName })).toBeVisible();
+
+	await sidebar.getByRole("button", { name: boardName }).click();
+	await expect(page).toHaveURL(`/organizations/${organization}/tasks/TASK`);
+});
+
 test("sidebar expands and collapses a long organization list", async ({
 	page,
 	request,

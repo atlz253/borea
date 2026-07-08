@@ -11,11 +11,14 @@ import { useState } from "react";
 import * as m from "#/paraglide/messages";
 import SidebarRecentOrganizations from "./SidebarRecentOrganizations";
 import SidebarRecentRepositories from "./SidebarRecentRepositories";
+import SidebarRecentTaskBoards from "./SidebarRecentTaskBoards";
 
 export default function Sidebar() {
 	const location = useLocation();
 	const navigate = useNavigate();
-	const [opened, setOpened] = useState(true);
+	const [organizationsOpened, setOrganizationsOpened] = useState(true);
+	const [repositoriesOpened, setRepositoriesOpened] = useState(true);
+	const [tasksOpened, setTasksOpened] = useState(true);
 	const organizationName = /^\/organizations\/([^/]+)(?:\/|$)/.exec(
 		location.pathname,
 	)?.[1];
@@ -50,18 +53,22 @@ export default function Sidebar() {
 								style={{ cursor: "pointer", display: "flex" }}
 								onClick={(e) => {
 									e.stopPropagation();
-									setOpened((o) => !o);
+									setRepositoriesOpened((o) => !o);
 								}}
 							>
-								{opened ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+								{repositoriesOpened ? (
+									<ChevronUp size={14} />
+								) : (
+									<ChevronDown size={14} />
+								)}
 							</span>
 						}
 					/>
-					{opened && (
+					{repositoriesOpened && (
 						<Box pl="1.75rem">
 							<SidebarRecentRepositories
 								key={organizationName}
-								opened={opened}
+								opened={repositoriesOpened}
 								organizationName={organizationName}
 							/>
 						</Box>
@@ -78,7 +85,32 @@ export default function Sidebar() {
 								params: { organization: organizationName },
 							})
 						}
+						rightSection={
+							// biome-ignore lint/a11y: span inside <button>, keyboard handled by parent
+							<span
+								style={{ cursor: "pointer", display: "flex" }}
+								onClick={(e) => {
+									e.stopPropagation();
+									setTasksOpened((o) => !o);
+								}}
+							>
+								{tasksOpened ? (
+									<ChevronUp size={14} />
+								) : (
+									<ChevronDown size={14} />
+								)}
+							</span>
+						}
 					/>
+					{tasksOpened && (
+						<Box pl="1.75rem">
+							<SidebarRecentTaskBoards
+								key={organizationName}
+								opened={tasksOpened}
+								organizationName={organizationName}
+							/>
+						</Box>
+					)}
 				</>
 			) : (
 				<>
@@ -95,16 +127,20 @@ export default function Sidebar() {
 								style={{ cursor: "pointer", display: "flex" }}
 								onClick={(e) => {
 									e.stopPropagation();
-									setOpened((o) => !o);
+									setOrganizationsOpened((o) => !o);
 								}}
 							>
-								{opened ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+								{organizationsOpened ? (
+									<ChevronUp size={14} />
+								) : (
+									<ChevronDown size={14} />
+								)}
 							</span>
 						}
 					/>
-					{opened && (
+					{organizationsOpened && (
 						<Box pl="1.75rem">
-							<SidebarRecentOrganizations opened={opened} />
+							<SidebarRecentOrganizations opened={organizationsOpened} />
 						</Box>
 					)}
 				</>

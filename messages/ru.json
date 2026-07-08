@@ -14,6 +14,7 @@
 	"shared_sidebar_loading": "Загрузка...",
 	"shared_sidebar_failedOrganizations": "Не удалось загрузить организации",
 	"shared_sidebar_failedRepositories": "Не удалось загрузить репозитории",
+	"shared_sidebar_failedTaskBoards": "Не удалось загрузить доски задач",
 	"shared_themeToggle_theme": "Тема: {scheme}",
 	"shared_themeToggle_auto": "Авто",
 	"shared_themeToggle_dark": "Тёмная",

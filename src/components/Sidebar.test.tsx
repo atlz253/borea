@@ -17,9 +17,13 @@ vi.mock("#/modules/repositories", () => ({
 vi.mock("#/modules/organizations", () => ({
 	listOrganizationsFn: vi.fn(),
 }));
+vi.mock("#/modules/tasks", () => ({
+	listTaskBoardsFn: vi.fn(),
+}));
 
 import { listOrganizationsFn } from "#/modules/organizations";
 import { listRepositoriesFn } from "#/modules/repositories";
+import { listTaskBoardsFn } from "#/modules/tasks";
 
 const ORGANIZATIONS = [
 	{
@@ -39,6 +43,17 @@ const REPOS = Array.from({ length: 6 }, (_, index) => ({
 	name: `repo-${index + 1}`,
 	description: `Description ${index + 1}`,
 	createdAt: new Date(2024, 0, 6 - index),
+}));
+
+const BOARDS = Array.from({ length: 6 }, (_, index) => ({
+	id: `00000000-0000-4000-8000-00000000000${index}`,
+	organizationName: "default",
+	key: `TASK-${index + 1}`,
+	name: `Board ${index + 1}`,
+	description: `Board description ${index + 1}`,
+	lastTaskNumber: 0,
+	createdAt: new Date(2024, 0, 6 - index).toISOString(),
+	updatedAt: new Date(2024, 0, 6 - index).toISOString(),
 }));
 
 async function renderSidebar(initialEntry = "/organizations") {
@@ -67,12 +82,27 @@ async function renderSidebar(initialEntry = "/organizations") {
 		getParentRoute: () => rootRoute,
 		path: "/organizations/$organization/repositories/$repository/pulls/$pullId",
 	});
+	const tasksRoute = createRoute({
+		getParentRoute: () => rootRoute,
+		path: "/organizations/$organization/tasks",
+	});
+	const taskBoardRoute = createRoute({
+		getParentRoute: () => rootRoute,
+		path: "/organizations/$organization/tasks/$boardKey",
+	});
+	const taskCardRoute = createRoute({
+		getParentRoute: () => rootRoute,
+		path: "/organizations/$organization/tasks/$boardKey/$taskPublicId",
+	});
 	const router = createRouter({
 		routeTree: rootRoute.addChildren([
 			organizationsRoute,
 			organizationRoute,
 			repositoryRoute,
 			pullRequestRoute,
+			tasksRoute,
+			taskBoardRoute,
+			taskCardRoute,
 		]),
 		history: createMemoryHistory({ initialEntries: [initialEntry] }),
 	});
@@ -89,6 +119,7 @@ describe("Sidebar", () => {
 		vi.clearAllMocks();
 		vi.mocked(listOrganizationsFn).mockResolvedValue(ORGANIZATIONS);
 		vi.mocked(listRepositoriesFn).mockResolvedValue(REPOS);
+		vi.mocked(listTaskBoardsFn).mockResolvedValue([]);
 	});
 
 	it("shows organizations on the organizations page", async () => {
@@ -102,6 +133,7 @@ describe("Sidebar", () => {
 		).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "other" })).toBeInTheDocument();
 		expect(listRepositoriesFn).not.toHaveBeenCalled();
+		expect(listTaskBoardsFn).not.toHaveBeenCalled();
 	});
 
 	it("shows repositories for the current organization", async () => {
@@ -115,6 +147,9 @@ describe("Sidebar", () => {
 		).not.toBeInTheDocument();
 		await screen.findAllByRole("button", { name: /repo-/i });
 		expect(listRepositoriesFn).toHaveBeenCalledWith({
+			data: { organizationName: "default" },
+		});
+		expect(listTaskBoardsFn).toHaveBeenCalledWith({
 			data: { organizationName: "default" },
 		});
 		expect(listOrganizationsFn).not.toHaveBeenCalled();
@@ -185,6 +220,90 @@ describe("Sidebar", () => {
 			await waitFor(() => expect(listRepositoriesFn).toHaveBeenCalledOnce());
 			expect(
 				screen.queryByRole("button", { name: /repo-/i }),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	describe("recent task boards list", () => {
+		beforeEach(() => {
+			vi.mocked(listRepositoriesFn).mockResolvedValue([]);
+			vi.mocked(listTaskBoardsFn).mockResolvedValue(BOARDS);
+		});
+
+		it("shows task boards for the current organization", async () => {
+			await renderSidebar("/organizations/default");
+
+			expect(screen.getByRole("button", { name: "Tasks" })).toBeInTheDocument();
+			expect(
+				await screen.findByRole("button", { name: "Board 1" }),
+			).toBeInTheDocument();
+			expect(listTaskBoardsFn).toHaveBeenCalledWith({
+				data: { organizationName: "default" },
+			});
+		});
+
+		it("keeps task board context on board routes", async () => {
+			await renderSidebar("/organizations/default/tasks/TASK-1");
+
+			const board = await screen.findByRole("button", { name: "Board 1" });
+			expect(board.getAttribute("data-active")).toBe("true");
+		});
+
+		it("keeps task board context on card routes", async () => {
+			await renderSidebar("/organizations/default/tasks/TASK-1/TASK-1-1");
+
+			const board = await screen.findByRole("button", { name: "Board 1" });
+			expect(board.getAttribute("data-active")).toBe("true");
+		});
+
+		it("shows 5 most recent task boards by default", async () => {
+			await renderSidebar("/organizations/default");
+
+			const items = await screen.findAllByRole("button", { name: /Board /i });
+			expect(items).toHaveLength(5);
+			expect(screen.getByText(/show more/i)).toBeInTheDocument();
+			expect(screen.queryByText(/show less/i)).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole("button", { name: "Board 6" }),
+			).not.toBeInTheDocument();
+		});
+
+		it("expands and collapses the task board list", async () => {
+			const user = userEvent.setup();
+			await renderSidebar("/organizations/default");
+			await screen.findAllByRole("button", { name: /Board /i });
+
+			await user.click(screen.getByText(/show more/i));
+			expect(screen.getAllByRole("button", { name: /Board /i })).toHaveLength(
+				6,
+			);
+			expect(screen.getByText(/show less/i)).toBeInTheDocument();
+
+			await user.click(screen.getByText(/show less/i));
+			expect(screen.getAllByRole("button", { name: /Board /i })).toHaveLength(
+				5,
+			);
+			expect(screen.getByText(/show more/i)).toBeInTheDocument();
+		});
+
+		it("does not collapse when clicking the tasks heading", async () => {
+			const user = userEvent.setup();
+			await renderSidebar("/organizations/default");
+			await screen.findAllByRole("button", { name: /Board /i });
+
+			await user.click(screen.getByRole("button", { name: "Tasks" }));
+			expect(screen.getAllByRole("button", { name: /Board /i })).toHaveLength(
+				5,
+			);
+		});
+
+		it("shows no task board links when the organization has no boards", async () => {
+			vi.mocked(listTaskBoardsFn).mockResolvedValue([]);
+			await renderSidebar("/organizations/default");
+
+			await waitFor(() => expect(listTaskBoardsFn).toHaveBeenCalledOnce());
+			expect(
+				screen.queryByRole("button", { name: /Board /i }),
 			).not.toBeInTheDocument();
 		});
 	});
