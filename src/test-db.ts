@@ -29,7 +29,7 @@ export function createTestDatabase(): PrismaDatabaseProvider {
 			url,
 		],
 		{
-			env: { ...process.env, DATABASE_URL: url },
+			env: { ...process.env, DATABASE_URL: url, RUST_LOG: "info" },
 		},
 	);
 	return new PrismaDatabaseProvider(url);

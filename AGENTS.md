@@ -15,6 +15,7 @@ Borea is an open-source software development workspace (analogue of JetBrains Sp
 - **UI:** React 19 + Mantine v9
 - **Notifications:** @mantine/notifications
 - **Icons:** lucide-react
+- **Drag and drop:** @dnd-kit
 - **Build:** Vite 8
 - **Styling:** Mantine (CSS layers, style props, CSS variables) — no Tailwind
 - **Lint/format:** Biome 2
@@ -90,6 +91,7 @@ npm run db:studio   # Launch Prisma Studio GUI
 | `docs/deployment.md` | Production Docker image and Compose deployment guide |
 | `docs/git-http.md` | User guide for clone/push over HTTP |
 | `docs/repository-page.md` | User guide for repository UI pages |
+| `docs/tasks.md` | User guide for organization Kanban task boards |
 | `docs/commit-diff.md` | User guide for commit diff viewing |
 | `docs/security/noauth-mode.md` | NoAuth mode documentation |
 | `CONTRIBUTING.md` | Contributor guide |

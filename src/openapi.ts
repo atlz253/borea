@@ -6,6 +6,7 @@ import { registerAuthOpenApi } from "#/modules/auth";
 import { registerOrganizationOpenApi } from "#/modules/organizations";
 import { registerPullRequestOpenApi } from "#/modules/pull-requests";
 import { registerRepositoryOpenApi } from "#/modules/repositories";
+import { registerTaskOpenApi } from "#/modules/tasks";
 
 export function generateOpenApiDocument() {
 	const registry = new OpenAPIRegistry();
@@ -13,6 +14,7 @@ export function generateOpenApiDocument() {
 	registerOrganizationOpenApi(registry);
 	registerRepositoryOpenApi(registry);
 	registerPullRequestOpenApi(registry);
+	registerTaskOpenApi(registry);
 
 	return new OpenApiGeneratorV31(registry.definitions).generateDocument({
 		openapi: "3.1.0",
@@ -20,7 +22,7 @@ export function generateOpenApiDocument() {
 			title: "Borea REST API",
 			version: "1.0.0",
 			description:
-				"Authenticated REST API for Borea organizations, repositories, and pull requests.",
+				"Authenticated REST API for Borea organizations, repositories, pull requests, and task boards.",
 		},
 	});
 }

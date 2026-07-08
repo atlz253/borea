@@ -9,7 +9,12 @@ describe("i18n message catalogs", () => {
 	it("ru has the same message keys as en", () => {
 		const missingInRu = enKeys.filter((key) => !ruKeys.includes(key));
 		const extraInRu = ruKeys.filter((key) => !enKeys.includes(key));
-		expect(missingInRu, `Keys missing in ru.json: ${missingInRu.join(", ")}`).toEqual([]);
-		expect(extraInRu, `Extra keys in ru.json: ${extraInRu.join(", ")}`).toEqual([]);
+		expect(
+			missingInRu,
+			`Keys missing in ru.json: ${missingInRu.join(", ")}`,
+		).toEqual([]);
+		expect(extraInRu, `Extra keys in ru.json: ${extraInRu.join(", ")}`).toEqual(
+			[],
+		);
 	});
 });

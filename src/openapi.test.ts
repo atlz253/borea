@@ -20,6 +20,12 @@ describe("generateOpenApiDocument", () => {
 				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests",
 				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}",
 				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}/merge",
+				"/api/v1/organizations/{organization}/task-boards",
+				"/api/v1/organizations/{organization}/task-boards/{boardKey}",
+				"/api/v1/organizations/{organization}/task-boards/{boardKey}/columns",
+				"/api/v1/organizations/{organization}/task-boards/{boardKey}/columns/{columnId}",
+				"/api/v1/organizations/{organization}/task-boards/{boardKey}/cards",
+				"/api/v1/organizations/{organization}/task-boards/{boardKey}/cards/{taskPublicId}",
 			]),
 		);
 		expect(
@@ -42,6 +48,14 @@ describe("generateOpenApiDocument", () => {
 			paths[
 				"/api/v1/organizations/{organization}/repositories/{repository}/pull-requests/{pullId}/merge"
 			]?.post,
+		).toBeDefined();
+		expect(
+			paths["/api/v1/organizations/{organization}/task-boards"]?.post,
+		).toBeDefined();
+		expect(
+			paths[
+				"/api/v1/organizations/{organization}/task-boards/{boardKey}/cards/{taskPublicId}"
+			]?.patch,
 		).toBeDefined();
 	});
 });

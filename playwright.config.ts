@@ -43,6 +43,7 @@ export default defineConfig({
 			DATABASE_URL: databaseUrl,
 			DISABLE_HMR_OVERLAY: "1",
 			ORGANIZATION_MODE: "single",
+			RUST_LOG: "info",
 		},
 	},
 });

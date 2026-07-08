@@ -218,6 +218,160 @@ Returns the updated branch info:
 Returns `404` when the repository or the old branch does not exist. Returns
 `409` when a branch with the new name already exists.
 
+### Task boards
+
+Task boards are organization-level Kanban boards. All organization members can
+read boards. Organization owners, administrators, and moderators can create and
+modify boards, columns, and cards. Ordinary members have read-only access.
+
+#### `GET /api/v1/organizations/{organization}/task-boards`
+
+Returns all task boards in the organization.
+
+#### `POST /api/v1/organizations/{organization}/task-boards`
+
+Creates a board and the default `Backlog`, `To do`, `Doing`, and `Done`
+columns:
+
+```json
+{
+  "key": "TASK",
+  "name": "Team tasks",
+  "description": "Product delivery board"
+}
+```
+
+The board key is normalized to uppercase and must be unique in the
+organization. Duplicate keys return `409`.
+
+#### `GET /api/v1/organizations/{organization}/task-boards/{boardKey}`
+
+Returns one board with its columns and cards:
+
+```json
+{
+  "id": "00000000-0000-4000-8000-000000000001",
+  "organizationName": "default",
+  "key": "TASK",
+  "name": "Team tasks",
+  "description": "Product delivery board",
+  "lastTaskNumber": 1,
+  "columns": [
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "boardId": "00000000-0000-4000-8000-000000000001",
+      "name": "Backlog",
+      "position": 0,
+      "createdAt": "2026-07-08T12:00:00.000Z",
+      "updatedAt": "2026-07-08T12:00:00.000Z"
+    }
+  ],
+  "cards": [
+    {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "boardId": "00000000-0000-4000-8000-000000000001",
+      "columnId": "00000000-0000-4000-8000-000000000002",
+      "publicId": "TASK-1",
+      "number": 1,
+      "title": "Prepare release scope",
+      "description": "",
+      "position": 0,
+      "createdAt": "2026-07-08T12:00:00.000Z",
+      "updatedAt": "2026-07-08T12:00:00.000Z"
+    }
+  ],
+  "createdAt": "2026-07-08T12:00:00.000Z",
+  "updatedAt": "2026-07-08T12:00:00.000Z"
+}
+```
+
+#### `PATCH /api/v1/organizations/{organization}/task-boards/{boardKey}`
+
+Updates the board name or description:
+
+```json
+{
+  "name": "Platform tasks",
+  "description": "Platform team board"
+}
+```
+
+#### `DELETE /api/v1/organizations/{organization}/task-boards/{boardKey}`
+
+Deletes the board, its columns, and its cards. Returns `204 No Content`.
+
+#### `POST /api/v1/organizations/{organization}/task-boards/{boardKey}/columns`
+
+Creates a column:
+
+```json
+{
+  "name": "Review",
+  "position": 2
+}
+```
+
+When `position` is omitted, the column is appended to the end.
+
+#### `PATCH /api/v1/organizations/{organization}/task-boards/{boardKey}/columns/{columnId}`
+
+Renames or reorders a column:
+
+```json
+{
+  "name": "In review",
+  "position": 3
+}
+```
+
+#### `DELETE /api/v1/organizations/{organization}/task-boards/{boardKey}/columns/{columnId}`
+
+Deletes a column. Non-empty columns require a target column for moved cards:
+
+```json
+{
+  "targetColumnId": "00000000-0000-4000-8000-000000000004"
+}
+```
+
+Deleting the last column or deleting a non-empty column without a target returns
+`400`.
+
+#### `POST /api/v1/organizations/{organization}/task-boards/{boardKey}/cards`
+
+Creates a card in a column:
+
+```json
+{
+  "columnId": "00000000-0000-4000-8000-000000000002",
+  "title": "Prepare release scope",
+  "description": "Write the initial task tracker specification"
+}
+```
+
+The response contains a public ID such as `TASK-1`.
+
+#### `GET /api/v1/organizations/{organization}/task-boards/{boardKey}/cards/{taskPublicId}`
+
+Returns one card by its public task ID.
+
+#### `PATCH /api/v1/organizations/{organization}/task-boards/{boardKey}/cards/{taskPublicId}`
+
+Updates or moves a card:
+
+```json
+{
+  "title": "Prepare Kanban release scope",
+  "description": "Update the technical specification",
+  "columnId": "00000000-0000-4000-8000-000000000004",
+  "position": 1
+}
+```
+
+#### `DELETE /api/v1/organizations/{organization}/task-boards/{boardKey}/cards/{taskPublicId}`
+
+Deletes a card. Returns `204 No Content`.
+
 ### Pull requests
 
 #### `GET /api/v1/organizations/{organization}/repositories/{repository}/pull-requests`

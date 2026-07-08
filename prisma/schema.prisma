@@ -46,6 +46,7 @@ model Organization {
 	owner        User?                 @relation("OrgOwner", fields: [ownerId], references: [id])
 	members      OrganizationMember[]
 	repositories Repository[]
+	taskBoards   TaskBoard[]
 
 	@@index([ownerId])
 }
@@ -140,4 +141,52 @@ model PullRequestCounter {
 	@@index([repositoryId])
 }
 
+model TaskBoard {
+	id               String  @id @default(uuid())
+	organizationName String
+	key              String
+	name             String
+	description      String?
+	lastTaskNumber   Int     @default(0)
+	createdAt        String
+	updatedAt        String
 
+	organization Organization @relation(fields: [organizationName], references: [name], onDelete: Cascade)
+	columns      TaskColumn[]
+
+	@@unique([organizationName, key])
+	@@index([organizationName])
+}
+
+model TaskColumn {
+	id        String @id @default(uuid())
+	boardId   String
+	name      String
+	position  Int
+	createdAt String
+	updatedAt String
+
+	board TaskBoard @relation(fields: [boardId], references: [id], onDelete: Cascade)
+	cards TaskCard[]
+
+	@@index([boardId, position])
+}
+
+model TaskCard {
+	id          String @id @default(uuid())
+	boardId     String
+	columnId    String
+	publicId    String
+	number      Int
+	title       String
+	description String
+	position    Int
+	createdAt   String
+	updatedAt   String
+
+	column TaskColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+
+	@@unique([boardId, number])
+	@@unique([boardId, publicId])
+	@@index([columnId, position])
+}

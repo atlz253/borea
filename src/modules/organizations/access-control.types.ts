@@ -13,6 +13,7 @@ export interface OrganizationAccessSummary {
 	canRemoveMembers: boolean;
 	canManageSettings: boolean;
 	canCreateRepository: boolean;
+	canManageTasks: boolean;
 	canDeleteOrganization: boolean;
 }
 

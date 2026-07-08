@@ -38,5 +38,7 @@ test("switching back to English restores original text", async ({ page }) => {
 
 	await page.getByRole("button", { name: /EN|RU/ }).click();
 	await page.getByRole("menuitem", { name: "EN" }).click();
-	await expect(page.getByRole("button", { name: "Repositories" })).toBeVisible();
+	await expect(
+		page.getByRole("button", { name: "Repositories" }),
+	).toBeVisible();
 });

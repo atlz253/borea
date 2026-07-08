@@ -9,6 +9,7 @@ export type OrganizationPermission =
 	| "createRepository"
 	| "deleteRepository"
 	| "manageRepositoryAccess"
+	| "manageTasks"
 	| "deleteOrganization";
 
 export type RepositoryPermission = "read" | "write" | "manageAccess" | "delete";
@@ -32,6 +33,7 @@ const organizationPermissions: Record<
 		"createRepository",
 		"deleteRepository",
 		"manageRepositoryAccess",
+		"manageTasks",
 		"deleteOrganization",
 	]),
 	administrator: new Set([
@@ -43,6 +45,7 @@ const organizationPermissions: Record<
 		"createRepository",
 		"deleteRepository",
 		"manageRepositoryAccess",
+		"manageTasks",
 	]),
 	moderator: new Set([
 		"read",
@@ -51,6 +54,7 @@ const organizationPermissions: Record<
 		"createRepository",
 		"deleteRepository",
 		"manageRepositoryAccess",
+		"manageTasks",
 	]),
 	member: new Set(["read"]),
 };

@@ -52,6 +52,7 @@ usage, and data management.
 - [Architecture Overview](docs/architecture.md) — project structure, modules, providers
 - [Docker Deployment](docs/deployment.md) — production image and Compose usage
 - [API Reference](docs/API.md) — REST API v1 and Git smart-HTTP endpoints
+- [Task Boards](docs/tasks.md) — organization Kanban boards
 - [Contributing Guide](CONTRIBUTING.md) — how to contribute
 
 ## License

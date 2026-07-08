@@ -19,6 +19,7 @@ const organizationPermissionSchema = z.enum([
 	"createRepository",
 	"deleteRepository",
 	"manageRepositoryAccess",
+	"manageTasks",
 	"deleteOrganization",
 ]);
 

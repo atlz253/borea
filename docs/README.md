@@ -12,6 +12,7 @@
 ## User Documentation
 
 - [Working with Organizations](organizations.md) — organization namespaces and contextual sidebar navigation
+- [Using Task Boards](tasks.md) — organization Kanban boards and direct task links
 - [Working with Repositories via HTTP](git-http.md) — how to clone and push using Git
 - [Using Repository Pages](repository-page.md) — how to browse repositories, files, and commit history
 - [Pull Request Code Review](code-review.md) — how to mark changed files as viewed

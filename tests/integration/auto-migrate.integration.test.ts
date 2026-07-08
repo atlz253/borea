@@ -29,7 +29,7 @@ it("applies pending migrations to an empty database", async () => {
 		"node",
 		["node_modules/prisma/build/index.js", "migrate", "deploy"],
 		{
-			env: { ...process.env, DATABASE_URL: url },
+			env: { ...process.env, DATABASE_URL: url, RUST_LOG: "info" },
 		},
 	);
 

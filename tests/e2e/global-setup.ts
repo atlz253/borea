@@ -21,7 +21,7 @@ async function globalSetup() {
 			"--url",
 			url,
 		],
-		{ env: { ...process.env, DATABASE_URL: url } },
+		{ env: { ...process.env, DATABASE_URL: url, RUST_LOG: "info" } },
 	);
 
 	const { createClient } = await import("@libsql/client");
@@ -29,7 +29,7 @@ async function globalSetup() {
 
 	const now = new Date().toISOString();
 
-	client.execute({
+	await client.execute({
 		sql: `INSERT OR IGNORE INTO User (id, name, email, createdAt, credential) VALUES (?, ?, ?, ?, ?)`,
 		args: [
 			NOAUTH_USER_ID,
@@ -40,7 +40,7 @@ async function globalSetup() {
 		],
 	});
 
-	client.execute({
+	await client.execute({
 		sql: `INSERT OR IGNORE INTO Organization (name, description, createdAt) VALUES (?, ?, ?)`,
 		args: ["default", "Default organization", now],
 	});

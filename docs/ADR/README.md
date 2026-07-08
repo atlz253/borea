@@ -32,6 +32,7 @@ This directory contains Architecture Decision Records (ADRs) for Borea. Each ADR
 | 0026 | [Project Rename: Nirvana to Borea](0026-project-rename-nirvana-to-borea.md) | Renaming the project from Nirvana to Borea with aesthetic direction |
 | 0027 | [Auto-Apply Pending Migrations on Startup](0027-auto-apply-migrations-on-startup.md) | Applying pending Prisma migrations automatically before dev server and Docker container start |
 | 0028 | [Internationalization with Paraglide JS](0028-i18n-paraglide.md) | Cookie-based i18n with Paraglide JS, English base + Russian translation, deferred service-layer errors |
+| 0029 | [Organization Task Tracker](0029-organization-task-tracker.md) | Organization-owned Kanban boards, task cards, REST API, and dnd-kit drag-and-drop |
 
 ## Adding a New ADR
 

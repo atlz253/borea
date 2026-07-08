@@ -210,6 +210,7 @@ export function createOrganizationService(
 					canRemoveMembers: false,
 					canManageSettings: false,
 					canCreateRepository: true,
+					canManageTasks: true,
 					canDeleteOrganization: false,
 				};
 			}
@@ -232,6 +233,7 @@ export function createOrganizationService(
 					role,
 					"createRepository",
 				),
+				canManageTasks: hasOrganizationPermission(role, "manageTasks"),
 				canDeleteOrganization: hasOrganizationPermission(
 					role,
 					"deleteOrganization",
