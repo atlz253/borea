@@ -78,6 +78,43 @@ export async function computeMergeTree(
 	return lines[0];
 }
 
+export async function createMergeCommit(
+	gitBin: string,
+	repoPath: string,
+	treeSha: string,
+	baseSha: string,
+	headSha: string,
+	message: string,
+): Promise<string> {
+	const { stdout } = await execa(
+		gitBin,
+		[
+			"--git-dir",
+			repoPath,
+			"commit-tree",
+			treeSha,
+			"-p",
+			baseSha,
+			"-p",
+			headSha,
+			"-m",
+			message,
+		],
+		{
+			env: {
+				...process.env,
+				GIT_AUTHOR_NAME: process.env.GIT_AUTHOR_NAME || "Borea",
+				GIT_AUTHOR_EMAIL:
+					process.env.GIT_AUTHOR_EMAIL || "borea@example.com",
+				GIT_COMMITTER_NAME: process.env.GIT_COMMITTER_NAME || "Borea",
+				GIT_COMMITTER_EMAIL:
+					process.env.GIT_COMMITTER_EMAIL || "borea@example.com",
+			},
+		},
+	);
+	return stdout.trim();
+}
+
 export async function mergeBase(
 	gitBin: string,
 	repoPath: string,

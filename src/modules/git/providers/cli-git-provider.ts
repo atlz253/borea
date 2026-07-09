@@ -27,6 +27,7 @@ import { readFileContent } from "./cli-git-file";
 import {
 	computeDiff,
 	computeMergeTree,
+	createMergeCommit,
 	isAncestor,
 	refExists,
 	renameBranch,
@@ -522,21 +523,14 @@ export class CliGitProvider implements GitProvider {
 		}
 
 		const message = options?.message ?? `Merge branch '${head}' into ${base}`;
-
-		const { stdout: commitSha } = await execa(this.gitBin, [
-			"--git-dir",
+		const mergedSha = await createMergeCommit(
+			this.gitBin,
 			repoPath,
-			"commit-tree",
 			treeSha,
-			"-p",
 			baseSha,
-			"-p",
 			headSha,
-			"-m",
 			message,
-		]);
-
-		const mergedSha = commitSha.trim();
+		);
 
 		await execa(this.gitBin, [
 			"--git-dir",
