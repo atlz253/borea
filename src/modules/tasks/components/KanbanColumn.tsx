@@ -9,10 +9,7 @@ import { Box, Button, Group, Select, Stack, Text } from "@mantine/core";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import * as m from "#/paraglide/messages";
 import type { TaskCard, TaskColumn } from "../schemas";
-
-export type DragData =
-	| { type: "column"; columnId: string }
-	| { type: "card"; cardId: string };
+import type { TaskBoardDragData as DragData } from "../task-board-dnd";
 
 const CARD_DRAG_OPACITY = 0.45;
 const COLUMN_DRAG_OPACITY = 0.55;
@@ -46,6 +43,8 @@ function SortableCard({
 	return (
 		<Box
 			ref={setNodeRef}
+			data-card-public-id={card.publicId}
+			data-testid="task-card"
 			style={{
 				...style,
 				border: "1px solid var(--mantine-color-default-border)",
@@ -138,6 +137,8 @@ export default function KanbanColumn({
 	return (
 		<Box
 			ref={setSortableRef}
+			data-column-name={column.name}
+			data-testid="task-column"
 			style={{
 				...style,
 				flex: "0 0 280px",
@@ -177,7 +178,12 @@ export default function KanbanColumn({
 				)}
 			</Group>
 
-			<Box ref={setDroppableRef} mih={80}>
+			<Box
+				ref={setDroppableRef}
+				data-column-name={column.name}
+				data-testid="task-column-dropzone"
+				mih={80}
+			>
 				<SortableContext
 					items={cards.map((card) => cardDragId(card.id))}
 					strategy={verticalListSortingStrategy}

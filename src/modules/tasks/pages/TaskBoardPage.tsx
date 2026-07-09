@@ -1,7 +1,9 @@
 import {
 	closestCorners,
 	DndContext,
+	type DragCancelEvent,
 	type DragEndEvent,
+	type DragOverEvent,
 	DragOverlay,
 	type DragStartEvent,
 	KeyboardSensor,
@@ -10,7 +12,6 @@ import {
 	useSensors,
 } from "@dnd-kit/core";
 import {
-	arrayMove,
 	SortableContext,
 	sortableKeyboardCoordinates,
 	verticalListSortingStrategy,
@@ -28,12 +29,11 @@ import {
 } from "@mantine/core";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Plus, Trash2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import * as m from "#/paraglide/messages";
 import KanbanColumn, {
 	cardDragId,
 	columnDragId,
-	type DragData,
 } from "../components/KanbanColumn";
 import type { TaskBoardDetail, TaskCard, TaskColumn } from "../schemas";
 import {
@@ -45,22 +45,20 @@ import {
 	updateTaskCardFn,
 	updateTaskColumnFn,
 } from "../server/task.functions";
+import {
+	moveTaskBoardCard,
+	moveTaskBoardColumn,
+	sortedTaskCards,
+	sortedTaskColumns,
+	type TaskBoardDragData,
+	taskBoardCardMoveTarget,
+} from "../task-board-dnd";
 
 interface TaskBoardPageProps {
 	activeTaskPublicId?: string;
 	board: TaskBoardDetail;
 	canManage: boolean;
 	organizationName: string;
-}
-
-function sortedColumns(board: TaskBoardDetail): TaskColumn[] {
-	return [...board.columns].sort((a, b) => a.position - b.position);
-}
-
-function sortedCards(board: TaskBoardDetail, columnId: string): TaskCard[] {
-	return board.cards
-		.filter((card) => card.columnId === columnId)
-		.sort((a, b) => a.position - b.position);
 }
 
 export default function TaskBoardPage({
@@ -83,6 +81,8 @@ export default function TaskBoardPage({
 		{},
 	);
 	const [error, setError] = useState<string | null>(null);
+	const dragStartBoardRef = useRef<TaskBoardDetail | null>(null);
+	const boardRef = useRef(board);
 	const taskPublicIdFromUrl = pathname.match(
 		new RegExp(`/tasks/${board.key}/([^/]+)$`),
 	)?.[1];
@@ -94,7 +94,7 @@ export default function TaskBoardPage({
 		selectedTaskPublicId === undefined
 			? undefined
 			: board.cards.find((card) => card.publicId === selectedTaskPublicId);
-	const columns = useMemo(() => sortedColumns(board), [board]);
+	const columns = useMemo(() => sortedTaskColumns(board), [board]);
 	const sensors = useSensors(
 		useSensor(PointerSensor),
 		useSensor(KeyboardSensor, {
@@ -103,11 +103,11 @@ export default function TaskBoardPage({
 	);
 
 	const refresh = async () => {
-		setBoard(
-			await getTaskBoardFn({
-				data: { organizationName, boardKey: board.key },
-			}),
-		);
+		const nextBoard = await getTaskBoardFn({
+			data: { organizationName, boardKey: board.key },
+		});
+		boardRef.current = nextBoard;
+		setBoard(nextBoard);
 	};
 
 	const openCard = (card: TaskCard) => {
@@ -277,68 +277,146 @@ export default function TaskBoardPage({
 	};
 
 	const dragData = (eventItem: { data: { current?: unknown } }) =>
-		eventItem.data.current as DragData | undefined;
+		eventItem.data.current as TaskBoardDragData | undefined;
 
 	const handleDragStart = (event: DragStartEvent) => {
 		setActiveDragId(String(event.active.id));
+		dragStartBoardRef.current = board;
 	};
 
-	const moveColumn = async (activeData: DragData, overData: DragData) => {
+	const handleDragOver = (event: DragOverEvent) => {
+		const { active, over } = event;
+		if (!over || active.id === over.id || !canManage) {
+			return;
+		}
+		const activeData = dragData(active);
+		const overData = dragData(over);
+		if (!activeData || !overData || activeData.type !== "card") {
+			return;
+		}
+		setBoard((currentBoard) => {
+			const target = taskBoardCardMoveTarget(currentBoard, overData);
+			if (!target) {
+				return currentBoard;
+			}
+			const activeCard = currentBoard.cards.find(
+				(card) => card.id === activeData.cardId,
+			);
+			if (
+				!activeCard ||
+				(activeCard.columnId === target.columnId &&
+					activeCard.position === target.position)
+			) {
+				return currentBoard;
+			}
+			const nextBoard =
+				moveTaskBoardCard(
+					currentBoard,
+					activeData.cardId,
+					target.columnId,
+					target.position,
+				) ?? currentBoard;
+			boardRef.current = nextBoard;
+			return nextBoard;
+		});
+	};
+
+	const handleDragCancel = (_event: DragCancelEvent) => {
+		setActiveDragId(null);
+		if (dragStartBoardRef.current) {
+			boardRef.current = dragStartBoardRef.current;
+			setBoard(dragStartBoardRef.current);
+			dragStartBoardRef.current = null;
+		}
+	};
+
+	const moveColumn = async (
+		activeData: TaskBoardDragData,
+		overData: TaskBoardDragData,
+		currentBoard: TaskBoardDetail,
+	) => {
 		if (activeData.type !== "column" || overData.type !== "column") {
 			return false;
 		}
-		const ordered = arrayMove(
-			columns,
-			columns.findIndex((column) => column.id === activeData.columnId),
-			columns.findIndex((column) => column.id === overData.columnId),
+		const nextBoard = moveTaskBoardColumn(
+			currentBoard,
+			activeData.columnId,
+			overData.columnId,
 		);
+		if (!nextBoard) {
+			return false;
+		}
+		const nextColumn = nextBoard.columns.find(
+			(column) => column.id === activeData.columnId,
+		);
+		boardRef.current = nextBoard;
+		setBoard(nextBoard);
 		await updateTaskColumnFn({
 			data: {
 				organizationName,
-				boardKey: board.key,
+				boardKey: currentBoard.key,
 				columnId: activeData.columnId,
-				position: ordered.findIndex(
-					(column) => column.id === activeData.columnId,
-				),
+				position: nextColumn?.position ?? 0,
 			},
 		});
 		return true;
 	};
 
-	const moveCard = async (activeData: DragData, overData: DragData) => {
+	const moveCard = async (
+		activeData: TaskBoardDragData,
+		overData: TaskBoardDragData,
+		currentBoard: TaskBoardDetail,
+	) => {
 		if (activeData.type !== "card") {
 			return false;
 		}
-		const activeCard = board.cards.find(
+		const activeCard = currentBoard.cards.find(
 			(card) => card.id === activeData.cardId,
 		);
 		if (!activeCard) {
 			return false;
 		}
-		const overCard =
-			overData.type === "card"
-				? board.cards.find((card) => card.id === overData.cardId)
-				: undefined;
-		const targetColumnId =
-			overData.type === "column" ? overData.columnId : overCard?.columnId;
-		if (!targetColumnId) {
+		const startedCard = dragStartBoardRef.current?.cards.find(
+			(card) => card.id === activeData.cardId,
+		);
+		if (
+			startedCard &&
+			(startedCard.columnId !== activeCard.columnId ||
+				startedCard.position !== activeCard.position)
+		) {
+			await updateTaskCardFn({
+				data: {
+					organizationName,
+					boardKey: currentBoard.key,
+					taskPublicId: activeCard.publicId,
+					columnId: activeCard.columnId,
+					position: activeCard.position,
+				},
+			});
+			return true;
+		}
+		const target = taskBoardCardMoveTarget(currentBoard, overData);
+		if (!target) {
 			return false;
 		}
-		const targetCards = sortedCards(board, targetColumnId);
-		const targetPosition =
-			overData.type === "column"
-				? targetCards.length
-				: Math.max(
-						0,
-						targetCards.findIndex((card) => card.id === overData.cardId),
-					);
+		const nextBoard = moveTaskBoardCard(
+			currentBoard,
+			activeData.cardId,
+			target.columnId,
+			target.position,
+		);
+		if (!nextBoard) {
+			return false;
+		}
+		boardRef.current = nextBoard;
+		setBoard(nextBoard);
 		await updateTaskCardFn({
 			data: {
 				organizationName,
-				boardKey: board.key,
+				boardKey: currentBoard.key,
 				taskPublicId: activeCard.publicId,
-				columnId: targetColumnId,
-				position: targetPosition,
+				columnId: target.columnId,
+				position: target.position,
 			},
 		});
 		return true;
@@ -347,24 +425,32 @@ export default function TaskBoardPage({
 	const handleDragEnd = async (event: DragEndEvent) => {
 		setActiveDragId(null);
 		const { active, over } = event;
-		if (!over || active.id === over.id) {
+		if (!over) {
+			dragStartBoardRef.current = null;
 			return;
 		}
 		const activeData = dragData(active);
 		const overData = dragData(over);
 		if (!activeData || !overData || !canManage) {
+			dragStartBoardRef.current = null;
 			return;
 		}
 		setError(null);
+		const previousBoard = dragStartBoardRef.current ?? board;
+		const currentBoard = boardRef.current;
 		try {
 			const moved =
-				(await moveColumn(activeData, overData)) ||
-				(await moveCard(activeData, overData));
+				(await moveColumn(activeData, overData, currentBoard)) ||
+				(await moveCard(activeData, overData, currentBoard));
 			if (moved) await refresh();
 		} catch (caught) {
+			boardRef.current = previousBoard;
+			setBoard(previousBoard);
 			setError(
 				caught instanceof Error ? caught.message : m.tasks_board_error_move(),
 			);
+		} finally {
+			dragStartBoardRef.current = null;
 		}
 	};
 
@@ -407,7 +493,9 @@ export default function TaskBoardPage({
 				sensors={sensors}
 				collisionDetection={closestCorners}
 				onDragStart={handleDragStart}
+				onDragOver={handleDragOver}
 				onDragEnd={(event) => void handleDragEnd(event)}
+				onDragCancel={handleDragCancel}
 			>
 				<SortableContext
 					items={columns.map((column) => columnDragId(column.id))}
@@ -423,7 +511,7 @@ export default function TaskBoardPage({
 							<KanbanColumn
 								key={column.id}
 								canManage={canManage}
-								cards={sortedCards(board, column.id)}
+								cards={sortedTaskCards(board, column.id)}
 								column={column}
 								columns={columns}
 								deleteTarget={deleteTargets[column.id]}
@@ -441,7 +529,7 @@ export default function TaskBoardPage({
 						))}
 					</Group>
 				</SortableContext>
-				<DragOverlay>
+				<DragOverlay dropAnimation={null}>
 					{overlayCard ? (
 						<Box
 							p="sm"

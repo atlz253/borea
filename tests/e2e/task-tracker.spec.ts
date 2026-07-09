@@ -1,3 +1,4 @@
+import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import { waitForHydration } from "./helpers";
 
@@ -14,6 +15,33 @@ async function waitForHydratedButton(
 			),
 		label,
 	);
+}
+
+async function dragToCenter(page: Page, source: Locator, target: Locator) {
+	const sourceBox = await source.boundingBox();
+	const targetBox = await target.boundingBox();
+	expect(sourceBox).not.toBeNull();
+	expect(targetBox).not.toBeNull();
+	if (!sourceBox || !targetBox) {
+		return;
+	}
+	await page.mouse.move(
+		sourceBox.x + sourceBox.width / 2,
+		sourceBox.y + sourceBox.height / 2,
+	);
+	await page.mouse.down();
+	await page.mouse.move(
+		sourceBox.x + sourceBox.width / 2 + 8,
+		sourceBox.y + sourceBox.height / 2 + 8,
+		{ steps: 4 },
+	);
+	await page.mouse.move(
+		targetBox.x + targetBox.width / 2,
+		targetBox.y + targetBox.height / 2,
+		{ steps: 30 },
+	);
+	await page.waitForTimeout(100);
+	await page.mouse.up();
 }
 
 test("creates a task board and opens a card by direct URL", async ({
@@ -61,4 +89,29 @@ test("creates a task board and opens a card by direct URL", async ({
 
 	await page.goto(`/organizations/default/tasks/${boardKey}/${boardKey}-1`);
 	await expect(cardDialog.getByLabel("Title")).toHaveValue(cardTitle);
+
+	if (testInfo.project.name !== "chromium") {
+		return;
+	}
+
+	await page.keyboard.press("Escape");
+	const doingColumn = page.locator(
+		'[data-testid="task-column"][data-column-name="Doing"]',
+	);
+	const doingDropzone = page.locator(
+		'[data-testid="task-column-dropzone"][data-column-name="Doing"]',
+	);
+	const dragHandle = page.getByRole("button", {
+		name: `Drag task ${boardKey}-1`,
+	});
+	await dragToCenter(page, dragHandle, doingDropzone);
+
+	await expect(
+		doingColumn.locator(`[data-card-public-id="${boardKey}-1"]`),
+	).toContainText(cardTitle);
+
+	await page.reload();
+	await expect(
+		doingColumn.locator(`[data-card-public-id="${boardKey}-1"]`),
+	).toContainText(cardTitle);
 });
