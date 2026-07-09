@@ -69,6 +69,22 @@ test("creates a task board and opens a card by direct URL", async ({
 	for (const name of ["Backlog", "To do", "Doing", "Done"]) {
 		await expect(page.getByText(name, { exact: true })).toBeVisible();
 	}
+	const emptyBacklogColumn = page.locator(
+		'[data-testid="task-column"][data-column-name="Backlog"]',
+	);
+	const emptyBacklogCountBox = await emptyBacklogColumn
+		.getByText("0 cards", { exact: true })
+		.boundingBox();
+	const emptyBacklogAddButtonBox = await emptyBacklogColumn
+		.getByRole("button", { name: "Add card" })
+		.boundingBox();
+	expect(emptyBacklogCountBox).not.toBeNull();
+	expect(emptyBacklogAddButtonBox).not.toBeNull();
+	if (emptyBacklogCountBox && emptyBacklogAddButtonBox) {
+		expect(emptyBacklogAddButtonBox.y - emptyBacklogCountBox.y).toBeLessThan(
+			48,
+		);
+	}
 
 	await expect(page.getByRole("button", { name: "Add column" })).toHaveCount(0);
 	await expect(page.getByRole("button", { name: "Delete column" })).toHaveCount(

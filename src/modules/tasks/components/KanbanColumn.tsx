@@ -13,6 +13,7 @@ import type { TaskBoardDragData as DragData } from "../task-board-dnd";
 
 const CARD_DRAG_OPACITY = 0.45;
 const COLUMN_DRAG_OPACITY = 0.55;
+const ACTIVE_DROPZONE_MIN_HEIGHT = 80;
 
 export const cardDragId = (id: string) => `card:${id}`;
 export const columnDragId = (id: string) => `column:${id}`;
@@ -93,6 +94,7 @@ export default function KanbanColumn({
 	column,
 	columns,
 	deleteTarget,
+	isDraggingCard,
 	isEditingColumns,
 	onAddCard,
 	onDelete,
@@ -105,6 +107,7 @@ export default function KanbanColumn({
 	column: TaskColumn;
 	columns: TaskColumn[];
 	deleteTarget?: string;
+	isDraggingCard: boolean;
 	isEditingColumns: boolean;
 	onAddCard: (column: TaskColumn) => void;
 	onDelete: (column: TaskColumn) => void;
@@ -184,7 +187,9 @@ export default function KanbanColumn({
 				ref={setDroppableRef}
 				data-column-name={column.name}
 				data-testid="task-column-dropzone"
-				mih={80}
+				mih={
+					cards.length > 0 || isDraggingCard ? ACTIVE_DROPZONE_MIN_HEIGHT : 0
+				}
 			>
 				<SortableContext
 					items={cards.map((card) => cardDragId(card.id))}

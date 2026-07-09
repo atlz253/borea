@@ -448,6 +448,7 @@ export default function TaskBoardPage({
 		activeDragId?.startsWith("card:") === true
 			? board.cards.find((card) => cardDragId(card.id) === activeDragId)
 			: undefined;
+	const isDraggingCard = activeDragId?.startsWith("card:") === true;
 
 	return (
 		<Container size="xl" py="xl">
@@ -504,7 +505,7 @@ export default function TaskBoardPage({
 					strategy={verticalListSortingStrategy}
 				>
 					<Group
-						align="stretch"
+						align="start"
 						wrap="nowrap"
 						style={{ overflowX: "auto" }}
 						pb="md"
@@ -517,6 +518,7 @@ export default function TaskBoardPage({
 								column={column}
 								columns={columns}
 								deleteTarget={deleteTargets[column.id]}
+								isDraggingCard={isDraggingCard}
 								isEditingColumns={isEditingColumns}
 								onAddCard={(item) => setAddCardColumn(item)}
 								onDelete={(item) => void deleteColumn(item)}
