@@ -1,5 +1,6 @@
 import { Menu, Text, UnstyledButton } from "@mantine/core";
 import { Languages } from "lucide-react";
+import { useState } from "react";
 import { getLocale, locales, setLocale } from "#/paraglide/runtime";
 
 const localeLabels: Record<string, string> = {
@@ -7,11 +8,25 @@ const localeLabels: Record<string, string> = {
 	ru: "RU",
 };
 
+type Locale = (typeof locales)[number];
+
 export default function LanguageToggle() {
 	const currentLocale = getLocale();
+	const [opened, setOpened] = useState(false);
+
+	const handleLocaleChange = (locale: Locale) => {
+		setOpened(false);
+		setLocale(locale);
+	};
 
 	return (
-		<Menu shadow="md" width={120}>
+		<Menu
+			key={currentLocale}
+			opened={opened}
+			onChange={setOpened}
+			shadow="md"
+			width={120}
+		>
 			<Menu.Target>
 				<UnstyledButton
 					style={{
@@ -37,7 +52,7 @@ export default function LanguageToggle() {
 				{locales.map((locale) => (
 					<Menu.Item
 						key={locale}
-						onClick={() => setLocale(locale)}
+						onClick={() => handleLocaleChange(locale)}
 						fw={locale === currentLocale ? "bold" : "normal"}
 					>
 						{localeLabels[locale] ?? locale}
