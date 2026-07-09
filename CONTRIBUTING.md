@@ -17,9 +17,13 @@ Before submitting a PR, run these commands and ensure they all pass:
 npm run check          # Biome lint + format (must pass clean)
 npx tsc --noEmit       # Typecheck (strict; no errors)
 npm run test           # Vitest unit tests
+npm run test:integration  # Vitest integration tests
 npm run test:e2e       # Playwright E2E tests
 npm run generate-routes  # Regenerate route tree if routes were added/removed
 ```
+
+GitHub Actions runs these checks on pushes to `main` and `develop`, and the
+same CI workflow can be started manually from the Actions tab.
 
 ## Available Scripts
 
@@ -30,6 +34,7 @@ npm run generate-routes  # Regenerate route tree if routes were added/removed
 | `npm run preview`         | Preview the production build                   |
 | `npm run generate-routes` | Regenerate the TanStack Router route tree      |
 | `npm run test`            | Run unit tests (Vitest)                        |
+| `npm run test:integration`| Run integration tests (Vitest)                 |
 | `npm run test:coverage`   | Run unit tests with coverage report            |
 | `npm run test:e2e`        | Run E2E tests (Playwright)                     |
 | `npm run test:e2e:ui`     | Run E2E tests in UI mode (Playwright)          |
