@@ -235,6 +235,8 @@
 	"tasks_boards_create_button": "Create board",
 	"tasks_boards_error_create": "Failed to create task board",
 	"tasks_board_back_button": "Back to boards",
+	"tasks_board_edit_button": "Edit",
+	"tasks_board_saveEditing_button": "Save",
 	"tasks_board_cardCount": "{count} cards",
 	"tasks_board_addCard_button": "Add card",
 	"tasks_board_deleteTarget_placeholder": "Move cards to...",

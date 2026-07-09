@@ -93,6 +93,7 @@ export default function KanbanColumn({
 	column,
 	columns,
 	deleteTarget,
+	isEditingColumns,
 	onAddCard,
 	onDelete,
 	onOpenCard,
@@ -104,6 +105,7 @@ export default function KanbanColumn({
 	column: TaskColumn;
 	columns: TaskColumn[];
 	deleteTarget?: string;
+	isEditingColumns: boolean;
 	onAddCard: (column: TaskColumn) => void;
 	onDelete: (column: TaskColumn) => void;
 	onOpenCard: (card: TaskCard) => void;
@@ -206,7 +208,7 @@ export default function KanbanColumn({
 					>
 						{m.tasks_board_addCard_button()}
 					</Button>
-					{cards.length > 0 && (
+					{isEditingColumns && cards.length > 0 && (
 						<Select
 							size="xs"
 							placeholder={m.tasks_board_deleteTarget_placeholder()}
@@ -215,15 +217,17 @@ export default function KanbanColumn({
 							onChange={(value) => onTargetChange(column.id, value)}
 						/>
 					)}
-					<Button
-						variant="subtle"
-						color="red"
-						size="xs"
-						leftSection={<Trash2 size={14} />}
-						onClick={() => onDelete(column)}
-					>
-						{m.tasks_board_deleteColumn_button()}
-					</Button>
+					{isEditingColumns && (
+						<Button
+							variant="subtle"
+							color="red"
+							size="xs"
+							leftSection={<Trash2 size={14} />}
+							onClick={() => onDelete(column)}
+						>
+							{m.tasks_board_deleteColumn_button()}
+						</Button>
+					)}
 				</Stack>
 			)}
 		</Box>

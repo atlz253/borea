@@ -235,6 +235,8 @@
 	"tasks_boards_create_button": "Создать доску",
 	"tasks_boards_error_create": "Не удалось создать доску задач",
 	"tasks_board_back_button": "Назад к доскам",
+	"tasks_board_edit_button": "Редактировать",
+	"tasks_board_saveEditing_button": "Сохранить",
 	"tasks_board_cardCount": "{count} карточек",
 	"tasks_board_addCard_button": "Добавить карточку",
 	"tasks_board_deleteTarget_placeholder": "Перенести карточки в...",

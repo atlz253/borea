@@ -73,6 +73,7 @@ export default function TaskBoardPage({
 	});
 	const [board, setBoard] = useState(initialBoard);
 	const [activeDragId, setActiveDragId] = useState<string | null>(null);
+	const [isEditingColumns, setIsEditingColumns] = useState(false);
 	const [newColumnName, setNewColumnName] = useState("");
 	const [addCardColumn, setAddCardColumn] = useState<TaskColumn | null>(null);
 	const [cardTitle, setCardTitle] = useState("");
@@ -469,17 +470,29 @@ export default function TaskBoardPage({
 					<Title order={1}>{board.name}</Title>
 					{board.description && <Text c="dimmed">{board.description}</Text>}
 				</div>
-				<Button
-					variant="subtle"
-					onClick={() =>
-						void navigate({
-							to: "/organizations/$organization/tasks",
-							params: { organization: organizationName },
-						})
-					}
-				>
-					{m.tasks_board_back_button()}
-				</Button>
+				<Group>
+					{canManage && (
+						<Button
+							variant={isEditingColumns ? "filled" : "light"}
+							onClick={() => setIsEditingColumns((current) => !current)}
+						>
+							{isEditingColumns
+								? m.tasks_board_saveEditing_button()
+								: m.tasks_board_edit_button()}
+						</Button>
+					)}
+					<Button
+						variant="subtle"
+						onClick={() =>
+							void navigate({
+								to: "/organizations/$organization/tasks",
+								params: { organization: organizationName },
+							})
+						}
+					>
+						{m.tasks_board_back_button()}
+					</Button>
+				</Group>
 			</Group>
 
 			{error && (
@@ -515,6 +528,7 @@ export default function TaskBoardPage({
 								column={column}
 								columns={columns}
 								deleteTarget={deleteTargets[column.id]}
+								isEditingColumns={isEditingColumns}
 								onAddCard={(item) => setAddCardColumn(item)}
 								onDelete={(item) => void deleteColumn(item)}
 								onOpenCard={openCard}
@@ -550,7 +564,7 @@ export default function TaskBoardPage({
 				</DragOverlay>
 			</DndContext>
 
-			{canManage && (
+			{canManage && isEditingColumns && (
 				<Box
 					mt="md"
 					p="md"

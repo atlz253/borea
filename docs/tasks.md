@@ -37,6 +37,9 @@ New boards start with four columns:
 ## Managing Columns
 
 Users who can manage tasks can add, rename, reorder, and delete columns.
+Click **Edit** on the board page to show the add-column form and column
+deletion controls. Click **Save** to leave edit mode. Column additions and
+deletions are saved immediately.
 
 Cards in a deleted column must be moved to another column. Select the target
 column before deleting a non-empty column. The last column on a board cannot be

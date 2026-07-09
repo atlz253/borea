@@ -70,6 +70,32 @@ test("creates a task board and opens a card by direct URL", async ({
 		await expect(page.getByText(name, { exact: true })).toBeVisible();
 	}
 
+	await expect(page.getByRole("button", { name: "Add column" })).toHaveCount(0);
+	await expect(page.getByRole("button", { name: "Delete column" })).toHaveCount(
+		0,
+	);
+	await waitForHydratedButton(page, "Edit");
+	await page.getByRole("button", { name: "Edit" }).click();
+	await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+
+	const extraColumnName = `Review ${suffix}`;
+	await page.getByLabel("New column").fill(extraColumnName);
+	await page.getByRole("button", { name: "Add column" }).click();
+	const extraColumn = page.locator(
+		`[data-testid="task-column"][data-column-name="${extraColumnName}"]`,
+	);
+	await expect(extraColumn).toBeVisible();
+	page.once("dialog", (dialog) => dialog.accept());
+	await extraColumn.getByRole("button", { name: "Delete column" }).click();
+	await expect(extraColumn).toBeHidden();
+
+	await page.getByRole("button", { name: "Save" }).click();
+	await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
+	await expect(page.getByRole("button", { name: "Add column" })).toHaveCount(0);
+	await expect(page.getByRole("button", { name: "Delete column" })).toHaveCount(
+		0,
+	);
+
 	const addCardButton = page.getByRole("button", { name: "Add card" }).first();
 	await expect(addCardButton).toBeVisible();
 	await waitForHydratedButton(page, "Add card");
