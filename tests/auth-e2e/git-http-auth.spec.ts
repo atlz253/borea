@@ -85,9 +85,13 @@ function basicAuthorization(token: string): string {
 }
 
 test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
+	baseURL,
 	browser,
 	page,
 }) => {
+	if (!baseURL) {
+		throw new Error("baseURL must be configured for auth E2E tests");
+	}
 	test.setTimeout(120_000);
 	const suffix = Date.now().toString(36);
 	const organizationName = `git-auth-${suffix}`;
@@ -173,7 +177,10 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 	});
 	expect(inaccessible.status()).toBe(404);
 
-	const cloneUrl = `http://localhost:3002/api/git/${organizationName}/${repositoryName}.git`;
+	const cloneUrl = new URL(
+		`/api/git/${organizationName}/${repositoryName}.git`,
+		baseURL,
+	).toString();
 	const readerAuthorization = basicAuthorization(readerToken ?? "");
 	const gitHeader = `Authorization: ${readerAuthorization}`;
 	const receiveInfoRefs = `/api/git/${organizationName}/${repositoryName}.git/info/refs?service=git-receive-pack`;

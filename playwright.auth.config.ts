@@ -2,6 +2,8 @@ import { defineConfig, devices } from "@playwright/test";
 
 const databaseUrl = "file:./data/e2e-auth/e2e.db";
 const repositoriesPath = "./data/e2e-auth/repositories";
+const port = process.env.E2E_AUTH_PORT ?? "3102";
+const baseURL = `http://localhost:${port}`;
 
 process.env.E2E_DATABASE_URL = databaseUrl;
 
@@ -12,7 +14,7 @@ export default defineConfig({
 	reporter: [["html", { outputFolder: "playwright-report-auth" }], ["list"]],
 	outputDir: "test-results-auth",
 	use: {
-		baseURL: "http://localhost:3002",
+		baseURL,
 		trace: "on-first-retry",
 	},
 	projects: [
@@ -22,8 +24,8 @@ export default defineConfig({
 		},
 	],
 	webServer: {
-		command: "npx prisma generate && npx vite dev --port 3002",
-		url: "http://localhost:3002",
+		command: `npx prisma generate && npx vite dev --port ${port} --strictPort`,
+		url: `${baseURL}/api/v1/openapi.json`,
 		reuseExistingServer: false,
 		timeout: 120_000,
 		env: {
