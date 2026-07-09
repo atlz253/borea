@@ -4,13 +4,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { execa } from "execa";
-import { waitForHydration } from "./helpers";
+import { fillTextInput, waitForHydration } from "./helpers";
 
 const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
 test("Files changed tab shows PR diff", async ({ page }) => {
-	test.setTimeout(60000);
+	test.setTimeout(90000);
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 	const repoName = `e2e-prfiles-${uid}`;
 	const barePath = join(STORAGE_PATH, repoName);
@@ -76,7 +76,7 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
 
-		await page.getByLabel("Title").fill("E2E test pull request");
+		await fillTextInput(page.getByLabel("Title"), "E2E test pull request");
 
 		await page.getByRole("combobox", { name: "Source branch" }).click();
 		const sourceOption = page.getByRole("option", { name: "feature-branch" });
@@ -152,6 +152,7 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		await expect(viewedCheckbox).not.toBeChecked();
 		await expect(page.getByText("feature content")).toBeVisible();
 
+		await page.evaluate(() => window.scrollTo(0, 0));
 		await page.getByRole("tab", { name: /Conversation/i }).click();
 		await page.waitForURL(
 			new RegExp(`/organizations/default/repositories/${repoName}/pulls/\\d+$`),

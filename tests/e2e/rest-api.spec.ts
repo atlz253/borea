@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { expect, test } from "@playwright/test";
 import { execa } from "execa";
-import { waitForHydration } from "./helpers";
+import { fillTextInput, waitForHydration } from "./helpers";
 
 const ORGANIZATION_NAME = "default";
 const REPOSITORIES_PATH = "./data/repositories/default";
@@ -112,8 +112,7 @@ test("REST API lists, reads, merges, and deletes repository data", async ({
 		);
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
-		await page.getByLabel("Title").fill("Feature change");
-		await expect(page.getByLabel("Title")).toHaveValue("Feature change");
+		await fillTextInput(page.getByLabel("Title"), "Feature change");
 		await page.getByRole("combobox", { name: "Source branch" }).click();
 		await page.getByRole("option", { name: "feature" }).click();
 		await page.getByRole("button", { name: /Create pull request/i }).click();
@@ -201,8 +200,7 @@ test("REST API validates parameters and reports merge conflicts", async ({
 		);
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
-		await page.getByLabel("Title").fill("Conflicting change");
-		await expect(page.getByLabel("Title")).toHaveValue("Conflicting change");
+		await fillTextInput(page.getByLabel("Title"), "Conflicting change");
 		await page.getByRole("combobox", { name: "Source branch" }).click();
 		await page.getByRole("option", { name: "feature" }).click();
 		await page.getByRole("button", { name: /Create pull request/i }).click();

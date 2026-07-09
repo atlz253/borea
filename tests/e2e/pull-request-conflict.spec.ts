@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 import { execa } from "execa";
-import { waitForHydration } from "./helpers";
+import { fillTextInput, waitForHydration } from "./helpers";
 
 const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
@@ -80,7 +80,7 @@ test("PR with conflicting branches shows conflict alert", async ({ page }) => {
 		await page.waitForLoadState("load");
 		await waitForHydration(page);
 
-		await page.getByLabel("Title").fill("Conflicting PR");
+		await fillTextInput(page.getByLabel("Title"), "Conflicting PR");
 
 		await page.getByRole("combobox", { name: "Source branch" }).click();
 		await page.getByRole("option", { name: "feature-branch" }).click();

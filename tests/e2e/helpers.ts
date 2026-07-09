@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 export async function waitForHydration(page: Page) {
 	await page.waitForFunction(
@@ -10,4 +10,10 @@ export async function waitForHydration(page: Page) {
 		},
 		{ timeout: 10000 },
 	);
+}
+
+export async function fillTextInput(locator: Locator, value: string) {
+	await locator.clear();
+	await locator.pressSequentially(value);
+	await expect(locator).toHaveValue(value);
 }

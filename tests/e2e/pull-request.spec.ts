@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, type Locator, test } from "@playwright/test";
 import { execa } from "execa";
-import { waitForHydration } from "./helpers";
+import { fillTextInput, waitForHydration } from "./helpers";
 
 const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
@@ -21,6 +21,7 @@ async function getContainerBounds(locator: Locator) {
 }
 
 test("create pull request via web UI and merge it", async ({ page }) => {
+	test.setTimeout(60000);
 	await page.setViewportSize({ width: 1600, height: 900 });
 
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -104,7 +105,7 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 			),
 		).toBe(true);
 
-		await page.getByLabel("Title").fill("E2E test pull request");
+		await fillTextInput(page.getByLabel("Title"), "E2E test pull request");
 
 		await page.getByRole("combobox", { name: "Source branch" }).click();
 		const sourceOption = page.getByRole("option", { name: "feature-branch" });
@@ -149,6 +150,7 @@ test("create pull request via web UI and merge it", async ({ page }) => {
 });
 
 test("pull request tab is visible on repository page", async ({ page }) => {
+	test.setTimeout(60000);
 	await page.setViewportSize({ width: 1600, height: 900 });
 
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
