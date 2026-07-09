@@ -21,3 +21,4 @@ docs
 Dockerfile*
 compose*.yaml
 compose*.yml
+docker/observability

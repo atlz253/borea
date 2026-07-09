@@ -1,11 +1,16 @@
+name: borea
+
 services:
   borea:
     build:
-      context: .
+      context: ..
+      dockerfile: docker/Dockerfile
     image: borea:local
     init: true
     env_file:
-      - .env
+      - path: ../.env
+      - path: ../.env.local
+        required: false
     environment:
       HOST: 0.0.0.0
       NODE_ENV: production
@@ -18,3 +23,4 @@ services:
 
 volumes:
   borea-data:
+    name: borea-data

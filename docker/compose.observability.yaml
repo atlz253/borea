@@ -1,0 +1,71 @@
+services:
+  borea:
+    environment:
+      OTEL_ENABLED: "true"
+      OTEL_SERVICE_NAME: borea
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4318
+    depends_on:
+      - alloy
+
+  alloy:
+    image: grafana/alloy:latest
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - /etc/alloy/config.alloy
+    ports:
+      - "127.0.0.1:12345:12345"
+    restart: unless-stopped
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+      - tempo
+
+  grafana:
+    image: grafana/grafana:latest
+    entrypoint:
+      - /bin/sh
+      - -c
+      - export GF_SECURITY_ADMIN_USER="$${GRAFANA_ADMIN_USER:-admin}" GF_SECURITY_ADMIN_PASSWORD="$${GRAFANA_ADMIN_PASSWORD:-admin}" && exec /run.sh
+    env_file:
+      - path: ./.env.observability
+      - path: ./.env.observability.local
+        required: false
+    ports:
+      - "127.0.0.1:3001:3000"
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - loki
+      - tempo
+
+  loki:
+    image: grafana/loki:latest
+    command:
+      - -config.file=/etc/loki/config.yaml
+    restart: unless-stopped
+    volumes:
+      - ./observability/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki-data:/loki
+
+  tempo:
+    image: grafana/tempo:latest
+    command:
+      - -config.file=/etc/tempo/config.yaml
+    restart: unless-stopped
+    volumes:
+      - ./observability/tempo/config.yaml:/etc/tempo/config.yaml:ro
+      - tempo-data:/var/tempo
+
+volumes:
+  grafana-data:
+    name: borea-grafana-data
+  loki-data:
+    name: borea-loki-data
+  tempo-data:
+    name: borea-tempo-data

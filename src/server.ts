@@ -1,3 +1,4 @@
+import "#/platform/observability";
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
 import { paraglideMiddleware } from "#/paraglide/server";
 

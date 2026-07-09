@@ -1,3 +1,4 @@
+import { trace } from "@opentelemetry/api";
 import pino, { type DestinationStream, type LoggerOptions } from "pino";
 
 const DEFAULT_SERVICE_NAME = "borea";
@@ -82,6 +83,17 @@ function createLoggerOptions(options: CreateAppLoggerOptions): LoggerOptions {
 		serializers: {
 			err: pino.stdSerializers.err,
 			error: pino.stdSerializers.err,
+		},
+		mixin() {
+			const span = trace.getActiveSpan();
+			const spanContext = span?.spanContext();
+			if (!spanContext?.traceId || !spanContext.spanId) {
+				return {};
+			}
+			return {
+				spanId: spanContext.spanId,
+				traceId: spanContext.traceId,
+			};
 		},
 	};
 }

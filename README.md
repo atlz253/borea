@@ -37,7 +37,7 @@ npm start
 Build and run the production container:
 
 ```bash
-docker compose up --build -d
+docker compose -f docker/compose.yaml up --build -d
 ```
 
 The application is available at <http://localhost:3000>. Before production
@@ -45,6 +45,17 @@ deployment, replace the development `SESSION_SECRET` in `.env`. Persistent
 application data is stored in a named Docker volume. See
 [Docker Deployment](docs/deployment.md) for image configuration, `docker run`
 usage, and data management.
+
+Run the optional Grafana observability stack:
+
+```bash
+docker compose \
+  -f docker/compose.yaml \
+  -f docker/compose.observability.yaml \
+  up --build -d
+```
+
+Grafana is available only on <http://127.0.0.1:3001> by default.
 
 ## Documentation
 

@@ -122,8 +122,9 @@ npm run db:studio   # Launch Prisma Studio GUI
 | `src/components/` | Shared presentational components |
 | `src/theme.ts` | Mantine theme customization (default: neutral dev-tool palette) |
 | `vite.config.ts` | Vite plugins: devtools, nitro, tanstackStart, react |
-| `Dockerfile` | Multi-stage production image with Nitro output and Git CLI |
-| `compose.yaml` | Single-container deployment with persistent application data |
+| `docker/Dockerfile` | Multi-stage production image with Nitro output and Git CLI |
+| `docker/compose.yaml` | Single-container deployment with persistent application data |
+| `docker/compose.observability.yaml` | Optional Grafana/Loki/Tempo/Alloy observability stack |
 | `biome.json` | Linter/formatter configuration |
 | `tsconfig.json` | TypeScript config (strict, `noEmit`, bundler resolution) |
 

@@ -14,6 +14,7 @@ Borea is a **modular monolith** — a single deployable process with clear separ
 | Build tool           | Vite 8                                                                 |
 | Styling              | Mantine CSS layers + CSS variables (no Tailwind)                       |
 | Logging              | Pino structured JSON logs via `platform/logger`                        |
+| Observability        | OpenTelemetry traces; optional Grafana, Loki, Tempo, Alloy via Docker  |
 | Validation           | [Zod](https://zod.dev) v4                                              |
 | Lint & format        | Biome 2 (tabs, double quotes)                                          |
 | Testing              | Vitest 4 + Testing Library + jsdom; Playwright 1 (E2E)                 |
@@ -36,6 +37,7 @@ src/
     config/               Application configuration (env variables)
     database/             DatabaseProvider interface + PrismaDatabaseProvider (SQLite via Prisma 7)
     logger/               Structured logging
+    observability/        OpenTelemetry SDK bootstrap
     errors/               Shared error types
   routes/                 File-based routing (TanStack Router)
     api/git/$.tsx         Git smart-HTTP endpoints (clone, push)
@@ -111,3 +113,15 @@ TanStack Start request middleware assigns or propagates `x-request-id`, includes
 it in every request log, and exposes the same value on the response. The
 middleware covers SSR, REST API routes, Git smart-HTTP routes, and server
 functions.
+
+### Observability
+
+OpenTelemetry tracing is disabled by default and enabled with
+`OTEL_ENABLED=true`. When enabled, the server exports OTLP traces according to
+the standard OpenTelemetry environment variables. The Docker observability
+override sends traces to Grafana Alloy and stores them in Tempo.
+
+The optional `docker/compose.observability.yaml` stack runs Grafana, Loki,
+Tempo, and Alloy. Alloy collects Borea JSON logs from Docker and receives OTLP
+traces from the application. Grafana is bound to `127.0.0.1` only; remote access
+is expected to use an SSH tunnel.

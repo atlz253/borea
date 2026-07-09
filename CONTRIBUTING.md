@@ -43,9 +43,11 @@ npm run generate-routes  # Regenerate route tree if routes were added/removed
 
 ```
 borea/
-├── Dockerfile                      # Multi-stage production image
-├── compose.yaml                    # Local single-container deployment
 ├── CONTRIBUTING.md                 # Contributor guide
+├── docker/
+│   ├── Dockerfile                  # Multi-stage production image
+│   ├── compose.yaml                # Local single-container deployment
+│   └── compose.observability.yaml  # Optional Grafana/Loki/Tempo/Alloy stack
 ├── docs/API.md                     # REST API and Git smart-HTTP reference
 ├── docs/
 │   ├── README.md                   # Documentation index
