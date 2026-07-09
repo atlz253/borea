@@ -24,8 +24,8 @@ Chromium.
 2. Trigger the workflow on pushes to `main` and `develop`, and allow manual
    execution with `workflow_dispatch`.
 3. Use Node.js 22 in CI to match the Docker build and runtime image.
-4. Install dependencies with `npm ci` and the built-in `actions/setup-node`
-   npm cache.
+4. Use npm 11.6.2 in CI, matching the Docker build image, then install
+   dependencies with `npm ci` and the built-in `actions/setup-node` npm cache.
 5. Generate the Prisma client before running each check job.
 6. Run quality checks, unit tests, integration tests, and E2E tests as separate
    jobs so they execute in parallel.
@@ -55,8 +55,8 @@ Chromium.
 
 ### Risks and Mitigations
 
-1. **Workflow drift from local commands:** Keep `CONTRIBUTING.md` and
-   `package.json` scripts aligned with the workflow.
+1. **Workflow drift from local commands:** Keep `CONTRIBUTING.md`,
+   `package.json` scripts, and the pinned CI npm version aligned with Docker.
 2. **Slow E2E execution:** Run the main browser projects in separate jobs and
    install only the required browser for each job.
 3. **Debuggability of CI-only E2E failures:** Upload Playwright report and
