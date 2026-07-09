@@ -6,6 +6,7 @@ import {
 	requireRepositoryPermissionFn,
 } from "#/modules/organizations";
 import { PrismaDatabaseProvider } from "#/platform/database";
+import { ConflictError } from "#/platform/errors";
 import { PrismaPullRequestStore } from "../prisma-pull-request.store";
 import { createPullRequestService } from "../pull-request.service";
 
@@ -49,6 +50,12 @@ export const createPullRequestFn = createServerFn({ method: "POST" })
 				user.id,
 			);
 		} catch (error) {
+			if (
+				error instanceof ConflictError &&
+				error.message === "Repository already exists"
+			) {
+				return service.createPullRequest({ ...data, authorName: user.name });
+			}
 			if (
 				typeof error !== "object" ||
 				error === null ||

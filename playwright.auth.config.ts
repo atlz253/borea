@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const databaseUrl = "file:./data/e2e-auth/e2e.db";
+const repositoriesPath = "./data/e2e-auth/repositories";
 
 process.env.E2E_DATABASE_URL = databaseUrl;
 
@@ -30,6 +31,7 @@ export default defineConfig({
 			DATABASE_URL: databaseUrl,
 			DISABLE_HMR_OVERLAY: "1",
 			ORGANIZATION_MODE: "multi",
+			REPOSITORIES_PATH: repositoriesPath,
 			SESSION_SECRET: "e2e-session-secret-with-at-least-32-characters",
 		},
 	},
