@@ -26,7 +26,8 @@ Chromium.
 3. Use Node.js 22 in CI to match the Docker build and runtime image.
 4. Use npm 11.6.2 in CI, matching the Docker build image, then install
    dependencies with `npm ci` and the built-in `actions/setup-node` npm cache.
-5. Generate the Prisma client before running each check job.
+5. Generate Paraglide i18n files and the Prisma client before running each
+   check job.
 6. Run quality checks, unit tests, integration tests, and E2E tests as separate
    jobs so they execute in parallel.
 7. Split the main Playwright suite by browser using a matrix over Chromium,

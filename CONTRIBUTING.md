@@ -16,6 +16,7 @@ Before submitting a PR, run these commands and ensure they all pass:
 ```bash
 npm run check          # Biome lint + format (must pass clean)
 npx tsc --noEmit       # Typecheck (strict; no errors)
+npm run generate-i18n  # Regenerate Paraglide messages for test/check imports
 npm run test           # Vitest unit tests
 npm run test:integration  # Vitest integration tests
 npm run test:e2e       # Playwright E2E tests
@@ -32,6 +33,7 @@ same CI workflow can be started manually from the Actions tab.
 | `npm run dev`             | Start the dev server (applies pending migrations) |
 | `npm run build`           | Build for production (outputs to `dist/`)      |
 | `npm run preview`         | Preview the production build                   |
+| `npm run generate-i18n`   | Regenerate Paraglide message files             |
 | `npm run generate-routes` | Regenerate the TanStack Router route tree      |
 | `npm run test`            | Run unit tests (Vitest)                        |
 | `npm run test:integration`| Run integration tests (Vitest)                 |
