@@ -57,6 +57,9 @@ The container sets these runtime defaults:
 | `REPOSITORIES_PATH` | `./data/repositories` |
 | `DATABASE_URL` | `file:./data/borea.db` |
 | `SESSION_COOKIE_SECURE` | `true` when `NODE_ENV=production`, otherwise `false` |
+| `LOG_LEVEL` | `info` in production, `debug` in development |
+| `LOG_FORMAT` | `json` outside development, `pretty` in development |
+| `OTEL_SERVICE_NAME` | `borea` |
 
 When `DATABASE_URL` uses the `file:` scheme, the application and Prisma CLI
 automatically create the parent directory on startup. A fresh checkout does not
@@ -66,6 +69,12 @@ Pending database migrations are applied automatically on every container start
 via the `ENTRYPOINT` (`prisma migrate deploy` before the Nitro server). The
 Dockerfile includes the Prisma CLI, schema, and migration files in the runtime
 image so that migration remains available without the build toolchain.
+
+Application logs are written to stdout/stderr through Pino. Production logs are
+JSON records suitable for collection with Docker, Kubernetes, or a log agent.
+Every handled request receives an `x-request-id` response header and the same
+value is included in request log records. Set `LOG_FORMAT=pretty` only for local
+human-readable output.
 
 Full authentication mode is the application default and requires
 `SESSION_SECRET`. All other application variables are documented in

@@ -13,6 +13,7 @@ Borea is a **modular monolith** — a single deployable process with clear separ
 | Icons                | [lucide-react](https://lucide.dev)                                     |
 | Build tool           | Vite 8                                                                 |
 | Styling              | Mantine CSS layers + CSS variables (no Tailwind)                       |
+| Logging              | Pino structured JSON logs via `platform/logger`                        |
 | Validation           | [Zod](https://zod.dev) v4                                              |
 | Lint & format        | Biome 2 (tabs, double quotes)                                          |
 | Testing              | Vitest 4 + Testing Library + jsdom; Playwright 1 (E2E)                 |
@@ -99,3 +100,14 @@ explicitly overridden.
 
 Git smart-HTTP remains public in both modes until repository visibility and Git
 credentials are implemented.
+
+### Logging
+
+Application code imports logging through `#/platform/logger`. The implementation
+uses Pino, writes JSON logs by default, and redacts common sensitive fields such
+as authorization headers, cookies, passwords, tokens, and session secrets.
+
+TanStack Start request middleware assigns or propagates `x-request-id`, includes
+it in every request log, and exposes the same value on the response. The
+middleware covers SSR, REST API routes, Git smart-HTTP routes, and server
+functions.

@@ -3,6 +3,7 @@ import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
 
 process.env.AUTH_MODE ??= "noauth";
+process.env.LOG_LEVEL ??= "silent";
 
 afterEach(() => {
 	cleanup();
