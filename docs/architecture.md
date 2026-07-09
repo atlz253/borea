@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Borea is a **modular monolith** — a single deployable process with clear separation between domain modules. The full application (frontend, backend, Git HTTP protocol) runs in one Nitro-powered server process, deployable as a single Docker container.
+Borea is a **modular monolith** — a single deployable application process with clear separation between domain modules. The full application (frontend, backend, Git HTTP protocol) runs in one Nitro-powered server process. Docker deployment can run as a SQLite-backed app container or with a PostgreSQL database service via compose override.
 
 ## Tech Stack
 
@@ -35,7 +35,7 @@ src/
     pull-requests/        Pull/merge requests (scaffold, not yet implemented)
   platform/               Cross-domain infrastructure
     config/               Application configuration (env variables)
-    database/             DatabaseProvider interface + PrismaDatabaseProvider (SQLite via Prisma 7)
+    database/             DatabaseProvider interface + PrismaDatabaseProvider (SQLite locally, PostgreSQL in Docker)
     logger/               Structured logging
     observability/        OpenTelemetry SDK bootstrap
     errors/               Shared error types
@@ -73,7 +73,7 @@ All architectural decisions are recorded as ADRs in `docs/ADR/`.
 All external dependencies are accessed through unified interfaces with swappable implementations:
 
 - **GitProvider** — repository operations, commit history, file tree, smart-HTTP streaming
-- **DatabaseProvider** — data persistence via SQLite backed by Prisma 7 (`PrismaDatabaseProvider` wraps `PrismaClient` with `@prisma/adapter-libsql`)
+- **DatabaseProvider** — data persistence via Prisma 7 (`PrismaDatabaseProvider` uses `@prisma/adapter-libsql` for local SQLite URLs and `@prisma/adapter-pg` for PostgreSQL Docker URLs)
 - **AuthProvider** — file-backed local authentication or fixed-user NoAuth
 
 ### Thin Routes

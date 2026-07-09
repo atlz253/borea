@@ -35,6 +35,7 @@ This directory contains Architecture Decision Records (ADRs) for Borea. Each ADR
 | 0029 | [Organization Task Tracker](0029-organization-task-tracker.md) | Organization-owned Kanban boards, task cards, REST API, and dnd-kit drag-and-drop |
 | 0030 | [Structured Logging with Pino](0030-structured-logging-with-pino.md) | Pino-backed structured JSON logging, request ids, redaction, and TanStack Start request middleware |
 | 0031 | [Grafana Observability Compose Override](0031-grafana-observability-compose-override.md) | Optional Grafana/Loki/Tempo/Alloy compose override and Docker artifact relocation |
+| 0032 | [PostgreSQL Docker Deployment With SQLite Local Development](0032-postgresql-docker-sqlite-local.md) | PostgreSQL for Docker deployment while keeping SQLite for local non-Docker development |
 
 ## Adding a New ADR
 

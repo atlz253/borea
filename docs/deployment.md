@@ -1,7 +1,9 @@
 # Docker Deployment
 
-Borea is distributed as a single Linux container containing the Nitro server,
-static assets, and the Git CLI used by `GitProvider`.
+Borea is distributed as a Linux container containing the Nitro server, static
+assets, and the Git CLI used by `GitProvider`. The default compose file runs
+the application as a single container with SQLite metadata storage. The
+PostgreSQL override adds a database container for production-like deployments.
 
 ## Docker Compose
 
@@ -14,7 +16,9 @@ docker compose -f docker/compose.yaml up --build -d
 ```
 
 The application is available at <http://localhost:3000>. Application data is
-stored in the `borea-data` named volume mounted at `/app/data`.
+stored in the `borea-data` named volume mounted at `/app/data`. This default
+compose file uses SQLite metadata storage and is suitable for local or simple
+single-container deployments.
 
 ```bash
 docker compose -f docker/compose.yaml logs -f borea
@@ -24,6 +28,48 @@ docker compose -f docker/compose.yaml down
 `docker compose down` keeps the named volume. Removing it with
 `docker compose -f docker/compose.yaml down --volumes` permanently deletes
 repositories, users, organizations, and pull request metadata stored there.
+
+## PostgreSQL Compose Override
+
+Use `docker/compose.postgres.yaml` to run the application with PostgreSQL
+metadata storage:
+
+```bash
+docker compose \
+  -f docker/compose.yaml \
+  -f docker/compose.postgres.yaml \
+  up --build -d
+```
+
+The override adds a `postgres` service, waits for it to become healthy, and
+builds the application image with the PostgreSQL Prisma schema. Metadata is
+stored in the `borea-postgres-data` named volume. Git repositories and other
+filesystem data remain in `borea-data`.
+
+```bash
+docker compose \
+  -f docker/compose.yaml \
+  -f docker/compose.postgres.yaml \
+  logs -f borea postgres
+
+docker compose \
+  -f docker/compose.yaml \
+  -f docker/compose.postgres.yaml \
+  down
+```
+
+Removing volumes deletes both repository data and PostgreSQL metadata:
+
+```bash
+docker compose \
+  -f docker/compose.yaml \
+  -f docker/compose.postgres.yaml \
+  down --volumes
+```
+
+SQLite metadata is not converted to PostgreSQL automatically. Treat the
+PostgreSQL override as a separate deployment database unless a dedicated data
+migration is written and run.
 
 ## Build and Run the Image
 
@@ -56,6 +102,8 @@ The container sets these runtime defaults:
 | `PORT` | `3000` |
 | `REPOSITORIES_PATH` | `./data/repositories` |
 | `DATABASE_URL` | `file:./data/borea.db` |
+| `PRISMA_SCHEMA` | `prisma/schema.prisma` |
+| `PRISMA_MIGRATIONS_PATH` | `prisma/migrations` |
 | `SESSION_COOKIE_SECURE` | `true` when `NODE_ENV=production`, otherwise `false` |
 | `LOG_LEVEL` | `info` in production, `debug` in development |
 | `LOG_FORMAT` | `json` outside development, `pretty` in development |
@@ -67,10 +115,21 @@ When `DATABASE_URL` uses the `file:` scheme, the application and Prisma CLI
 automatically create the parent directory on startup. A fresh checkout does not
 require a manual `mkdir`.
 
+The PostgreSQL override sets:
+
+| Variable | Value |
+| --- | --- |
+| `DATABASE_URL` | `postgresql://borea:borea@postgres:5432/borea` |
+| `PRISMA_SCHEMA` | `prisma/postgres/schema.prisma` |
+| `PRISMA_MIGRATIONS_PATH` | `prisma/postgres/migrations` |
+
 Pending database migrations are applied automatically on every container start
 via the `ENTRYPOINT` (`prisma migrate deploy` before the Nitro server). The
 Dockerfile includes the Prisma CLI, schema, and migration files in the runtime
 image so that migration remains available without the build toolchain.
+
+Prisma Client generation is provider-specific. Rebuild the image when switching
+between the default SQLite compose file and the PostgreSQL override.
 
 Application logs are written to stdout/stderr through Pino. Production logs are
 JSON records suitable for collection with Docker, Kubernetes, or a log agent.

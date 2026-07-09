@@ -2,7 +2,17 @@ FROM node:22-bookworm-slim AS build
 
 WORKDIR /app
 
-ENV DATABASE_URL="file:./data/borea.db"
+RUN apt-get update \
+	&& apt-get install --yes --no-install-recommends openssl \
+	&& rm -rf /var/lib/apt/lists/*
+
+ARG DATABASE_URL="file:./data/borea.db"
+ARG PRISMA_SCHEMA="prisma/schema.prisma"
+ARG PRISMA_MIGRATIONS_PATH="prisma/migrations"
+
+ENV DATABASE_URL=${DATABASE_URL} \
+	PRISMA_SCHEMA=${PRISMA_SCHEMA} \
+	PRISMA_MIGRATIONS_PATH=${PRISMA_MIGRATIONS_PATH}
 
 COPY package.json package-lock.json ./
 RUN npm install --global npm@11.6.2 && npm ci
@@ -12,13 +22,20 @@ RUN npm run build
 
 FROM node:22-bookworm-slim AS runtime
 
+ARG DATABASE_URL="file:./data/borea.db"
+ARG PRISMA_SCHEMA="prisma/schema.prisma"
+ARG PRISMA_MIGRATIONS_PATH="prisma/migrations"
+
 RUN apt-get update \
 	&& apt-get install --yes --no-install-recommends ca-certificates git \
 	&& rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production \
 	HOST=0.0.0.0 \
-	PORT=3000
+	PORT=3000 \
+	DATABASE_URL=${DATABASE_URL} \
+	PRISMA_SCHEMA=${PRISMA_SCHEMA} \
+	PRISMA_MIGRATIONS_PATH=${PRISMA_MIGRATIONS_PATH}
 
 WORKDIR /app
 

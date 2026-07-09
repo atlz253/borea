@@ -1,0 +1,33 @@
+services:
+  borea:
+    build:
+      args:
+        DATABASE_URL: postgresql://borea:borea@postgres:5432/borea
+        PRISMA_SCHEMA: prisma/postgres/schema.prisma
+        PRISMA_MIGRATIONS_PATH: prisma/postgres/migrations
+    environment:
+      DATABASE_URL: postgresql://borea:borea@postgres:5432/borea
+      PRISMA_SCHEMA: prisma/postgres/schema.prisma
+      PRISMA_MIGRATIONS_PATH: prisma/postgres/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: borea
+      POSTGRES_USER: borea
+      POSTGRES_PASSWORD: borea
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U borea -d borea"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+    volumes:
+      - borea-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  borea-postgres-data:
+    name: borea-postgres-data

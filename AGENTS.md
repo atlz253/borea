@@ -4,7 +4,7 @@ Guidance for AI coding agents (and human contributors) working in this repositor
 
 ## Project Overview
 
-Borea is an open-source software development workspace (analogue of JetBrains Space / Yandex SourceCraft). The MVP is a Git hosting service with repositories, pull/merge requests, code review, and a REST API — a modular monolith deployable as a single Docker container. Currently at the pre-MVP scaffolding stage.
+Borea is an open-source software development workspace (analogue of JetBrains Space / Yandex SourceCraft). The MVP is a Git hosting service with repositories, pull/merge requests, code review, and a REST API — a modular monolith running as one Nitro application process, with SQLite local storage and optional PostgreSQL Docker deployment. Currently at the pre-MVP scaffolding stage.
 
 - **Decisions:** `docs/ADR/README.md` — index of all ADRs. Record any new architectural decision as a numbered ADR before implementing it.
 
@@ -22,7 +22,7 @@ Borea is an open-source software development workspace (analogue of JetBrains Sp
 - **Tests:** Vitest 4 + Testing Library + jsdom; E2E via Playwright 1 (`tests/e2e/`, `playwright.config.ts`)
 - **Git operations:** system Git CLI via execa
 - **Validation:** Zod v4
-- **ORM:** Prisma 7 with SQLite (`@prisma/adapter-libsql` driver adapter)
+- **ORM:** Prisma 7 with SQLite for local non-Docker development (`@prisma/adapter-libsql`) and PostgreSQL for Docker deployment (`@prisma/adapter-pg`)
 - **OpenAPI:** `@asteasolutions/zod-to-openapi`, OpenAPI 3.1
 - **Language:** TypeScript, strict mode, `verbatimModuleSyntax`
 - **i18n:** Paraglide JS (`@inlang/paraglide-js`) — compiler-based, tree-shakable. Messages in `messages/{locale}.json`. `src/paraglide/` is generated (gitignored). Import messages as `import * as m from "#/paraglide/messages"`. Use `getLocale()`/`setLocale()` from `#/paraglide/runtime`.
@@ -123,7 +123,8 @@ npm run db:studio   # Launch Prisma Studio GUI
 | `src/theme.ts` | Mantine theme customization (default: neutral dev-tool palette) |
 | `vite.config.ts` | Vite plugins: devtools, nitro, tanstackStart, react |
 | `docker/Dockerfile` | Multi-stage production image with Nitro output and Git CLI |
-| `docker/compose.yaml` | Single-container deployment with persistent application data |
+| `docker/compose.yaml` | Default SQLite container deployment with persistent application data |
+| `docker/compose.postgres.yaml` | PostgreSQL Docker deployment override |
 | `docker/compose.observability.yaml` | Optional Grafana/Loki/Tempo/Alloy observability stack |
 | `biome.json` | Linter/formatter configuration |
 | `tsconfig.json` | TypeScript config (strict, `noEmit`, bundler resolution) |
@@ -135,7 +136,7 @@ Respect these when adding features — do not violate them without an ADR:
 - **Provider abstractions:** all external dependencies (Git, DB, auth) go through unified interfaces (`GitProvider`, `DatabaseProvider`, `AuthProvider`) with swappable implementations. See `docs/archive/MVP.md` §8.
 - **NoAuth mode (MVP):** all actions on behalf of a fixed user. Must be blocked in production (`NODE_ENV=production`) unless `ALLOW_NOAUTH_IN_PRODUCTION=true`. See §5.3 and the final recommendations in `docs/archive/MVP.md`.
 - **Modular monolith:** clear boundaries between domain modules (git, auth, repositories, pull-requests). See §7.
-- **Single-container deploy:** the whole app runs in one Nitro process; do not introduce a separate server framework. See ADR 0001.
+- **Deployment shape:** the application runs in one Nitro process; Docker may add PostgreSQL as a database service, but do not introduce a separate app server framework. See ADR 0001 and ADR 0032.
 - **Git smart-HTTP protocol:** served via `/api/git/<name>.git/` endpoints delegating to `GitProvider`. See ADR 0007 and ADR 0008.
 
 ## Documentation

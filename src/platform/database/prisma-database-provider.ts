@@ -1,5 +1,6 @@
 import type { Config } from "@libsql/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaPg } from "@prisma/adapter-pg";
 import {
 	type PrismaClient,
 	PrismaClient as PrismaClientClass,
@@ -13,13 +14,35 @@ type TxClient = Omit<
 	"$connect" | "$disconnect" | "$on" | "$use" | "$extends"
 >;
 
+type PrismaClientOptions = ConstructorParameters<typeof PrismaClientClass>[0];
+type PrismaAdapter = Exclude<
+	NonNullable<PrismaClientOptions>["adapter"],
+	undefined
+>;
+
+function createAdapter(url: string): PrismaAdapter {
+	if (url.startsWith("postgresql://") || url.startsWith("postgres://")) {
+		return new PrismaPg({ connectionString: url }) as PrismaAdapter;
+	}
+
+	if (
+		url.startsWith("file:") ||
+		url.startsWith("libsql://") ||
+		url === ":memory:"
+	) {
+		return new PrismaLibSql({ url } satisfies Config) as PrismaAdapter;
+	}
+
+	throw new Error(`Unsupported DATABASE_URL scheme: ${url}`);
+}
+
 export class PrismaDatabaseProvider implements DatabaseProvider {
 	private readonly client: PrismaClient;
 
 	constructor(databaseUrl?: string) {
 		const url = databaseUrl ?? getConfig().databaseUrl;
 		ensureFileDatabaseDir(url);
-		const adapter = new PrismaLibSql({ url } satisfies Config);
+		const adapter = createAdapter(url);
 		this.client = new PrismaClientClass({ adapter });
 	}
 

@@ -40,6 +40,15 @@ Build and run the production container:
 docker compose -f docker/compose.yaml up --build -d
 ```
 
+Run the Docker deployment with PostgreSQL metadata storage:
+
+```bash
+docker compose \
+  -f docker/compose.yaml \
+  -f docker/compose.postgres.yaml \
+  up --build -d
+```
+
 The application is available at <http://localhost:3000>. Before production
 deployment, replace the development `SESSION_SECRET` in `.env`. Persistent
 application data is stored in a named Docker volume. See
