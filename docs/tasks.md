@@ -41,9 +41,9 @@ Click **Edit** on the board page to show the add-column form and column
 deletion controls. Click **Save** to leave edit mode. Column additions and
 deletions are saved immediately.
 
-Cards in a deleted column must be moved to another column. Select the target
-column before deleting a non-empty column. The last column on a board cannot be
-deleted.
+Cards in a deleted column must be moved to another column. Open the column
+deletion menu, select the target column for a non-empty column, and confirm the
+deletion from the menu. The last column on a board cannot be deleted.
 
 ## Working with Cards
 
@@ -79,8 +79,8 @@ Opening that URL directly loads the board and opens the selected card.
 All organization members can read task boards, columns, and cards.
 
 Only `owner`, `administrator`, and `moderator` roles can create, update, move,
-or delete boards, columns, and cards. Ordinary `member` users have read-only
-access in the MVP.
+or delete boards, columns, and cards. Card deletion is confirmed from the card
+delete menu. Ordinary `member` users have read-only access in the MVP.
 
 NoAuth mode works with the fixed `default` organization and uses the existing
 NoAuth access policy.

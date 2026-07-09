@@ -85,8 +85,14 @@ test("creates a task board and opens a card by direct URL", async ({
 		`[data-testid="task-column"][data-column-name="${extraColumnName}"]`,
 	);
 	await expect(extraColumn).toBeVisible();
-	page.once("dialog", (dialog) => dialog.accept());
 	await extraColumn.getByRole("button", { name: "Delete column" }).click();
+	await expect(
+		page.getByText(`Delete column ${extraColumnName}?`, { exact: true }),
+	).toBeVisible();
+	await page
+		.getByRole("menu")
+		.getByRole("button", { name: "Delete column" })
+		.click();
 	await expect(extraColumn).toBeHidden();
 
 	await page.getByRole("button", { name: "Save" }).click();
@@ -115,6 +121,27 @@ test("creates a task board and opens a card by direct URL", async ({
 
 	await page.goto(`/organizations/default/tasks/${boardKey}/${boardKey}-1`);
 	await expect(cardDialog.getByLabel("Title")).toHaveValue(cardTitle);
+	await cardDialog.getByRole("button", { name: "Delete card" }).click();
+	await expect(
+		page.getByText(`Delete task ${boardKey}-1?`, { exact: true }),
+	).toBeVisible();
+	await page.keyboard.press("Escape");
+	await page.keyboard.press("Escape");
+	await expect(cardDialog).toBeHidden();
+
+	await page.getByRole("button", { name: "Edit" }).click();
+	const backlogColumn = page.locator(
+		'[data-testid="task-column"][data-column-name="Backlog"]',
+	);
+	await backlogColumn.getByRole("button", { name: "Delete column" }).click();
+	await expect(page.getByPlaceholder("Move cards to...")).toBeVisible();
+	await page.getByPlaceholder("Move cards to...").click();
+	await page.getByRole("option", { name: "To do" }).click();
+	await expect(
+		page.getByText("Delete column Backlog?", { exact: true }),
+	).toBeVisible();
+	await page.keyboard.press("Escape");
+	await page.getByRole("button", { name: "Save" }).click();
 
 	if (testInfo.project.name !== "chromium") {
 		return;

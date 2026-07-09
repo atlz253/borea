@@ -5,7 +5,7 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Box, Button, Group, Select, Stack, Text } from "@mantine/core";
+import { Box, Button, Group, Menu, Select, Stack, Text } from "@mantine/core";
 import { GripVertical, Plus, Trash2 } from "lucide-react";
 import * as m from "#/paraglide/messages";
 import type { TaskCard, TaskColumn } from "../schemas";
@@ -208,25 +208,45 @@ export default function KanbanColumn({
 					>
 						{m.tasks_board_addCard_button()}
 					</Button>
-					{isEditingColumns && cards.length > 0 && (
-						<Select
-							size="xs"
-							placeholder={m.tasks_board_deleteTarget_placeholder()}
-							data={targetOptions}
-							value={deleteTarget ?? null}
-							onChange={(value) => onTargetChange(column.id, value)}
-						/>
-					)}
 					{isEditingColumns && (
-						<Button
-							variant="subtle"
-							color="red"
-							size="xs"
-							leftSection={<Trash2 size={14} />}
-							onClick={() => onDelete(column)}
-						>
-							{m.tasks_board_deleteColumn_button()}
-						</Button>
+						<Menu position="bottom-start" shadow="md" width={260}>
+							<Menu.Target>
+								<Button
+									variant="subtle"
+									color="red"
+									size="xs"
+									leftSection={<Trash2 size={14} />}
+								>
+									{m.tasks_board_deleteColumn_button()}
+								</Button>
+							</Menu.Target>
+							<Menu.Dropdown p="sm">
+								<Stack gap="xs">
+									<Text size="sm" fw={600}>
+										{m.tasks_board_deleteColumn_confirm({ name: column.name })}
+									</Text>
+									{cards.length > 0 && (
+										<Select
+											size="xs"
+											placeholder={m.tasks_board_deleteTarget_placeholder()}
+											data={targetOptions}
+											value={deleteTarget ?? null}
+											comboboxProps={{ withinPortal: false }}
+											onChange={(value) => onTargetChange(column.id, value)}
+										/>
+									)}
+									<Button
+										variant="filled"
+										color="red"
+										size="xs"
+										leftSection={<Trash2 size={14} />}
+										onClick={() => onDelete(column)}
+									>
+										{m.tasks_board_deleteColumn_button()}
+									</Button>
+								</Stack>
+							</Menu.Dropdown>
+						</Menu>
 					)}
 				</Stack>
 			)}

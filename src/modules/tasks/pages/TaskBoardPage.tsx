@@ -21,6 +21,7 @@ import {
 	Button,
 	Container,
 	Group,
+	Menu,
 	Modal,
 	Text,
 	Textarea,
@@ -172,11 +173,6 @@ export default function TaskBoardPage({
 	};
 
 	const deleteColumn = async (column: TaskColumn) => {
-		if (
-			!window.confirm(m.tasks_board_deleteColumn_confirm({ name: column.name }))
-		) {
-			return;
-		}
 		setError(null);
 		try {
 			await deleteTaskColumnFn({
@@ -250,13 +246,6 @@ export default function TaskBoardPage({
 
 	const deleteCard = async () => {
 		if (!selectedCard) {
-			return;
-		}
-		if (
-			!window.confirm(
-				m.tasks_board_deleteCard_confirm({ id: selectedCard.publicId }),
-			)
-		) {
 			return;
 		}
 		setError(null);
@@ -533,12 +522,15 @@ export default function TaskBoardPage({
 								onDelete={(item) => void deleteColumn(item)}
 								onOpenCard={openCard}
 								onRename={(item) => void renameColumn(item)}
-								onTargetChange={(columnId, targetColumnId) =>
-									setDeleteTargets((current) => ({
-										...current,
-										...(targetColumnId ? { [columnId]: targetColumnId } : {}),
-									}))
-								}
+								onTargetChange={(columnId, targetColumnId) => {
+									setDeleteTargets((current) => {
+										if (targetColumnId) {
+											return { ...current, [columnId]: targetColumnId };
+										}
+										const { [columnId]: _removed, ...next } = current;
+										return next;
+									});
+								}}
 							/>
 						))}
 					</Group>
@@ -647,14 +639,33 @@ export default function TaskBoardPage({
 						/>
 						{canManage && (
 							<Group justify="space-between" mt="lg">
-								<Button
-									variant="subtle"
-									color="red"
-									leftSection={<Trash2 size={16} />}
-									onClick={() => void deleteCard()}
-								>
-									{m.tasks_board_deleteCard_button()}
-								</Button>
+								<Menu position="top-start" shadow="md" width={260}>
+									<Menu.Target>
+										<Button
+											variant="subtle"
+											color="red"
+											leftSection={<Trash2 size={16} />}
+										>
+											{m.tasks_board_deleteCard_button()}
+										</Button>
+									</Menu.Target>
+									<Menu.Dropdown p="sm">
+										<Text size="sm" fw={600} mb="xs">
+											{m.tasks_board_deleteCard_confirm({
+												id: selectedCard.publicId,
+											})}
+										</Text>
+										<Button
+											variant="filled"
+											color="red"
+											size="xs"
+											leftSection={<Trash2 size={14} />}
+											onClick={() => void deleteCard()}
+										>
+											{m.tasks_board_deleteCard_button()}
+										</Button>
+									</Menu.Dropdown>
+								</Menu>
 								<Button type="submit">{m.tasks_board_saveCard_button()}</Button>
 							</Group>
 						)}
