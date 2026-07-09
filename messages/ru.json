@@ -301,7 +301,18 @@
 	"pullRequests_pullRequestFilesPage_error_updateReview": "Не удалось обновить ревью файла",
 	"pullRequests_pullRequestFilesPage_error_updateReview_alertTitle": "Не удалось обновить ревью файла",
 	"pullRequests_pullRequestFilesPage_empty": "Нет изменений файлов в этом pull request'е.",
-	"pullRequests_pullRequestFilesPage_filesChanged": "{count} файл | {count} файла | {count} файлов изменено",
+	"pullRequests_pullRequestFilesPage_filesChanged": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} файл изменён",
+				"countPlural=few": "{count} файла изменено",
+				"countPlural=many": "{count} файлов изменено",
+				"countPlural=*": "{count} файла изменено"
+			}
+		}
+	],
 	"pullRequests_pullRequestFilesPage_viewed_label": "Просмотрено",
 	"pullRequests_pullRequestFilesPage_viewed_aria": "Отметить {filePath} как просмотренный",
 	"pullRequests_pullRequestFilesPage_fileNotInDiff": "Файл больше не в текущем диффе",

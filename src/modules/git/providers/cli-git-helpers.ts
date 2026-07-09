@@ -104,8 +104,7 @@ export async function createMergeCommit(
 			env: {
 				...process.env,
 				GIT_AUTHOR_NAME: process.env.GIT_AUTHOR_NAME || "Borea",
-				GIT_AUTHOR_EMAIL:
-					process.env.GIT_AUTHOR_EMAIL || "borea@example.com",
+				GIT_AUTHOR_EMAIL: process.env.GIT_AUTHOR_EMAIL || "borea@example.com",
 				GIT_COMMITTER_NAME: process.env.GIT_COMMITTER_NAME || "Borea",
 				GIT_COMMITTER_EMAIL:
 					process.env.GIT_COMMITTER_EMAIL || "borea@example.com",

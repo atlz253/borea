@@ -301,7 +301,16 @@
 	"pullRequests_pullRequestFilesPage_error_updateReview": "Failed to update file review",
 	"pullRequests_pullRequestFilesPage_error_updateReview_alertTitle": "Failed to update file review",
 	"pullRequests_pullRequestFilesPage_empty": "No file changes in this pull request.",
-	"pullRequests_pullRequestFilesPage_filesChanged": "{count} file | {count} files changed",
+	"pullRequests_pullRequestFilesPage_filesChanged": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} file changed",
+				"countPlural=*": "{count} files changed"
+			}
+		}
+	],
 	"pullRequests_pullRequestFilesPage_viewed_label": "Viewed",
 	"pullRequests_pullRequestFilesPage_viewed_aria": "Mark {filePath} as viewed",
 	"pullRequests_pullRequestFilesPage_fileNotInDiff": "File is no longer in the current diff",

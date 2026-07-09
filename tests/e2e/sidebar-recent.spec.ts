@@ -29,9 +29,17 @@ test("clicking a recent repo in sidebar navigates to it", async ({ page }) => {
 	await page.goto("/organizations/default", { waitUntil: "load" });
 	await waitForHydration(page);
 
-	const navButtons = page.getByRole("navigation").getByRole("button");
-	if ((await navButtons.count()) > 1) {
-		await navButtons.nth(1).click();
-		await page.waitForURL(/\/organizations\/default\/repositories\/[^/]+$/);
+	const recentRepo = page
+		.getByRole("navigation")
+		.getByRole("button", { name: /^e2e-(direct|empty)-/ })
+		.first();
+	if ((await recentRepo.count()) > 0) {
+		const repoName = (await recentRepo.textContent())?.trim();
+		if (!repoName) return;
+
+		await recentRepo.click();
+		await page.waitForURL((url) => {
+			return url.pathname === `/organizations/default/repositories/${repoName}`;
+		});
 	}
 });

@@ -13,7 +13,8 @@ test("switching to Russian changes UI text", async ({ page }) => {
 	await page.getByRole("button", { name: /EN|RU/ }).click();
 	await page.getByRole("menuitem", { name: "RU" }).click();
 
-	await expect(page.getByText(/Организации/)).toBeVisible();
+	await expect(page.getByRole("button", { name: "Репозитории" })).toBeVisible();
+	await expect(page.getByRole("button", { name: "RU" })).toBeVisible();
 });
 
 test("locale persists after page reload", async ({ page }) => {
@@ -21,11 +22,12 @@ test("locale persists after page reload", async ({ page }) => {
 	await waitForHydration(page);
 	await page.getByRole("button", { name: /EN|RU/ }).click();
 	await page.getByRole("menuitem", { name: "RU" }).click();
-	await expect(page.getByText(/Организации/)).toBeVisible();
+	await expect(page.getByRole("button", { name: "Репозитории" })).toBeVisible();
 
 	await page.reload();
 	await waitForHydration(page);
-	await expect(page.getByText(/Организации/)).toBeVisible();
+	await expect(page.getByRole("button", { name: "Репозитории" })).toBeVisible();
+	await expect(page.getByRole("button", { name: "RU" })).toBeVisible();
 });
 
 test("switching back to English restores original text", async ({ page }) => {
@@ -34,9 +36,10 @@ test("switching back to English restores original text", async ({ page }) => {
 
 	await page.getByRole("button", { name: /EN|RU/ }).click();
 	await page.getByRole("menuitem", { name: "RU" }).click();
-	await expect(page.getByText(/Организации/)).toBeVisible();
+	await expect(page.getByRole("button", { name: "Репозитории" })).toBeVisible();
 
-	await page.getByRole("button", { name: /EN|RU/ }).click();
+	await page.getByRole("button", { name: "RU" }).click();
+	await expect(page.getByRole("menuitem", { name: "EN" })).toBeVisible();
 	await page.getByRole("menuitem", { name: "EN" }).click();
 	await expect(
 		page.getByRole("button", { name: "Repositories" }),
