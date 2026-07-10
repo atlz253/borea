@@ -22,12 +22,14 @@ export {
 	loginSchema,
 	passwordSchema,
 	registerSchema,
+	usernameSchema,
 	userSchema,
 } from "./schemas";
 export {
 	assertSameOriginFn,
 	createGitTokenFn,
 	getCurrentUserFn,
+	getUserByUsernameFn,
 	listGitTokensFn,
 	loginFn,
 	logoutFn,

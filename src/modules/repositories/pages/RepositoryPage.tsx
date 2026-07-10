@@ -19,6 +19,7 @@ import type { TreeEntry } from "../schemas";
 
 interface RepositoryPageProps {
 	organizationName?: string;
+	userName?: string;
 	name: string;
 	path: string;
 	entries: TreeEntry[];
@@ -42,6 +43,7 @@ function accumulatePath(segments: string[], index: number): string {
 
 export default function RepositoryPage({
 	organizationName = "default",
+	userName,
 	name,
 	path,
 	entries,
@@ -57,12 +59,20 @@ export default function RepositoryPage({
 	const breadcrumbItems = [
 		<Link
 			key="root"
-			to="/organizations/$organization/repositories/$repository/tree/$branch"
-			params={{
-				organization: organizationName,
-				repository: name,
-				branch: encodedBranch,
-			}}
+			to={
+				(userName
+					? "/users/$username/repositories/$repository/tree/$branch"
+					: "/organizations/$organization/repositories/$repository/tree/$branch") as never
+			}
+			params={
+				(userName
+					? { username: userName, repository: name, branch: encodedBranch }
+					: {
+							organization: organizationName,
+							repository: name,
+							branch: encodedBranch,
+						}) as never
+			}
 			style={LINK_STYLE}
 		>
 			{name}
@@ -70,13 +80,26 @@ export default function RepositoryPage({
 		...segments.map((seg, i) => (
 			<Link
 				key={accumulatePath(segments, i)}
-				to="/organizations/$organization/repositories/$repository/tree/$branch/$"
-				params={{
-					organization: organizationName,
-					repository: name,
-					branch: encodedBranch,
-					_splat: accumulatePath(segments, i),
-				}}
+				to={
+					(userName
+						? "/users/$username/repositories/$repository/tree/$branch/$"
+						: "/organizations/$organization/repositories/$repository/tree/$branch/$") as never
+				}
+				params={
+					(userName
+						? {
+								username: userName,
+								repository: name,
+								branch: encodedBranch,
+								_splat: accumulatePath(segments, i),
+							}
+						: {
+								organization: organizationName,
+								repository: name,
+								branch: encodedBranch,
+								_splat: accumulatePath(segments, i),
+							}) as never
+				}
 				style={LINK_STYLE}
 			>
 				{seg}
@@ -92,11 +115,16 @@ export default function RepositoryPage({
 
 			<Stack mb="lg">
 				<Group justify="space-between" align="center">
-					<GitCloneInfo organizationName={organizationName} name={name} />
+					<GitCloneInfo
+						organizationName={organizationName}
+						userName={userName}
+						name={name}
+					/>
 					<Group gap="xs">
 						{branches.length > 0 && (
 							<BranchSwitcher
 								organizationName={organizationName}
+								userName={userName}
 								repoName={name}
 								branches={branches}
 								selectedBranch={selectedBranch}
@@ -106,6 +134,7 @@ export default function RepositoryPage({
 						{commitCount > 0 && (
 							<CommitCountLink
 								organizationName={organizationName}
+								userName={userName}
 								repoName={name}
 								count={commitCount}
 								branchName={selectedBranch}
@@ -142,6 +171,7 @@ export default function RepositoryPage({
 			) : (
 				<FileList
 					organizationName={organizationName}
+					userName={userName}
 					entries={entries}
 					repoName={name}
 					currentPath={path}

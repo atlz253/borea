@@ -2,20 +2,49 @@ import { NavLink, Text } from "@mantine/core";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { listOrganizationsFn } from "#/modules/organizations";
 import type { Repository } from "#/modules/repositories";
-import { listRepositoriesFn } from "#/modules/repositories";
+import {
+	listRepositoriesFn,
+	listUserRepositoriesFn,
+} from "#/modules/repositories";
 import * as m from "#/paraglide/messages";
 
 interface Props {
 	opened: boolean;
-	organizationName: string;
+	organizationName?: string;
+	userName?: string;
+	includeOrganizations?: boolean;
 }
 
 const INITIAL_COUNT = 5;
 
+async function loadRepositories(
+	userName: string | undefined,
+	organizationName: string | undefined,
+	includeOrganizations: boolean,
+): Promise<Repository[]> {
+	if (!userName) {
+		return listRepositoriesFn({ data: { organizationName } });
+	}
+	const personal = await listUserRepositoriesFn({ data: { userName } });
+	if (!includeOrganizations) {
+		return personal;
+	}
+	const organizations = await listOrganizationsFn();
+	const organizationRepositories = await Promise.all(
+		organizations.map((organization) =>
+			listRepositoriesFn({ data: { organizationName: organization.name } }),
+		),
+	);
+	return [...personal, ...organizationRepositories.flat()];
+}
+
 export default function SidebarRecentRepositories({
 	opened,
 	organizationName,
+	userName,
+	includeOrganizations = false,
 }: Props) {
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -23,19 +52,20 @@ export default function SidebarRecentRepositories({
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [showAll, setShowAll] = useState(false);
-	const loadedOrganizationRef = useRef<string | null>(null);
+	const loadedScopeRef = useRef<string | null>(null);
 	const requestRef = useRef(0);
 
 	useEffect(() => {
-		if (!opened || loadedOrganizationRef.current === organizationName) {
+		const scope = userName ? `user:${userName}` : `org:${organizationName}`;
+		if (!opened || loadedScopeRef.current === scope) {
 			return;
 		}
-		loadedOrganizationRef.current = organizationName;
+		loadedScopeRef.current = scope;
 		const request = ++requestRef.current;
 		setLoading(true);
 		setError(null);
 		setShowAll(false);
-		listRepositoriesFn({ data: { organizationName } })
+		loadRepositories(userName, organizationName, includeOrganizations)
 			.then((result) => {
 				if (request !== requestRef.current) return;
 				const sorted = result.sort(
@@ -54,7 +84,7 @@ export default function SidebarRecentRepositories({
 				);
 				setLoading(false);
 			});
-	}, [opened, organizationName]);
+	}, [includeOrganizations, opened, organizationName, userName]);
 
 	if (loading) {
 		return (
@@ -72,7 +102,7 @@ export default function SidebarRecentRepositories({
 		);
 	}
 
-	if (loadedOrganizationRef.current === null || repos.length === 0) return null;
+	if (loadedScopeRef.current === null || repos.length === 0) return null;
 
 	const visible = showAll ? repos : repos.slice(0, INITIAL_COUNT);
 
@@ -84,20 +114,30 @@ export default function SidebarRecentRepositories({
 					component="button"
 					label={repo.name}
 					active={
-						location.pathname ===
-							`/organizations/${repo.organizationName}/repositories/${repo.name}` ||
-						location.pathname.startsWith(
-							`/organizations/${repo.organizationName}/repositories/${repo.name}/`,
-						)
+						repo.userName
+							? location.pathname ===
+									`/users/${repo.userName}/repositories/${repo.name}` ||
+								location.pathname.startsWith(
+									`/users/${repo.userName}/repositories/${repo.name}/`,
+								)
+							: location.pathname ===
+									`/organizations/${repo.organizationName}/repositories/${repo.name}` ||
+								location.pathname.startsWith(
+									`/organizations/${repo.organizationName}/repositories/${repo.name}/`,
+								)
 					}
 					variant="light"
 					onClick={() =>
 						navigate({
-							to: "/organizations/$organization/repositories/$repository",
-							params: {
-								organization: repo.organizationName,
-								repository: repo.name,
-							},
+							to: (repo.userName
+								? "/users/$username/repositories/$repository"
+								: "/organizations/$organization/repositories/$repository") as never,
+							params: (repo.userName
+								? { username: repo.userName, repository: repo.name }
+								: {
+										organization: repo.organizationName,
+										repository: repo.name,
+									}) as never,
 						})
 					}
 				/>

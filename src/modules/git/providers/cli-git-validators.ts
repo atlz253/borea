@@ -1,6 +1,8 @@
 import path from "node:path";
+import type { RepositoryLocator } from "../git-provider";
 
 const REPO_NAME_RE = /^[a-zA-Z0-9._-]+$/;
+const USERNAME_RE = /^[a-zA-Z0-9._-]+$/;
 
 const MAX_NAME_LENGTH = 100;
 const MAX_PATH_LENGTH = 1024;
@@ -21,6 +23,51 @@ export function resolvePath(
 		throw new Error("Invalid repository name");
 	}
 	return resolved;
+}
+
+export function resolveUserPath(
+	storagePath: string,
+	userName: string,
+	repositoryName: string,
+): string {
+	validateUserName(userName);
+	validateName(repositoryName);
+	const resolved = path.resolve(storagePath, "users", userName, repositoryName);
+	const root = path.resolve(storagePath, "users");
+	if (!resolved.startsWith(`${root}${path.sep}`)) {
+		throw new Error("Invalid repository name");
+	}
+	return resolved;
+}
+
+export function resolveRepositoryPath(
+	storagePath: string,
+	locator: RepositoryLocator,
+	legacy = false,
+): string {
+	if (legacy) {
+		validateName(locator.repositoryName);
+		return path.resolve(storagePath, locator.repositoryName);
+	}
+	return "userName" in locator
+		? resolveUserPath(storagePath, locator.userName, locator.repositoryName)
+		: resolvePath(
+				storagePath,
+				locator.organizationName,
+				locator.repositoryName,
+			);
+}
+
+export function validateUserName(name: string): void {
+	if (!name || !USERNAME_RE.test(name)) {
+		throw new Error("Invalid username");
+	}
+	if (name === "." || name === ".." || name.startsWith(".")) {
+		throw new Error("Username cannot start with a dot");
+	}
+	if (name.length > MAX_NAME_LENGTH) {
+		throw new Error("Username is too long (max 100 characters)");
+	}
 }
 
 export function validateOrganizationName(name: string): void {

@@ -8,11 +8,11 @@ import { PrismaOrganizationStore } from "./prisma-organization.store";
 const owner = createUser("00000000-0000-4000-8000-000000000001", "Owner");
 const member = createUser("00000000-0000-4000-8000-000000000004", "Member");
 
-function createUser(id: string, name: string): User {
+function createUser(id: string, username: string): User {
 	return {
 		id,
-		name,
-		email: `${name.toLowerCase()}@test.com`,
+		username,
+		email: `${username.toLowerCase()}@test.com`,
 		createdAt: new Date().toISOString(),
 	};
 }
@@ -36,7 +36,7 @@ async function seedUsers(): Promise<ReturnType<typeof createTestDatabase>> {
 		await c.user.create({
 			data: {
 				id: u.id,
-				name: u.name,
+				username: u.username,
 				email: u.email,
 				createdAt: now,
 				credential: "{}",

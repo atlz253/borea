@@ -18,12 +18,14 @@ import { createRepositoryFn } from "../server/repository.functions";
 interface RepositoriesPageProps {
 	canCreate?: boolean;
 	organizationName?: string;
+	userName?: string;
 	repositories: Repository[];
 }
 
 export default function RepositoriesPage({
 	canCreate = true,
 	organizationName = "default",
+	userName,
 	repositories,
 }: RepositoriesPageProps) {
 	const [showForm, setShowForm] = useState(false);
@@ -39,12 +41,18 @@ export default function RepositoriesPage({
 
 		try {
 			await createRepositoryFn({
-				data: { organizationName, name, description },
+				data: userName
+					? { userName, name, description }
+					: { organizationName, name, description },
 			});
 			setName("");
 			setDescription("");
 			setShowForm(false);
-			window.location.reload();
+			window.location.assign(
+				userName
+					? `/users/${userName}/repositories/${name}`
+					: `/organizations/${organizationName}/repositories/${name}`,
+			);
 		} catch (err) {
 			setError(
 				err instanceof Error
@@ -63,7 +71,7 @@ export default function RepositoriesPage({
 					<Text size="xs" tt="uppercase" fw={700} c="dimmed" mb="xs">
 						{m.repositories_repositoriesPage_organization_label()}
 					</Text>
-					<Title order={1}>{organizationName}</Title>
+					<Title order={1}>{userName ?? organizationName}</Title>
 				</div>
 				{canCreate && (
 					<Button

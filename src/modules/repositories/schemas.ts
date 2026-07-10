@@ -1,5 +1,6 @@
 import "#/platform/http/openapi-zod";
 import { z } from "zod";
+import { usernameSchema } from "#/modules/auth";
 import { organizationNameSchema } from "#/modules/organizations";
 import * as m from "#/paraglide/messages";
 
@@ -26,22 +27,35 @@ export const repoNameSchema = z
 		m.repositories_schemas_nameInvalid(),
 	);
 
-export const createRepositorySchema = z.object({
-	organizationName: organizationNameSchema.default("default"),
-	name: repoNameSchema,
-	description: z
-		.string()
-		.trim()
-		.max(MAX_DESC_LENGTH, m.repositories_schemas_descriptionTooLong())
-		.optional()
-		.default(""),
-});
+export const createRepositorySchema = z
+	.object({
+		organizationName: organizationNameSchema.optional(),
+		userName: usernameSchema.optional(),
+		name: repoNameSchema,
+		description: z
+			.string()
+			.trim()
+			.max(MAX_DESC_LENGTH, m.repositories_schemas_descriptionTooLong())
+			.optional()
+			.default(""),
+	})
+	.refine((data) => !(data.organizationName && data.userName), {
+		message:
+			"Repository scope cannot include both organizationName and userName",
+		path: ["organizationName"],
+	});
 
 export const deleteRepositorySchema = z
 	.object({
-		organizationName: organizationNameSchema.default("default"),
+		organizationName: organizationNameSchema.optional(),
+		userName: usernameSchema.optional(),
 		name: repoNameSchema,
 		confirmation: z.string(),
+	})
+	.refine((data) => !(data.organizationName && data.userName), {
+		message:
+			"Repository scope cannot include both organizationName and userName",
+		path: ["organizationName"],
 	})
 	.refine((data) => data.confirmation === data.name, {
 		message: m.repositories_schemas_nameConfirmMismatch(),
@@ -49,7 +63,8 @@ export const deleteRepositorySchema = z
 	});
 
 export const repositorySchema = z.object({
-	organizationName: organizationNameSchema,
+	organizationName: organizationNameSchema.optional(),
+	userName: usernameSchema.optional(),
 	name: z.string(),
 	description: z.string().optional(),
 	createdAt: z.date(),
@@ -87,10 +102,17 @@ export const refSchema = z
 	.max(MAX_PATH_LENGTH)
 	.refine((p) => !p.includes("\0"), m.repositories_schemas_refNullByte());
 
-export const repositoryLocatorSchema = z.object({
-	organizationName: organizationNameSchema.default("default"),
-	name: repoNameSchema,
-});
+export const repositoryLocatorSchema = z
+	.object({
+		organizationName: organizationNameSchema.optional(),
+		userName: usernameSchema.optional(),
+		name: repoNameSchema,
+	})
+	.refine((data) => !(data.organizationName && data.userName), {
+		message:
+			"Repository scope cannot include both organizationName and userName",
+		path: ["organizationName"],
+	});
 
 export const listFilesSchema = repositoryLocatorSchema.extend({
 	path: repoPathSchema.optional(),

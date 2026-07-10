@@ -47,7 +47,7 @@ export default function AppShellLayout({
 								<Text component="span" fw={600}>
 									{m.shared_noauthBanner_label()}
 								</Text>
-								{m.shared_noauthBanner({ name: user.name })}
+								{m.shared_noauthBanner({ name: user.username })}
 							</Text>
 						</Alert>
 					)}

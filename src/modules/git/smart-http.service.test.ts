@@ -36,6 +36,18 @@ describe("parseSmartHttpPath", () => {
 		expect(result.service).toBe("git-upload-pack");
 	});
 
+	it("parses user-scoped repository endpoints", () => {
+		const result = parseSmartHttpPath(
+			"users/alice/myrepo.git/info/refs",
+			new URLSearchParams("service=git-upload-pack"),
+		);
+
+		expect(result.userName).toBe("alice");
+		expect(result.organizationName).toBeUndefined();
+		expect(result.repoName).toBe("myrepo");
+		expect(result.endpoint).toBe("info/refs");
+	});
+
 	it("parses git-receive-pack endpoint", () => {
 		const result = parseSmartHttpPath(
 			"default/myrepo.git/git-receive-pack",

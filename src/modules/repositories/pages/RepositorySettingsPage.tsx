@@ -29,6 +29,7 @@ interface RepositorySettingsPageProps {
 	access?: RepositoryAccessSummary;
 	members?: OrganizationMember[];
 	organizationName?: string;
+	userName?: string;
 	name: string;
 	onDeleted?: () => void;
 	repositoryMembers?: RepositoryMember[];
@@ -169,7 +170,7 @@ function RepositoryAccessManager({
 					return (
 						<Group key={member.id} justify="space-between">
 							<div>
-								<Text fw={500}>{member.name}</Text>
+								<Text fw={500}>{member.username}</Text>
 								<Text size="sm" c="dimmed">
 									{member.email}
 								</Text>
@@ -211,7 +212,7 @@ function RepositoryAccessManager({
 					searchable
 					data={candidates.map((member) => ({
 						value: member.id,
-						label: `${member.name} (${member.email})`,
+						label: `${member.username} (${member.email})`,
 					}))}
 					value={selectedUserId}
 					onChange={setSelectedUserId}
@@ -256,9 +257,12 @@ export default function RepositorySettingsPage({
 	access = defaultAccess,
 	members = [],
 	organizationName = "default",
+	userName,
 	name,
 	onDeleted = () =>
-		window.location.assign(`/organizations/${organizationName}`),
+		window.location.assign(
+			userName ? `/users/${userName}` : `/organizations/${organizationName}`,
+		),
 	repositoryMembers = [],
 }: RepositorySettingsPageProps) {
 	const [opened, setOpened] = useState(false);
@@ -282,7 +286,9 @@ export default function RepositorySettingsPage({
 
 		try {
 			await deleteRepositoryFn({
-				data: { organizationName, name, confirmation },
+				data: userName
+					? { userName, name, confirmation }
+					: { organizationName, name, confirmation },
 			});
 			onDeleted();
 		} catch (caught) {

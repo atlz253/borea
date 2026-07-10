@@ -32,7 +32,7 @@ import AppShellLayout from "./AppShellLayout";
 
 const USER = {
 	id: "00000000-0000-4000-8000-000000000001",
-	name: "Test User",
+	username: "test-user",
 	email: "test@example.com",
 	createdAt: new Date(0).toISOString(),
 };
@@ -87,7 +87,7 @@ describe("AppShellLayout", () => {
 		renderLayout({ authMode: "noauth" });
 		const alert = screen.getByRole("alert");
 		expect(alert).toHaveTextContent(/NoAuth mode/);
-		expect(alert).toHaveTextContent(USER.name);
+		expect(alert).toHaveTextContent(USER.username);
 		expect(alert).toHaveTextContent(/Do not use in production/);
 	});
 

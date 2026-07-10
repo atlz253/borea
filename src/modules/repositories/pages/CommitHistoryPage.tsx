@@ -17,6 +17,7 @@ import BranchSwitcher from "../components/BranchSwitcher";
 
 interface CommitHistoryPageProps {
 	organizationName?: string;
+	userName?: string;
 	name: string;
 	commits: CommitInfo[];
 	branches: BranchInfo[];
@@ -35,6 +36,7 @@ function formatDate(date: Date): string {
 
 export default function CommitHistoryPage({
 	organizationName = "default",
+	userName,
 	name,
 	commits,
 	branches,
@@ -47,12 +49,20 @@ export default function CommitHistoryPage({
 		<Container size="lg" py="xl">
 			<Group mb="md">
 				<Link
-					to="/organizations/$organization/repositories/$repository/tree/$branch"
-					params={{
-						organization: organizationName,
-						repository: name,
-						branch: encodedBranch,
-					}}
+					to={
+						(userName
+							? "/users/$username/repositories/$repository/tree/$branch"
+							: "/organizations/$organization/repositories/$repository/tree/$branch") as never
+					}
+					params={
+						(userName
+							? { username: userName, repository: name, branch: encodedBranch }
+							: {
+									organization: organizationName,
+									repository: name,
+									branch: encodedBranch,
+								}) as never
+					}
 					style={{
 						color: "var(--mantine-color-anchor-color)",
 						textDecoration: "none",
@@ -70,6 +80,7 @@ export default function CommitHistoryPage({
 					<Title order={1}>{m.repositories_commitHistory_title()}</Title>
 					<BranchSwitcher
 						organizationName={organizationName}
+						userName={userName}
 						repoName={name}
 						branches={branches}
 						selectedBranch={selectedBranch}
@@ -121,13 +132,22 @@ export default function CommitHistoryPage({
 								style={{ cursor: "pointer" }}
 								onClick={() =>
 									navigate({
-										to: "/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha",
-										params: {
-											organization: organizationName,
-											repository: name,
-											branch: encodedBranch,
-											sha: commit.sha,
-										},
+										to: (userName
+											? "/users/$username/repositories/$repository/tree/$branch/commits/$sha"
+											: "/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha") as never,
+										params: (userName
+											? {
+													username: userName,
+													repository: name,
+													branch: encodedBranch,
+													sha: commit.sha,
+												}
+											: {
+													organization: organizationName,
+													repository: name,
+													branch: encodedBranch,
+													sha: commit.sha,
+												}) as never,
 									})
 								}
 							>

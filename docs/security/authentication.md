@@ -32,9 +32,14 @@ causes browsers to silently reject the session cookie on HTTP sites.
 
 ## Registration and Sessions
 
-Open `/auth` to sign in or register with a name, email, and password. Email
-addresses are normalized to lowercase and must be unique. Passwords must
-contain between 8 and 128 characters.
+Open `/auth` to sign in or register with a username, email, and password.
+Usernames are immutable, must be 1-100 characters, and may contain only English
+letters, digits, `.`, `_`, and `-`. They cannot be `.`, `..`, or start with
+`.`. Email addresses are normalized to lowercase and must be unique. Passwords
+must contain between 8 and 128 characters.
+
+`username` is the display identity and URL namespace for personal repositories.
+There is no separate user display-name field.
 
 Registration immediately creates a seven-day encrypted cookie session. The
 cookie is HTTP-only, uses `SameSite=Lax`, and is marked `Secure` when

@@ -9,21 +9,21 @@ import { waitForHydration } from "../e2e/helpers";
 interface TestAccount {
 	context: import("@playwright/test").BrowserContext;
 	page: import("@playwright/test").Page;
-	profile: { id: string; email: string; name: string };
+	profile: { id: string; email: string; username: string };
 }
 
 async function register(
 	page: import("@playwright/test").Page,
-	user: { name: string; email: string; password: string },
+	user: { username: string; email: string; password: string },
 ) {
 	await page.goto("/auth");
 	await waitForHydration(page);
 	await page.getByRole("tab", { name: "Register" }).click();
-	await page.getByLabel("Name").fill(user.name);
+	await page.getByRole("textbox", { name: "Username" }).fill(user.username);
 	await page.getByLabel("Email").fill(user.email);
 	await page.getByRole("textbox", { name: "Password" }).fill(user.password);
 	await page.getByRole("button", { name: "Create account" }).click();
-	await expect(page).toHaveURL("/organizations");
+	await expect(page).toHaveURL("/repositories");
 }
 
 async function createAccount(
@@ -34,7 +34,7 @@ async function createAccount(
 	const context = await browser.newContext();
 	const page = await context.newPage();
 	const user = {
-		name,
+		username: `${name.toLowerCase()}-${suffix}`,
 		email: `${name.toLowerCase()}-${suffix}@example.com`,
 		password: "password123",
 	};
@@ -107,7 +107,7 @@ test("enforces organization and repository role hierarchy", async ({
 	test.setTimeout(120_000);
 	const suffix = Date.now().toString(36);
 	const owner = {
-		name: "Owner",
+		username: `owner-${suffix}`,
 		email: `owner-${suffix}@example.com`,
 		password: "password123",
 	};

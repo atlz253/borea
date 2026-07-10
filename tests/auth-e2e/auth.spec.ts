@@ -3,16 +3,16 @@ import { waitForHydration } from "../e2e/helpers";
 
 async function register(
 	page: import("@playwright/test").Page,
-	user: { name: string; email: string; password: string },
+	user: { username: string; email: string; password: string },
 ) {
 	if (!new URL(page.url()).pathname.startsWith("/auth")) {
 		await page.goto("/auth");
 	}
 	const redirectTo =
-		new URL(page.url()).searchParams.get("redirect") ?? "/organizations";
+		new URL(page.url()).searchParams.get("redirect") ?? "/repositories";
 	await waitForHydration(page);
 	await page.getByRole("tab", { name: "Register" }).click();
-	await page.getByLabel("Name").fill(user.name);
+	await page.getByRole("textbox", { name: "Username" }).fill(user.username);
 	await page.getByLabel("Email").fill(user.email);
 	await page.getByRole("textbox", { name: "Password" }).fill(user.password);
 	await page.getByRole("button", { name: "Create account" }).click();
@@ -25,7 +25,7 @@ test("authenticates users and shares organizations through membership", async ({
 }) => {
 	const suffix = Date.now().toString(36);
 	const alice = {
-		name: "Alice",
+		username: `alice-${suffix}`,
 		email: `alice-${suffix}@example.com`,
 		password: "password123",
 	};
@@ -35,7 +35,7 @@ test("authenticates users and shares organizations through membership", async ({
 	await page.goto(`/organizations?source=${suffix}`);
 	await expect(page).toHaveURL(/\/auth\?redirect=/);
 	await register(page, alice);
-	await expect(page.getByText(alice.name, { exact: true })).toBeVisible();
+	await expect(page.getByText(alice.username, { exact: true })).toBeVisible();
 
 	await waitForHydration(page);
 	await page.getByRole("button", { name: "New organization" }).click();
@@ -62,12 +62,12 @@ test("authenticates users and shares organizations through membership", async ({
 
 	await page.getByRole("textbox", { name: "Password" }).fill(alice.password);
 	await page.getByRole("button", { name: "Sign in" }).click();
-	await expect(page).toHaveURL("/organizations");
+	await expect(page).toHaveURL("/repositories");
 
 	const bobContext = await browser.newContext();
 	const bobPage = await bobContext.newPage();
 	const bob = {
-		name: "Bob",
+		username: `bob-${suffix}`,
 		email: `bob-${suffix}@example.com`,
 		password: "password123",
 	};
@@ -86,7 +86,7 @@ test("authenticates users and shares organizations through membership", async ({
 	const charlieContext = await browser.newContext();
 	const charliePage = await charlieContext.newPage();
 	const charlie = {
-		name: "Charlie",
+		username: `charlie-${suffix}`,
 		email: `charlie-${suffix}@example.com`,
 		password: "password123",
 	};
@@ -137,10 +137,14 @@ test("authenticates users and shares organizations through membership", async ({
 	await bobPage.getByRole("button", { name: "New repository" }).click();
 	await bobPage.getByLabel("Repository name").fill(repositoryName);
 	await bobPage.getByRole("button", { name: "Create repository" }).click();
+	await expect(bobPage).toHaveURL(
+		`/organizations/${organizationName}/repositories/${repositoryName}`,
+	);
 	await expect(
-		bobPage.getByRole("link", { name: repositoryName }),
+		bobPage.getByRole("heading", { name: repositoryName }),
 	).toBeVisible();
 
+	await bobPage.goto(`/organizations/${organizationName}`);
 	await waitForHydration(bobPage);
 	await bobPage.getByLabel("Invite member by email").fill(charlie.email);
 	await bobPage.getByRole("button", { name: "Invite member" }).click();

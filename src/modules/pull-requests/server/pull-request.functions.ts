@@ -54,7 +54,10 @@ export const createPullRequestFn = createServerFn({ method: "POST" })
 				error instanceof ConflictError &&
 				error.message === "Repository already exists"
 			) {
-				return service.createPullRequest({ ...data, authorName: user.name });
+				return service.createPullRequest({
+					...data,
+					authorName: user.username,
+				});
 			}
 			if (
 				typeof error !== "object" ||
@@ -64,7 +67,7 @@ export const createPullRequestFn = createServerFn({ method: "POST" })
 				throw error;
 			}
 		}
-		return service.createPullRequest({ ...data, authorName: user.name });
+		return service.createPullRequest({ ...data, authorName: user.username });
 	});
 
 export const listPullRequestsFn = createServerFn({ method: "GET" })

@@ -16,7 +16,7 @@ import { loginFn, registerFn } from "../server/auth.functions";
 
 export default function AuthPage({ redirectTo }: { redirectTo: string }) {
 	const [tab, setTab] = useState<string | null>("login");
-	const [name, setName] = useState("");
+	const [username, setUsername] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | null>(null);
@@ -28,7 +28,7 @@ export default function AuthPage({ redirectTo }: { redirectTo: string }) {
 		setLoading(true);
 		try {
 			if (tab === "register") {
-				await registerFn({ data: { name, email, password } });
+				await registerFn({ data: { username, email, password } });
 			} else {
 				await loginFn({ data: { email, password } });
 			}
@@ -68,10 +68,10 @@ export default function AuthPage({ redirectTo }: { redirectTo: string }) {
 					<Stack mt="lg">
 						{tab === "register" && (
 							<TextInput
-								label={m.auth_authPage_name_label()}
+								label={m.auth_authPage_username_label()}
 								required
-								value={name}
-								onChange={(event) => setName(event.currentTarget.value)}
+								value={username}
+								onChange={(event) => setUsername(event.currentTarget.value)}
 							/>
 						)}
 						<TextInput

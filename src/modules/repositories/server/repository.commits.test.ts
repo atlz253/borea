@@ -12,7 +12,6 @@ describe("repository commit validators", () => {
 			const result = listCommitsSchema.parse({ name: "my-repo" });
 			expect(result).toEqual({
 				name: "my-repo",
-				organizationName: "default",
 			});
 		});
 
@@ -77,7 +76,6 @@ describe("repository commit validators", () => {
 			const result = countCommitsSchema.parse({ name: "my-repo" });
 			expect(result).toEqual({
 				name: "my-repo",
-				organizationName: "default",
 			});
 		});
 

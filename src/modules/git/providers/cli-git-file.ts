@@ -8,7 +8,11 @@ import type {
 } from "../git-provider";
 import { refExists } from "./cli-git-helpers";
 import { DEFAULT_REF } from "./cli-git-parsers";
-import { normalizePath, resolvePath, validateName } from "./cli-git-validators";
+import {
+	normalizePath,
+	resolveRepositoryPath,
+	validateName,
+} from "./cli-git-validators";
 
 export async function readFileContent(
 	gitBin: string,
@@ -19,9 +23,7 @@ export async function readFileContent(
 ): Promise<FileContent> {
 	const name = locator.repositoryName;
 	validateName(name);
-	const repoPath = legacy
-		? path.resolve(storagePath, name)
-		: resolvePath(storagePath, locator.organizationName, name);
+	const repoPath = resolveRepositoryPath(storagePath, locator, legacy);
 
 	if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 		throw new Error(`Repository "${name}" not found`);

@@ -59,6 +59,15 @@ export class FileAuthProvider implements AuthProvider {
 		return user;
 	}
 
+	async getUserByUsername(username: string): Promise<User | undefined> {
+		const stored = await this.users.getByUsername(username);
+		if (!stored) {
+			return undefined;
+		}
+		const { credential: _credential, ...user } = stored;
+		return user;
+	}
+
 	async authenticateGitToken(token: string): Promise<User | null> {
 		const userId = await this.gitTokens.verify(token);
 		return userId ? ((await this.getUserById(userId)) ?? null) : null;
@@ -103,7 +112,7 @@ export class NoAuthProvider implements AuthProvider {
 	constructor(name: string) {
 		this.user = {
 			id: "00000000-0000-4000-8000-000000000000",
-			name,
+			username: name,
 			email: "noauth@localhost",
 			createdAt: new Date(0).toISOString(),
 		};
@@ -123,6 +132,10 @@ export class NoAuthProvider implements AuthProvider {
 
 	async getUserById(id: string): Promise<User | undefined> {
 		return id === this.user.id ? this.user : undefined;
+	}
+
+	async getUserByUsername(username: string): Promise<User | undefined> {
+		return username === this.user.username ? this.user : undefined;
 	}
 
 	async authenticateGitToken(_token: string): Promise<User> {

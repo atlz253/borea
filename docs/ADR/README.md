@@ -37,6 +37,7 @@ This directory contains Architecture Decision Records (ADRs) for Borea. Each ADR
 | 0031 | [Grafana Observability Compose Override](0031-grafana-observability-compose-override.md) | Optional Grafana/Loki/Tempo/Alloy compose override and Docker artifact relocation |
 | 0032 | [PostgreSQL Docker Deployment With SQLite Local Development](0032-postgresql-docker-sqlite-local.md) | PostgreSQL for Docker deployment while keeping SQLite for local non-Docker development |
 | 0033 | [GitHub Actions CI](0033-github-actions-ci.md) | Parallel GitHub Actions checks for quality, Vitest, integration, and Playwright E2E suites |
+| 0034 | [User-Scoped Repositories](0034-user-scoped-repositories.md) | Personal repositories under `/users/:username`, user Git URLs, and username-based identity |
 
 ## Adding a New ADR
 

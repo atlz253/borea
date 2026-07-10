@@ -57,7 +57,6 @@ describe("getFileSchema", () => {
 				ref: "main",
 			}),
 		).toEqual({
-			organizationName: "default",
 			name: "my-repo",
 			path: "src/index.ts",
 			ref: "main",
@@ -114,10 +113,30 @@ describe("deleteRepositorySchema", () => {
 				confirmation: "my-repo",
 			}),
 		).toEqual({
-			organizationName: "default",
 			name: "my-repo",
 			confirmation: "my-repo",
 		});
+	});
+
+	it("accepts a personal repository scope", () => {
+		expect(
+			deleteRepositorySchema.parse({
+				userName: "alice",
+				name: "my-repo",
+				confirmation: "my-repo",
+			}),
+		).toMatchObject({ userName: "alice", name: "my-repo" });
+	});
+
+	it("rejects conflicting user and organization scopes", () => {
+		expect(() =>
+			deleteRepositorySchema.parse({
+				organizationName: "default",
+				userName: "alice",
+				name: "my-repo",
+				confirmation: "my-repo",
+			}),
+		).toThrow(/cannot include both/);
 	});
 
 	it("rejects a mismatched or differently cased confirmation", () => {

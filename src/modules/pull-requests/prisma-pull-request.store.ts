@@ -9,6 +9,9 @@ import type {
 } from "./schemas";
 
 function repoId(locator: RepositoryLocator): string {
+	if ("userName" in locator) {
+		return `users/${locator.userName}/${locator.repositoryName}`;
+	}
 	return `${locator.organizationName}/${locator.repositoryName}`;
 }
 
@@ -23,11 +26,11 @@ function toPullRequest(row: {
 	createdAt: string;
 	updatedAt: string;
 	viewedFiles: string;
-	repository: { organizationName: string; name: string };
+	repository: { organizationName: string | null; name: string };
 }): PullRequest {
 	return {
 		id: row.prNumber,
-		organizationName: row.repository.organizationName,
+		organizationName: row.repository.organizationName ?? "",
 		repoName: row.repository.name,
 		title: row.title,
 		sourceBranch: row.sourceBranch,

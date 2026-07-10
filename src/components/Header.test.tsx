@@ -11,7 +11,7 @@ import Header from "./Header";
 
 const USER = {
 	id: "00000000-0000-4000-8000-000000000001",
-	name: "Test User",
+	username: "test-user",
 	email: "test@example.com",
 	createdAt: new Date(0).toISOString(),
 };

@@ -2,9 +2,11 @@
 
 Borea provides a web interface for browsing and managing Git repositories. This guide covers the main pages you'll use.
 
-## Organizations and Repositories
+## Repositories
 
-The main page at `/organizations` shows available organizations. Opening
+The authenticated landing page is `/repositories`. It shows the current user's
+personal repositories together with organization repositories they can access.
+Opening `/users/<username>` shows personal repositories for that user. Opening
 `/organizations/<organization>` shows repositories in that organization.
 
 - Each repository is shown with its name and optional description.
@@ -19,13 +21,15 @@ The main page at `/organizations` shows available organizations. Opening
    - **Description** (optional).
 3. Click **"Create repository"**.
 
-After creation, the new repository appears in the list.
+On `/repositories`, new repositories are personal repositories and open at
+`/users/<username>/repositories/<name>`. On an organization page, new
+repositories stay organization-owned.
 
 ## Repository Page
 
-Opening a repository (`/organizations/<organization>/repositories/<name>`)
-brings you to its main page. If it has commits, the page redirects to its
-namespaced tree route.
+Opening a repository (`/users/<username>/repositories/<name>` or
+`/organizations/<organization>/repositories/<name>`) brings you to its main
+page. If it has commits, the page redirects to its namespaced tree route.
 
 ### Branch Switcher
 
@@ -57,7 +61,7 @@ The same branch name rules apply as for creating a branch. The old branch is rem
 You'll find the **"Git pull URL"** field with the address for cloning the repository over HTTP. Click the copy button to copy it, then use it in your terminal:
 
 ```bash
-git clone http://localhost:3000/api/git/default/my-project.git
+git clone http://localhost:3000/api/git/users/alice/my-project.git
 ```
 
 See [Working with Repositories via HTTP](git-http.md) for detailed instructions.
@@ -72,7 +76,8 @@ Below the clone URL is the file browser — a table with two columns: **Name** a
 
 - **Directories** are listed first (with a folder icon), followed by **files** (with a file icon), sorted alphabetically.
 - Click a directory name to navigate inside it.
-- Click a file name to open its contents at `/organizations/<organization>/repositories/<name>/blob/<branch>/<path>`.
+- Click a file name to open its contents under the same `/users/...` or
+  `/organizations/...` repository namespace.
 - Use the **`..`** entry at the top to go up one level.
 - **Breadcrumbs** above the table show your current path inside the repository. Click any part of the breadcrumb to jump directly to that folder.
 
@@ -96,7 +101,8 @@ Push your first commit to make the file browser appear.
 
 ## Commit History
 
-Navigate to `/repositories/<name>/tree/<branch>/commits` to see the commit history.
+Navigate to the repository's `/tree/<branch>/commits` route to see the commit
+history.
 
 - Click **"← Back to repository"** to return to the main repository page for the same branch.
 - The branch switcher is available at the top, so you can switch branches without leaving the commit history page.
@@ -149,9 +155,9 @@ action. Click **"Delete repository"**, then enter the repository name exactly
 as shown to enable the confirmation button. The confirmation is case-sensitive
 and whitespace is not removed.
 
-Deleting a repository also permanently deletes all pull requests associated
-with it. This action cannot be undone. After deletion, you are returned to the
-repositories list.
+Deleting an organization repository also permanently deletes its pull requests.
+Personal repositories do not support pull requests in this version. This action
+cannot be undone. After deletion, you are returned to the repositories list.
 
 ## Tips
 

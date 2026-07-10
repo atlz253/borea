@@ -21,6 +21,7 @@ export {
 export type { Repository, TreeEntry, TreeEntryType } from "./schemas";
 export {
 	branchNameSchema,
+	createRepositorySchema,
 	renameBranchSchema,
 	repoNameSchema,
 	repositoryResponseSchema,
@@ -37,9 +38,11 @@ export {
 	getCommitFn,
 	getRepositoryFileFn,
 	getRepositoryFn,
+	getUserRepositoryAccessFn,
 	listBranchesFn,
 	listCommitsFn,
 	listRepositoriesFn,
 	listRepositoryFilesFn,
+	listUserRepositoriesFn,
 	renameBranchFn,
 } from "./server/repository.functions";

@@ -10,18 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as RepositoriesRouteImport } from './routes/repositories'
 import { Route as OrganizationsRouteImport } from './routes/organizations'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings.index'
 import { Route as OrganizationsIndexRouteImport } from './routes/organizations.index'
+import { Route as UsersUsernameRouteImport } from './routes/users.$username'
 import { Route as SettingsGitTokensRouteImport } from './routes/settings.git-tokens'
+import { Route as UsersUsernameIndexRouteImport } from './routes/users.$username.index'
 import { Route as OrganizationsOrganizationIndexRouteImport } from './routes/organizations.$organization.index'
 import { Route as OrganizationsOrganizationTasksRouteImport } from './routes/organizations.$organization.tasks'
 import { Route as ApiV1OrganizationsRouteImport } from './routes/api/v1/organizations'
 import { Route as ApiV1OpenapiDotjsonRouteImport } from './routes/api/v1/openapi[.]json'
 import { Route as ApiGitSplatRouteImport } from './routes/api/git/$'
 import { Route as OrganizationsOrganizationTasksIndexRouteImport } from './routes/organizations.$organization.tasks.index'
+import { Route as UsersUsernameRepositoriesRepositoryRouteImport } from './routes/users.$username.repositories.$repository'
 import { Route as OrganizationsOrganizationTasksBoardKeyRouteImport } from './routes/organizations.$organization.tasks.$boardKey'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryRouteImport } from './routes/organizations.$organization.repositories.$repository'
 import { Route as ApiV1OrganizationsOrganizationRouteImport } from './routes/api/v1/organizations.$organization'
@@ -30,9 +34,12 @@ import { Route as ApiV1AuthMeRouteImport } from './routes/api/v1/auth.me'
 import { Route as ApiV1AuthLogoutRouteImport } from './routes/api/v1/auth.logout'
 import { Route as ApiV1AuthLoginRouteImport } from './routes/api/v1/auth.login'
 import { Route as ApiV1AuthGitTokensRouteImport } from './routes/api/v1/auth.git-tokens'
+import { Route as UsersUsernameRepositoriesRepositoryIndexRouteImport } from './routes/users.$username.repositories.$repository.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.index'
+import { Route as UsersUsernameRepositoriesRepositorySettingsRouteImport } from './routes/users.$username.repositories.$repository.settings'
 import { Route as OrganizationsOrganizationTasksBoardKeyTaskPublicIdRouteImport } from './routes/organizations.$organization.tasks.$boardKey.$taskPublicId'
 import { Route as OrganizationsOrganizationRepositoriesRepositorySettingsRouteImport } from './routes/organizations.$organization.repositories.$repository.settings'
+import { Route as ApiV1UsersUsernameRepositoriesRouteImport } from './routes/api/v1/users.$username.repositories'
 import { Route as ApiV1OrganizationsOrganizationTaskBoardsRouteImport } from './routes/api/v1/organizations.$organization.task-boards'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRouteImport } from './routes/api/v1/organizations.$organization.repositories'
 import { Route as ApiV1OrganizationsOrganizationMembersRouteImport } from './routes/api/v1/organizations.$organization.members'
@@ -40,11 +47,16 @@ import { Route as ApiV1AuthGitTokensTokenIdRouteImport } from './routes/api/v1/a
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsNewRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.new'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.$pullId'
+import { Route as ApiV1UsersUsernameRepositoriesRepositoryRouteImport } from './routes/api/v1/users.$username.repositories.$repository'
 import { Route as ApiV1OrganizationsOrganizationTaskBoardsBoardKeyRouteImport } from './routes/api/v1/organizations.$organization.task-boards.$boardKey'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository'
 import { Route as ApiV1OrganizationsOrganizationMembersUserIdRouteImport } from './routes/api/v1/organizations.$organization.members.$userId'
+import { Route as UsersUsernameRepositoriesRepositoryTreeBranchIndexRouteImport } from './routes/users.$username.repositories.$repository.tree.$branch.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.$pullId.index'
+import { Route as UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteImport } from './routes/users.$username.repositories.$repository.tree.$branch.commits'
+import { Route as UsersUsernameRepositoriesRepositoryTreeBranchSplatRouteImport } from './routes/users.$username.repositories.$repository.tree.$branch.$'
+import { Route as UsersUsernameRepositoriesRepositoryBlobBranchSplatRouteImport } from './routes/users.$username.repositories.$repository.blob.$branch.$'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.commits'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchSplatRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.$'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryPullsPullIdFilesRouteImport } from './routes/organizations.$organization.repositories.$repository.pulls.$pullId.files'
@@ -53,7 +65,9 @@ import { Route as ApiV1OrganizationsOrganizationTaskBoardsBoardKeyColumnsRouteIm
 import { Route as ApiV1OrganizationsOrganizationTaskBoardsBoardKeyCardsRouteImport } from './routes/api/v1/organizations.$organization.task-boards.$boardKey.cards'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository.pull-requests'
 import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteImport } from './routes/api/v1/organizations.$organization.repositories.$repository.members'
+import { Route as UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRouteImport } from './routes/users.$username.repositories.$repository.tree.$branch.commits.index'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.commits.index'
+import { Route as UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRouteImport } from './routes/users.$username.repositories.$repository.tree.$branch.commits.$sha'
 import { Route as OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRouteImport } from './routes/organizations.$organization.repositories.$repository.tree.$branch.commits.$sha'
 import { Route as ApiV1OrganizationsOrganizationTaskBoardsBoardKeyColumnsColumnIdRouteImport } from './routes/api/v1/organizations.$organization.task-boards.$boardKey.columns.$columnId'
 import { Route as ApiV1OrganizationsOrganizationTaskBoardsBoardKeyCardsTaskPublicIdRouteImport } from './routes/api/v1/organizations.$organization.task-boards.$boardKey.cards.$taskPublicId'
@@ -64,6 +78,11 @@ import { Route as ApiV1OrganizationsOrganizationRepositoriesRepositoryPullReques
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RepositoriesRoute = RepositoriesRouteImport.update({
+  id: '/repositories',
+  path: '/repositories',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrganizationsRoute = OrganizationsRouteImport.update({
@@ -91,10 +110,20 @@ const OrganizationsIndexRoute = OrganizationsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => OrganizationsRoute,
 } as any)
+const UsersUsernameRoute = UsersUsernameRouteImport.update({
+  id: '/users/$username',
+  path: '/users/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsGitTokensRoute = SettingsGitTokensRouteImport.update({
   id: '/git-tokens',
   path: '/git-tokens',
   getParentRoute: () => SettingsRoute,
+} as any)
+const UsersUsernameIndexRoute = UsersUsernameIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => UsersUsernameRoute,
 } as any)
 const OrganizationsOrganizationIndexRoute =
   OrganizationsOrganizationIndexRouteImport.update({
@@ -128,6 +157,12 @@ const OrganizationsOrganizationTasksIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => OrganizationsOrganizationTasksRoute,
+  } as any)
+const UsersUsernameRepositoriesRepositoryRoute =
+  UsersUsernameRepositoriesRepositoryRouteImport.update({
+    id: '/repositories/$repository',
+    path: '/repositories/$repository',
+    getParentRoute: () => UsersUsernameRoute,
   } as any)
 const OrganizationsOrganizationTasksBoardKeyRoute =
   OrganizationsOrganizationTasksBoardKeyRouteImport.update({
@@ -172,11 +207,23 @@ const ApiV1AuthGitTokensRoute = ApiV1AuthGitTokensRouteImport.update({
   path: '/api/v1/auth/git-tokens',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersUsernameRepositoriesRepositoryIndexRoute =
+  UsersUsernameRepositoriesRepositoryIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => UsersUsernameRepositoriesRepositoryRoute,
+  } as any)
 const OrganizationsOrganizationRepositoriesRepositoryIndexRoute =
   OrganizationsOrganizationRepositoriesRepositoryIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => OrganizationsOrganizationRepositoriesRepositoryRoute,
+  } as any)
+const UsersUsernameRepositoriesRepositorySettingsRoute =
+  UsersUsernameRepositoriesRepositorySettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => UsersUsernameRepositoriesRepositoryRoute,
   } as any)
 const OrganizationsOrganizationTasksBoardKeyTaskPublicIdRoute =
   OrganizationsOrganizationTasksBoardKeyTaskPublicIdRouteImport.update({
@@ -189,6 +236,12 @@ const OrganizationsOrganizationRepositoriesRepositorySettingsRoute =
     id: '/settings',
     path: '/settings',
     getParentRoute: () => OrganizationsOrganizationRepositoriesRepositoryRoute,
+  } as any)
+const ApiV1UsersUsernameRepositoriesRoute =
+  ApiV1UsersUsernameRepositoriesRouteImport.update({
+    id: '/api/v1/users/$username/repositories',
+    path: '/api/v1/users/$username/repositories',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const ApiV1OrganizationsOrganizationTaskBoardsRoute =
   ApiV1OrganizationsOrganizationTaskBoardsRouteImport.update({
@@ -232,6 +285,12 @@ const OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRoute =
     path: '/pulls/$pullId',
     getParentRoute: () => OrganizationsOrganizationRepositoriesRepositoryRoute,
   } as any)
+const ApiV1UsersUsernameRepositoriesRepositoryRoute =
+  ApiV1UsersUsernameRepositoriesRepositoryRouteImport.update({
+    id: '/$repository',
+    path: '/$repository',
+    getParentRoute: () => ApiV1UsersUsernameRepositoriesRoute,
+  } as any)
 const ApiV1OrganizationsOrganizationTaskBoardsBoardKeyRoute =
   ApiV1OrganizationsOrganizationTaskBoardsBoardKeyRouteImport.update({
     id: '/$boardKey',
@@ -249,6 +308,12 @@ const ApiV1OrganizationsOrganizationMembersUserIdRoute =
     id: '/$userId',
     path: '/$userId',
     getParentRoute: () => ApiV1OrganizationsOrganizationMembersRoute,
+  } as any)
+const UsersUsernameRepositoriesRepositoryTreeBranchIndexRoute =
+  UsersUsernameRepositoriesRepositoryTreeBranchIndexRouteImport.update({
+    id: '/tree/$branch/',
+    path: '/tree/$branch/',
+    getParentRoute: () => UsersUsernameRepositoriesRepositoryRoute,
   } as any)
 const OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRoute =
   OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRouteImport.update(
@@ -268,6 +333,24 @@ const OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRoute =
         OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRoute,
     } as any,
   )
+const UsersUsernameRepositoriesRepositoryTreeBranchCommitsRoute =
+  UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteImport.update({
+    id: '/tree/$branch/commits',
+    path: '/tree/$branch/commits',
+    getParentRoute: () => UsersUsernameRepositoriesRepositoryRoute,
+  } as any)
+const UsersUsernameRepositoriesRepositoryTreeBranchSplatRoute =
+  UsersUsernameRepositoriesRepositoryTreeBranchSplatRouteImport.update({
+    id: '/tree/$branch/$',
+    path: '/tree/$branch/$',
+    getParentRoute: () => UsersUsernameRepositoriesRepositoryRoute,
+  } as any)
+const UsersUsernameRepositoriesRepositoryBlobBranchSplatRoute =
+  UsersUsernameRepositoriesRepositoryBlobBranchSplatRouteImport.update({
+    id: '/blob/$branch/$',
+    path: '/blob/$branch/$',
+    getParentRoute: () => UsersUsernameRepositoriesRepositoryRoute,
+  } as any)
 const OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRoute =
   OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRouteImport.update(
     {
@@ -334,6 +417,13 @@ const ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRoute =
         ApiV1OrganizationsOrganizationRepositoriesRepositoryRoute,
     } as any,
   )
+const UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRoute =
+  UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () =>
+      UsersUsernameRepositoriesRepositoryTreeBranchCommitsRoute,
+  } as any)
 const OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute =
   OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRouteImport.update(
     {
@@ -343,6 +433,13 @@ const OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute
         OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRoute,
     } as any,
   )
+const UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRoute =
+  UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRouteImport.update({
+    id: '/$sha',
+    path: '/$sha',
+    getParentRoute: () =>
+      UsersUsernameRepositoriesRepositoryTreeBranchCommitsRoute,
+  } as any)
 const OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRoute =
   OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRouteImport.update(
     {
@@ -402,8 +499,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/organizations': typeof OrganizationsRouteWithChildren
+  '/repositories': typeof RepositoriesRoute
   '/settings': typeof SettingsRouteWithChildren
   '/settings/git-tokens': typeof SettingsGitTokensRoute
+  '/users/$username': typeof UsersUsernameRouteWithChildren
   '/organizations/': typeof OrganizationsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
@@ -411,6 +510,7 @@ export interface FileRoutesByFullPath {
   '/api/v1/organizations': typeof ApiV1OrganizationsRouteWithChildren
   '/organizations/$organization/tasks': typeof OrganizationsOrganizationTasksRouteWithChildren
   '/organizations/$organization/': typeof OrganizationsOrganizationIndexRoute
+  '/users/$username/': typeof UsersUsernameIndexRoute
   '/api/v1/auth/git-tokens': typeof ApiV1AuthGitTokensRouteWithChildren
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
@@ -419,17 +519,22 @@ export interface FileRoutesByFullPath {
   '/api/v1/organizations/$organization': typeof ApiV1OrganizationsOrganizationRouteWithChildren
   '/organizations/$organization/repositories/$repository': typeof OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/organizations/$organization/tasks/$boardKey': typeof OrganizationsOrganizationTasksBoardKeyRouteWithChildren
+  '/users/$username/repositories/$repository': typeof UsersUsernameRepositoriesRepositoryRouteWithChildren
   '/organizations/$organization/tasks/': typeof OrganizationsOrganizationTasksIndexRoute
   '/api/v1/auth/git-tokens/$tokenId': typeof ApiV1AuthGitTokensTokenIdRoute
   '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
   '/api/v1/organizations/$organization/task-boards': typeof ApiV1OrganizationsOrganizationTaskBoardsRouteWithChildren
+  '/api/v1/users/$username/repositories': typeof ApiV1UsersUsernameRepositoriesRouteWithChildren
   '/organizations/$organization/repositories/$repository/settings': typeof OrganizationsOrganizationRepositoriesRepositorySettingsRoute
   '/organizations/$organization/tasks/$boardKey/$taskPublicId': typeof OrganizationsOrganizationTasksBoardKeyTaskPublicIdRoute
+  '/users/$username/repositories/$repository/settings': typeof UsersUsernameRepositoriesRepositorySettingsRoute
   '/organizations/$organization/repositories/$repository/': typeof OrganizationsOrganizationRepositoriesRepositoryIndexRoute
+  '/users/$username/repositories/$repository/': typeof UsersUsernameRepositoriesRepositoryIndexRoute
   '/api/v1/organizations/$organization/members/$userId': typeof ApiV1OrganizationsOrganizationMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/api/v1/organizations/$organization/task-boards/$boardKey': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyRouteWithChildren
+  '/api/v1/users/$username/repositories/$repository': typeof ApiV1UsersUsernameRepositoriesRepositoryRoute
   '/organizations/$organization/repositories/$repository/pulls/$pullId': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/new': typeof OrganizationsOrganizationRepositoriesRepositoryPullsNewRoute
   '/organizations/$organization/repositories/$repository/pulls/': typeof OrganizationsOrganizationRepositoriesRepositoryPullsIndexRoute
@@ -441,19 +546,26 @@ export interface FileRoutesByFullPath {
   '/organizations/$organization/repositories/$repository/pulls/$pullId/files': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdFilesRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/$': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchSplatRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRouteWithChildren
+  '/users/$username/repositories/$repository/blob/$branch/$': typeof UsersUsernameRepositoriesRepositoryBlobBranchSplatRoute
+  '/users/$username/repositories/$repository/tree/$branch/$': typeof UsersUsernameRepositoriesRepositoryTreeBranchSplatRoute
+  '/users/$username/repositories/$repository/tree/$branch/commits': typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/$pullId/': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRoute
+  '/users/$username/repositories/$repository/tree/$branch/': typeof UsersUsernameRepositoriesRepositoryTreeBranchIndexRoute
   '/api/v1/organizations/$organization/repositories/$repository/members/$userId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteWithChildren
   '/api/v1/organizations/$organization/task-boards/$boardKey/cards/$taskPublicId': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyCardsTaskPublicIdRoute
   '/api/v1/organizations/$organization/task-boards/$boardKey/columns/$columnId': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyColumnsColumnIdRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRoute
+  '/users/$username/repositories/$repository/tree/$branch/commits/$sha': typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute
+  '/users/$username/repositories/$repository/tree/$branch/commits/': typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMergeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/repositories': typeof RepositoriesRoute
   '/settings/git-tokens': typeof SettingsGitTokensRoute
   '/organizations': typeof OrganizationsIndexRoute
   '/settings': typeof SettingsIndexRoute
@@ -461,6 +573,7 @@ export interface FileRoutesByTo {
   '/api/v1/openapi.json': typeof ApiV1OpenapiDotjsonRoute
   '/api/v1/organizations': typeof ApiV1OrganizationsRouteWithChildren
   '/organizations/$organization': typeof OrganizationsOrganizationIndexRoute
+  '/users/$username': typeof UsersUsernameIndexRoute
   '/api/v1/auth/git-tokens': typeof ApiV1AuthGitTokensRouteWithChildren
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
@@ -473,12 +586,16 @@ export interface FileRoutesByTo {
   '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
   '/api/v1/organizations/$organization/task-boards': typeof ApiV1OrganizationsOrganizationTaskBoardsRouteWithChildren
+  '/api/v1/users/$username/repositories': typeof ApiV1UsersUsernameRepositoriesRouteWithChildren
   '/organizations/$organization/repositories/$repository/settings': typeof OrganizationsOrganizationRepositoriesRepositorySettingsRoute
   '/organizations/$organization/tasks/$boardKey/$taskPublicId': typeof OrganizationsOrganizationTasksBoardKeyTaskPublicIdRoute
+  '/users/$username/repositories/$repository/settings': typeof UsersUsernameRepositoriesRepositorySettingsRoute
   '/organizations/$organization/repositories/$repository': typeof OrganizationsOrganizationRepositoriesRepositoryIndexRoute
+  '/users/$username/repositories/$repository': typeof UsersUsernameRepositoriesRepositoryIndexRoute
   '/api/v1/organizations/$organization/members/$userId': typeof ApiV1OrganizationsOrganizationMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/api/v1/organizations/$organization/task-boards/$boardKey': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyRouteWithChildren
+  '/api/v1/users/$username/repositories/$repository': typeof ApiV1UsersUsernameRepositoriesRepositoryRoute
   '/organizations/$organization/repositories/$repository/pulls/new': typeof OrganizationsOrganizationRepositoriesRepositoryPullsNewRoute
   '/organizations/$organization/repositories/$repository/pulls': typeof OrganizationsOrganizationRepositoriesRepositoryPullsIndexRoute
   '/api/v1/organizations/$organization/repositories/$repository/members': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteWithChildren
@@ -488,14 +605,19 @@ export interface FileRoutesByTo {
   '/organizations/$organization/repositories/$repository/blob/$branch/$': typeof OrganizationsOrganizationRepositoriesRepositoryBlobBranchSplatRoute
   '/organizations/$organization/repositories/$repository/pulls/$pullId/files': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdFilesRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/$': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchSplatRoute
+  '/users/$username/repositories/$repository/blob/$branch/$': typeof UsersUsernameRepositoriesRepositoryBlobBranchSplatRoute
+  '/users/$username/repositories/$repository/tree/$branch/$': typeof UsersUsernameRepositoriesRepositoryTreeBranchSplatRoute
   '/organizations/$organization/repositories/$repository/pulls/$pullId': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRoute
   '/organizations/$organization/repositories/$repository/tree/$branch': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRoute
+  '/users/$username/repositories/$repository/tree/$branch': typeof UsersUsernameRepositoriesRepositoryTreeBranchIndexRoute
   '/api/v1/organizations/$organization/repositories/$repository/members/$userId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteWithChildren
   '/api/v1/organizations/$organization/task-boards/$boardKey/cards/$taskPublicId': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyCardsTaskPublicIdRoute
   '/api/v1/organizations/$organization/task-boards/$boardKey/columns/$columnId': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyColumnsColumnIdRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRoute
+  '/users/$username/repositories/$repository/tree/$branch/commits/$sha': typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute
+  '/users/$username/repositories/$repository/tree/$branch/commits': typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMergeRoute
 }
 export interface FileRoutesById {
@@ -503,8 +625,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/organizations': typeof OrganizationsRouteWithChildren
+  '/repositories': typeof RepositoriesRoute
   '/settings': typeof SettingsRouteWithChildren
   '/settings/git-tokens': typeof SettingsGitTokensRoute
+  '/users/$username': typeof UsersUsernameRouteWithChildren
   '/organizations/': typeof OrganizationsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/api/git/$': typeof ApiGitSplatRoute
@@ -512,6 +636,7 @@ export interface FileRoutesById {
   '/api/v1/organizations': typeof ApiV1OrganizationsRouteWithChildren
   '/organizations/$organization/tasks': typeof OrganizationsOrganizationTasksRouteWithChildren
   '/organizations/$organization/': typeof OrganizationsOrganizationIndexRoute
+  '/users/$username/': typeof UsersUsernameIndexRoute
   '/api/v1/auth/git-tokens': typeof ApiV1AuthGitTokensRouteWithChildren
   '/api/v1/auth/login': typeof ApiV1AuthLoginRoute
   '/api/v1/auth/logout': typeof ApiV1AuthLogoutRoute
@@ -520,17 +645,22 @@ export interface FileRoutesById {
   '/api/v1/organizations/$organization': typeof ApiV1OrganizationsOrganizationRouteWithChildren
   '/organizations/$organization/repositories/$repository': typeof OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/organizations/$organization/tasks/$boardKey': typeof OrganizationsOrganizationTasksBoardKeyRouteWithChildren
+  '/users/$username/repositories/$repository': typeof UsersUsernameRepositoriesRepositoryRouteWithChildren
   '/organizations/$organization/tasks/': typeof OrganizationsOrganizationTasksIndexRoute
   '/api/v1/auth/git-tokens/$tokenId': typeof ApiV1AuthGitTokensTokenIdRoute
   '/api/v1/organizations/$organization/members': typeof ApiV1OrganizationsOrganizationMembersRouteWithChildren
   '/api/v1/organizations/$organization/repositories': typeof ApiV1OrganizationsOrganizationRepositoriesRouteWithChildren
   '/api/v1/organizations/$organization/task-boards': typeof ApiV1OrganizationsOrganizationTaskBoardsRouteWithChildren
+  '/api/v1/users/$username/repositories': typeof ApiV1UsersUsernameRepositoriesRouteWithChildren
   '/organizations/$organization/repositories/$repository/settings': typeof OrganizationsOrganizationRepositoriesRepositorySettingsRoute
   '/organizations/$organization/tasks/$boardKey/$taskPublicId': typeof OrganizationsOrganizationTasksBoardKeyTaskPublicIdRoute
+  '/users/$username/repositories/$repository/settings': typeof UsersUsernameRepositoriesRepositorySettingsRoute
   '/organizations/$organization/repositories/$repository/': typeof OrganizationsOrganizationRepositoriesRepositoryIndexRoute
+  '/users/$username/repositories/$repository/': typeof UsersUsernameRepositoriesRepositoryIndexRoute
   '/api/v1/organizations/$organization/members/$userId': typeof ApiV1OrganizationsOrganizationMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRouteWithChildren
   '/api/v1/organizations/$organization/task-boards/$boardKey': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyRouteWithChildren
+  '/api/v1/users/$username/repositories/$repository': typeof ApiV1UsersUsernameRepositoriesRepositoryRoute
   '/organizations/$organization/repositories/$repository/pulls/$pullId': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/new': typeof OrganizationsOrganizationRepositoriesRepositoryPullsNewRoute
   '/organizations/$organization/repositories/$repository/pulls/': typeof OrganizationsOrganizationRepositoriesRepositoryPullsIndexRoute
@@ -542,14 +672,20 @@ export interface FileRoutesById {
   '/organizations/$organization/repositories/$repository/pulls/$pullId/files': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdFilesRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/$': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchSplatRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRouteWithChildren
+  '/users/$username/repositories/$repository/blob/$branch/$': typeof UsersUsernameRepositoriesRepositoryBlobBranchSplatRoute
+  '/users/$username/repositories/$repository/tree/$branch/$': typeof UsersUsernameRepositoriesRepositoryTreeBranchSplatRoute
+  '/users/$username/repositories/$repository/tree/$branch/commits': typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteWithChildren
   '/organizations/$organization/repositories/$repository/pulls/$pullId/': typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchIndexRoute
+  '/users/$username/repositories/$repository/tree/$branch/': typeof UsersUsernameRepositoriesRepositoryTreeBranchIndexRoute
   '/api/v1/organizations/$organization/repositories/$repository/members/$userId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersUserIdRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdRouteWithChildren
   '/api/v1/organizations/$organization/task-boards/$boardKey/cards/$taskPublicId': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyCardsTaskPublicIdRoute
   '/api/v1/organizations/$organization/task-boards/$boardKey/columns/$columnId': typeof ApiV1OrganizationsOrganizationTaskBoardsBoardKeyColumnsColumnIdRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsShaRoute
+  '/users/$username/repositories/$repository/tree/$branch/commits/$sha': typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRoute
   '/organizations/$organization/repositories/$repository/tree/$branch/commits/': typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRoute
+  '/users/$username/repositories/$repository/tree/$branch/commits/': typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRoute
   '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge': typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryPullRequestsPullIdMergeRoute
 }
 export interface FileRouteTypes {
@@ -558,8 +694,10 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/organizations'
+    | '/repositories'
     | '/settings'
     | '/settings/git-tokens'
+    | '/users/$username'
     | '/organizations/'
     | '/settings/'
     | '/api/git/$'
@@ -567,6 +705,7 @@ export interface FileRouteTypes {
     | '/api/v1/organizations'
     | '/organizations/$organization/tasks'
     | '/organizations/$organization/'
+    | '/users/$username/'
     | '/api/v1/auth/git-tokens'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
@@ -575,17 +714,22 @@ export interface FileRouteTypes {
     | '/api/v1/organizations/$organization'
     | '/organizations/$organization/repositories/$repository'
     | '/organizations/$organization/tasks/$boardKey'
+    | '/users/$username/repositories/$repository'
     | '/organizations/$organization/tasks/'
     | '/api/v1/auth/git-tokens/$tokenId'
     | '/api/v1/organizations/$organization/members'
     | '/api/v1/organizations/$organization/repositories'
     | '/api/v1/organizations/$organization/task-boards'
+    | '/api/v1/users/$username/repositories'
     | '/organizations/$organization/repositories/$repository/settings'
     | '/organizations/$organization/tasks/$boardKey/$taskPublicId'
+    | '/users/$username/repositories/$repository/settings'
     | '/organizations/$organization/repositories/$repository/'
+    | '/users/$username/repositories/$repository/'
     | '/api/v1/organizations/$organization/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository'
     | '/api/v1/organizations/$organization/task-boards/$boardKey'
+    | '/api/v1/users/$username/repositories/$repository'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId'
     | '/organizations/$organization/repositories/$repository/pulls/new'
     | '/organizations/$organization/repositories/$repository/pulls/'
@@ -597,19 +741,26 @@ export interface FileRouteTypes {
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/files'
     | '/organizations/$organization/repositories/$repository/tree/$branch/$'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits'
+    | '/users/$username/repositories/$repository/blob/$branch/$'
+    | '/users/$username/repositories/$repository/tree/$branch/$'
+    | '/users/$username/repositories/$repository/tree/$branch/commits'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/'
     | '/organizations/$organization/repositories/$repository/tree/$branch/'
+    | '/users/$username/repositories/$repository/tree/$branch/'
     | '/api/v1/organizations/$organization/repositories/$repository/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId'
     | '/api/v1/organizations/$organization/task-boards/$boardKey/cards/$taskPublicId'
     | '/api/v1/organizations/$organization/task-boards/$boardKey/columns/$columnId'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha'
+    | '/users/$username/repositories/$repository/tree/$branch/commits/$sha'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/'
+    | '/users/$username/repositories/$repository/tree/$branch/commits/'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/repositories'
     | '/settings/git-tokens'
     | '/organizations'
     | '/settings'
@@ -617,6 +768,7 @@ export interface FileRouteTypes {
     | '/api/v1/openapi.json'
     | '/api/v1/organizations'
     | '/organizations/$organization'
+    | '/users/$username'
     | '/api/v1/auth/git-tokens'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
@@ -629,12 +781,16 @@ export interface FileRouteTypes {
     | '/api/v1/organizations/$organization/members'
     | '/api/v1/organizations/$organization/repositories'
     | '/api/v1/organizations/$organization/task-boards'
+    | '/api/v1/users/$username/repositories'
     | '/organizations/$organization/repositories/$repository/settings'
     | '/organizations/$organization/tasks/$boardKey/$taskPublicId'
+    | '/users/$username/repositories/$repository/settings'
     | '/organizations/$organization/repositories/$repository'
+    | '/users/$username/repositories/$repository'
     | '/api/v1/organizations/$organization/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository'
     | '/api/v1/organizations/$organization/task-boards/$boardKey'
+    | '/api/v1/users/$username/repositories/$repository'
     | '/organizations/$organization/repositories/$repository/pulls/new'
     | '/organizations/$organization/repositories/$repository/pulls'
     | '/api/v1/organizations/$organization/repositories/$repository/members'
@@ -644,22 +800,29 @@ export interface FileRouteTypes {
     | '/organizations/$organization/repositories/$repository/blob/$branch/$'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/files'
     | '/organizations/$organization/repositories/$repository/tree/$branch/$'
+    | '/users/$username/repositories/$repository/blob/$branch/$'
+    | '/users/$username/repositories/$repository/tree/$branch/$'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId'
     | '/organizations/$organization/repositories/$repository/tree/$branch'
+    | '/users/$username/repositories/$repository/tree/$branch'
     | '/api/v1/organizations/$organization/repositories/$repository/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId'
     | '/api/v1/organizations/$organization/task-boards/$boardKey/cards/$taskPublicId'
     | '/api/v1/organizations/$organization/task-boards/$boardKey/columns/$columnId'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha'
+    | '/users/$username/repositories/$repository/tree/$branch/commits/$sha'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits'
+    | '/users/$username/repositories/$repository/tree/$branch/commits'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/organizations'
+    | '/repositories'
     | '/settings'
     | '/settings/git-tokens'
+    | '/users/$username'
     | '/organizations/'
     | '/settings/'
     | '/api/git/$'
@@ -667,6 +830,7 @@ export interface FileRouteTypes {
     | '/api/v1/organizations'
     | '/organizations/$organization/tasks'
     | '/organizations/$organization/'
+    | '/users/$username/'
     | '/api/v1/auth/git-tokens'
     | '/api/v1/auth/login'
     | '/api/v1/auth/logout'
@@ -675,17 +839,22 @@ export interface FileRouteTypes {
     | '/api/v1/organizations/$organization'
     | '/organizations/$organization/repositories/$repository'
     | '/organizations/$organization/tasks/$boardKey'
+    | '/users/$username/repositories/$repository'
     | '/organizations/$organization/tasks/'
     | '/api/v1/auth/git-tokens/$tokenId'
     | '/api/v1/organizations/$organization/members'
     | '/api/v1/organizations/$organization/repositories'
     | '/api/v1/organizations/$organization/task-boards'
+    | '/api/v1/users/$username/repositories'
     | '/organizations/$organization/repositories/$repository/settings'
     | '/organizations/$organization/tasks/$boardKey/$taskPublicId'
+    | '/users/$username/repositories/$repository/settings'
     | '/organizations/$organization/repositories/$repository/'
+    | '/users/$username/repositories/$repository/'
     | '/api/v1/organizations/$organization/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository'
     | '/api/v1/organizations/$organization/task-boards/$boardKey'
+    | '/api/v1/users/$username/repositories/$repository'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId'
     | '/organizations/$organization/repositories/$repository/pulls/new'
     | '/organizations/$organization/repositories/$repository/pulls/'
@@ -697,14 +866,20 @@ export interface FileRouteTypes {
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/files'
     | '/organizations/$organization/repositories/$repository/tree/$branch/$'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits'
+    | '/users/$username/repositories/$repository/blob/$branch/$'
+    | '/users/$username/repositories/$repository/tree/$branch/$'
+    | '/users/$username/repositories/$repository/tree/$branch/commits'
     | '/organizations/$organization/repositories/$repository/pulls/$pullId/'
     | '/organizations/$organization/repositories/$repository/tree/$branch/'
+    | '/users/$username/repositories/$repository/tree/$branch/'
     | '/api/v1/organizations/$organization/repositories/$repository/members/$userId'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId'
     | '/api/v1/organizations/$organization/task-boards/$boardKey/cards/$taskPublicId'
     | '/api/v1/organizations/$organization/task-boards/$boardKey/columns/$columnId'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha'
+    | '/users/$username/repositories/$repository/tree/$branch/commits/$sha'
     | '/organizations/$organization/repositories/$repository/tree/$branch/commits/'
+    | '/users/$username/repositories/$repository/tree/$branch/commits/'
     | '/api/v1/organizations/$organization/repositories/$repository/pull-requests/$pullId/merge'
   fileRoutesById: FileRoutesById
 }
@@ -712,7 +887,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   OrganizationsRoute: typeof OrganizationsRouteWithChildren
+  RepositoriesRoute: typeof RepositoriesRoute
   SettingsRoute: typeof SettingsRouteWithChildren
+  UsersUsernameRoute: typeof UsersUsernameRouteWithChildren
   ApiGitSplatRoute: typeof ApiGitSplatRoute
   ApiV1OpenapiDotjsonRoute: typeof ApiV1OpenapiDotjsonRoute
   ApiV1OrganizationsRoute: typeof ApiV1OrganizationsRouteWithChildren
@@ -721,6 +898,7 @@ export interface RootRouteChildren {
   ApiV1AuthLogoutRoute: typeof ApiV1AuthLogoutRoute
   ApiV1AuthMeRoute: typeof ApiV1AuthMeRoute
   ApiV1AuthRegisterRoute: typeof ApiV1AuthRegisterRoute
+  ApiV1UsersUsernameRepositoriesRoute: typeof ApiV1UsersUsernameRepositoriesRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -730,6 +908,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/repositories': {
+      id: '/repositories'
+      path: '/repositories'
+      fullPath: '/repositories'
+      preLoaderRoute: typeof RepositoriesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/organizations': {
@@ -767,12 +952,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationsIndexRouteImport
       parentRoute: typeof OrganizationsRoute
     }
+    '/users/$username': {
+      id: '/users/$username'
+      path: '/users/$username'
+      fullPath: '/users/$username'
+      preLoaderRoute: typeof UsersUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings/git-tokens': {
       id: '/settings/git-tokens'
       path: '/git-tokens'
       fullPath: '/settings/git-tokens'
       preLoaderRoute: typeof SettingsGitTokensRouteImport
       parentRoute: typeof SettingsRoute
+    }
+    '/users/$username/': {
+      id: '/users/$username/'
+      path: '/'
+      fullPath: '/users/$username/'
+      preLoaderRoute: typeof UsersUsernameIndexRouteImport
+      parentRoute: typeof UsersUsernameRoute
     }
     '/organizations/$organization/': {
       id: '/organizations/$organization/'
@@ -815,6 +1014,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/organizations/$organization/tasks/'
       preLoaderRoute: typeof OrganizationsOrganizationTasksIndexRouteImport
       parentRoute: typeof OrganizationsOrganizationTasksRoute
+    }
+    '/users/$username/repositories/$repository': {
+      id: '/users/$username/repositories/$repository'
+      path: '/repositories/$repository'
+      fullPath: '/users/$username/repositories/$repository'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositoryRouteImport
+      parentRoute: typeof UsersUsernameRoute
     }
     '/organizations/$organization/tasks/$boardKey': {
       id: '/organizations/$organization/tasks/$boardKey'
@@ -872,12 +1078,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1AuthGitTokensRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users/$username/repositories/$repository/': {
+      id: '/users/$username/repositories/$repository/'
+      path: '/'
+      fullPath: '/users/$username/repositories/$repository/'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositoryIndexRouteImport
+      parentRoute: typeof UsersUsernameRepositoriesRepositoryRoute
+    }
     '/organizations/$organization/repositories/$repository/': {
       id: '/organizations/$organization/repositories/$repository/'
       path: '/'
       fullPath: '/organizations/$organization/repositories/$repository/'
       preLoaderRoute: typeof OrganizationsOrganizationRepositoriesRepositoryIndexRouteImport
       parentRoute: typeof OrganizationsOrganizationRepositoriesRepositoryRoute
+    }
+    '/users/$username/repositories/$repository/settings': {
+      id: '/users/$username/repositories/$repository/settings'
+      path: '/settings'
+      fullPath: '/users/$username/repositories/$repository/settings'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositorySettingsRouteImport
+      parentRoute: typeof UsersUsernameRepositoriesRepositoryRoute
     }
     '/organizations/$organization/tasks/$boardKey/$taskPublicId': {
       id: '/organizations/$organization/tasks/$boardKey/$taskPublicId'
@@ -892,6 +1112,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/organizations/$organization/repositories/$repository/settings'
       preLoaderRoute: typeof OrganizationsOrganizationRepositoriesRepositorySettingsRouteImport
       parentRoute: typeof OrganizationsOrganizationRepositoriesRepositoryRoute
+    }
+    '/api/v1/users/$username/repositories': {
+      id: '/api/v1/users/$username/repositories'
+      path: '/api/v1/users/$username/repositories'
+      fullPath: '/api/v1/users/$username/repositories'
+      preLoaderRoute: typeof ApiV1UsersUsernameRepositoriesRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/v1/organizations/$organization/task-boards': {
       id: '/api/v1/organizations/$organization/task-boards'
@@ -942,6 +1169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRouteImport
       parentRoute: typeof OrganizationsOrganizationRepositoriesRepositoryRoute
     }
+    '/api/v1/users/$username/repositories/$repository': {
+      id: '/api/v1/users/$username/repositories/$repository'
+      path: '/$repository'
+      fullPath: '/api/v1/users/$username/repositories/$repository'
+      preLoaderRoute: typeof ApiV1UsersUsernameRepositoriesRepositoryRouteImport
+      parentRoute: typeof ApiV1UsersUsernameRepositoriesRoute
+    }
     '/api/v1/organizations/$organization/task-boards/$boardKey': {
       id: '/api/v1/organizations/$organization/task-boards/$boardKey'
       path: '/$boardKey'
@@ -963,6 +1197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1OrganizationsOrganizationMembersUserIdRouteImport
       parentRoute: typeof ApiV1OrganizationsOrganizationMembersRoute
     }
+    '/users/$username/repositories/$repository/tree/$branch/': {
+      id: '/users/$username/repositories/$repository/tree/$branch/'
+      path: '/tree/$branch'
+      fullPath: '/users/$username/repositories/$repository/tree/$branch/'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchIndexRouteImport
+      parentRoute: typeof UsersUsernameRepositoriesRepositoryRoute
+    }
     '/organizations/$organization/repositories/$repository/tree/$branch/': {
       id: '/organizations/$organization/repositories/$repository/tree/$branch/'
       path: '/tree/$branch'
@@ -976,6 +1217,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/organizations/$organization/repositories/$repository/pulls/$pullId/'
       preLoaderRoute: typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdIndexRouteImport
       parentRoute: typeof OrganizationsOrganizationRepositoriesRepositoryPullsPullIdRoute
+    }
+    '/users/$username/repositories/$repository/tree/$branch/commits': {
+      id: '/users/$username/repositories/$repository/tree/$branch/commits'
+      path: '/tree/$branch/commits'
+      fullPath: '/users/$username/repositories/$repository/tree/$branch/commits'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteImport
+      parentRoute: typeof UsersUsernameRepositoriesRepositoryRoute
+    }
+    '/users/$username/repositories/$repository/tree/$branch/$': {
+      id: '/users/$username/repositories/$repository/tree/$branch/$'
+      path: '/tree/$branch/$'
+      fullPath: '/users/$username/repositories/$repository/tree/$branch/$'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchSplatRouteImport
+      parentRoute: typeof UsersUsernameRepositoriesRepositoryRoute
+    }
+    '/users/$username/repositories/$repository/blob/$branch/$': {
+      id: '/users/$username/repositories/$repository/blob/$branch/$'
+      path: '/blob/$branch/$'
+      fullPath: '/users/$username/repositories/$repository/blob/$branch/$'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositoryBlobBranchSplatRouteImport
+      parentRoute: typeof UsersUsernameRepositoriesRepositoryRoute
     }
     '/organizations/$organization/repositories/$repository/tree/$branch/commits': {
       id: '/organizations/$organization/repositories/$repository/tree/$branch/commits'
@@ -1033,12 +1295,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryMembersRouteImport
       parentRoute: typeof ApiV1OrganizationsOrganizationRepositoriesRepositoryRoute
     }
+    '/users/$username/repositories/$repository/tree/$branch/commits/': {
+      id: '/users/$username/repositories/$repository/tree/$branch/commits/'
+      path: '/'
+      fullPath: '/users/$username/repositories/$repository/tree/$branch/commits/'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRouteImport
+      parentRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsRoute
+    }
     '/organizations/$organization/repositories/$repository/tree/$branch/commits/': {
       id: '/organizations/$organization/repositories/$repository/tree/$branch/commits/'
       path: '/'
       fullPath: '/organizations/$organization/repositories/$repository/tree/$branch/commits/'
       preLoaderRoute: typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsIndexRouteImport
       parentRoute: typeof OrganizationsOrganizationRepositoriesRepositoryTreeBranchCommitsRoute
+    }
+    '/users/$username/repositories/$repository/tree/$branch/commits/$sha': {
+      id: '/users/$username/repositories/$repository/tree/$branch/commits/$sha'
+      path: '/$sha'
+      fullPath: '/users/$username/repositories/$repository/tree/$branch/commits/$sha'
+      preLoaderRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRouteImport
+      parentRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsRoute
     }
     '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha': {
       id: '/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha'
@@ -1225,6 +1501,69 @@ const SettingsRouteChildren: SettingsRouteChildren = {
 
 const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
   SettingsRouteChildren,
+)
+
+interface UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteChildren {
+  UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRoute
+  UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRoute
+}
+
+const UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteChildren: UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteChildren =
+  {
+    UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRoute:
+      UsersUsernameRepositoriesRepositoryTreeBranchCommitsShaRoute,
+    UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRoute:
+      UsersUsernameRepositoriesRepositoryTreeBranchCommitsIndexRoute,
+  }
+
+const UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteWithChildren =
+  UsersUsernameRepositoriesRepositoryTreeBranchCommitsRoute._addFileChildren(
+    UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteChildren,
+  )
+
+interface UsersUsernameRepositoriesRepositoryRouteChildren {
+  UsersUsernameRepositoriesRepositorySettingsRoute: typeof UsersUsernameRepositoriesRepositorySettingsRoute
+  UsersUsernameRepositoriesRepositoryIndexRoute: typeof UsersUsernameRepositoriesRepositoryIndexRoute
+  UsersUsernameRepositoriesRepositoryBlobBranchSplatRoute: typeof UsersUsernameRepositoriesRepositoryBlobBranchSplatRoute
+  UsersUsernameRepositoriesRepositoryTreeBranchSplatRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchSplatRoute
+  UsersUsernameRepositoriesRepositoryTreeBranchCommitsRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteWithChildren
+  UsersUsernameRepositoriesRepositoryTreeBranchIndexRoute: typeof UsersUsernameRepositoriesRepositoryTreeBranchIndexRoute
+}
+
+const UsersUsernameRepositoriesRepositoryRouteChildren: UsersUsernameRepositoriesRepositoryRouteChildren =
+  {
+    UsersUsernameRepositoriesRepositorySettingsRoute:
+      UsersUsernameRepositoriesRepositorySettingsRoute,
+    UsersUsernameRepositoriesRepositoryIndexRoute:
+      UsersUsernameRepositoriesRepositoryIndexRoute,
+    UsersUsernameRepositoriesRepositoryBlobBranchSplatRoute:
+      UsersUsernameRepositoriesRepositoryBlobBranchSplatRoute,
+    UsersUsernameRepositoriesRepositoryTreeBranchSplatRoute:
+      UsersUsernameRepositoriesRepositoryTreeBranchSplatRoute,
+    UsersUsernameRepositoriesRepositoryTreeBranchCommitsRoute:
+      UsersUsernameRepositoriesRepositoryTreeBranchCommitsRouteWithChildren,
+    UsersUsernameRepositoriesRepositoryTreeBranchIndexRoute:
+      UsersUsernameRepositoriesRepositoryTreeBranchIndexRoute,
+  }
+
+const UsersUsernameRepositoriesRepositoryRouteWithChildren =
+  UsersUsernameRepositoriesRepositoryRoute._addFileChildren(
+    UsersUsernameRepositoriesRepositoryRouteChildren,
+  )
+
+interface UsersUsernameRouteChildren {
+  UsersUsernameIndexRoute: typeof UsersUsernameIndexRoute
+  UsersUsernameRepositoriesRepositoryRoute: typeof UsersUsernameRepositoriesRepositoryRouteWithChildren
+}
+
+const UsersUsernameRouteChildren: UsersUsernameRouteChildren = {
+  UsersUsernameIndexRoute: UsersUsernameIndexRoute,
+  UsersUsernameRepositoriesRepositoryRoute:
+    UsersUsernameRepositoriesRepositoryRouteWithChildren,
+}
+
+const UsersUsernameRouteWithChildren = UsersUsernameRoute._addFileChildren(
+  UsersUsernameRouteChildren,
 )
 
 interface ApiV1OrganizationsOrganizationMembersRouteChildren {
@@ -1427,11 +1766,28 @@ const ApiV1AuthGitTokensRouteChildren: ApiV1AuthGitTokensRouteChildren = {
 const ApiV1AuthGitTokensRouteWithChildren =
   ApiV1AuthGitTokensRoute._addFileChildren(ApiV1AuthGitTokensRouteChildren)
 
+interface ApiV1UsersUsernameRepositoriesRouteChildren {
+  ApiV1UsersUsernameRepositoriesRepositoryRoute: typeof ApiV1UsersUsernameRepositoriesRepositoryRoute
+}
+
+const ApiV1UsersUsernameRepositoriesRouteChildren: ApiV1UsersUsernameRepositoriesRouteChildren =
+  {
+    ApiV1UsersUsernameRepositoriesRepositoryRoute:
+      ApiV1UsersUsernameRepositoriesRepositoryRoute,
+  }
+
+const ApiV1UsersUsernameRepositoriesRouteWithChildren =
+  ApiV1UsersUsernameRepositoriesRoute._addFileChildren(
+    ApiV1UsersUsernameRepositoriesRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   OrganizationsRoute: OrganizationsRouteWithChildren,
+  RepositoriesRoute: RepositoriesRoute,
   SettingsRoute: SettingsRouteWithChildren,
+  UsersUsernameRoute: UsersUsernameRouteWithChildren,
   ApiGitSplatRoute: ApiGitSplatRoute,
   ApiV1OpenapiDotjsonRoute: ApiV1OpenapiDotjsonRoute,
   ApiV1OrganizationsRoute: ApiV1OrganizationsRouteWithChildren,
@@ -1440,6 +1796,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiV1AuthLogoutRoute: ApiV1AuthLogoutRoute,
   ApiV1AuthMeRoute: ApiV1AuthMeRoute,
   ApiV1AuthRegisterRoute: ApiV1AuthRegisterRoute,
+  ApiV1UsersUsernameRepositoriesRoute:
+    ApiV1UsersUsernameRepositoriesRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

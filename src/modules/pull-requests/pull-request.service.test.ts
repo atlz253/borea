@@ -422,14 +422,14 @@ describe("setPullRequestFileViewed", () => {
 describe("pull request file comments", () => {
 	const author = {
 		id: "11111111-1111-4111-8111-111111111111",
-		name: "Alice",
+		username: "alice",
 	};
 	const comment = {
 		id: "22222222-2222-4222-8222-222222222222",
 		target: { type: "file" as const, filePath: "src/file.ts" },
 		body: "Looks good",
 		authorId: author.id,
-		authorName: author.name,
+		authorName: author.username,
 		createdAt: "2026-01-01T00:00:00.000Z",
 	};
 
@@ -490,7 +490,7 @@ describe("pull request file comments", () => {
 			target: { type: "file", filePath: "src/file.ts" },
 			body: "Looks good",
 			authorId: author.id,
-			authorName: author.name,
+			authorName: author.username,
 		});
 	});
 

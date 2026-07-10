@@ -11,6 +11,7 @@ export interface AuthProvider {
 	requireCurrentUser(): Promise<User>;
 	getUserByEmail(email: string): Promise<User | undefined>;
 	getUserById(id: string): Promise<User | undefined>;
+	getUserByUsername(username: string): Promise<User | undefined>;
 	authenticateGitToken(token: string): Promise<User | null>;
 	createGitToken(userId: string, name: string): Promise<CreatedGitToken>;
 	listGitTokens(userId: string): Promise<GitToken[]>;

@@ -192,7 +192,7 @@ export function createPullRequestService(
 			id: number,
 			filePath: string,
 			body: string,
-			author: { id: string; name: string },
+			author: { id: string; username: string },
 		): Promise<PullRequestComment> {
 			const pr = await requirePullRequest(locator, id);
 			if (pr.status !== "open") {
@@ -219,7 +219,7 @@ export function createPullRequestService(
 				target: { type: "file", filePath },
 				body,
 				authorId: author.id,
-				authorName: author.name,
+				authorName: author.username,
 			});
 		},
 

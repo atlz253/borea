@@ -11,8 +11,12 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Sidebar from "./Sidebar";
 
+vi.mock("#/modules/auth", () => ({
+	getCurrentUserFn: vi.fn(),
+}));
 vi.mock("#/modules/repositories", () => ({
 	listRepositoriesFn: vi.fn(),
+	listUserRepositoriesFn: vi.fn(),
 }));
 vi.mock("#/modules/organizations", () => ({
 	listOrganizationsFn: vi.fn(),
@@ -21,8 +25,12 @@ vi.mock("#/modules/tasks", () => ({
 	listTaskBoardsFn: vi.fn(),
 }));
 
+import { getCurrentUserFn } from "#/modules/auth";
 import { listOrganizationsFn } from "#/modules/organizations";
-import { listRepositoriesFn } from "#/modules/repositories";
+import {
+	listRepositoriesFn,
+	listUserRepositoriesFn,
+} from "#/modules/repositories";
 import { listTaskBoardsFn } from "#/modules/tasks";
 
 const ORGANIZATIONS = [
@@ -44,6 +52,13 @@ const REPOS = Array.from({ length: 6 }, (_, index) => ({
 	description: `Description ${index + 1}`,
 	createdAt: new Date(2024, 0, 6 - index),
 }));
+
+const USER = {
+	id: "00000000-0000-4000-8000-000000000001",
+	username: "alice",
+	email: "alice@example.com",
+	createdAt: "2024-01-01T00:00:00.000Z",
+};
 
 const BOARDS = Array.from({ length: 6 }, (_, index) => ({
 	id: `00000000-0000-4000-8000-00000000000${index}`,
@@ -117,8 +132,20 @@ async function renderSidebar(initialEntry = "/organizations") {
 describe("Sidebar", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.mocked(getCurrentUserFn).mockResolvedValue({
+			user: null,
+			authMode: "full",
+		});
 		vi.mocked(listOrganizationsFn).mockResolvedValue(ORGANIZATIONS);
-		vi.mocked(listRepositoriesFn).mockResolvedValue(REPOS);
+		vi.mocked(listRepositoriesFn).mockImplementation((options) =>
+			Promise.resolve(
+				(options?.data as { organizationName?: string } | undefined)
+					?.organizationName === "default"
+					? REPOS
+					: [],
+			),
+		);
+		vi.mocked(listUserRepositoriesFn).mockResolvedValue([]);
 		vi.mocked(listTaskBoardsFn).mockResolvedValue([]);
 	});
 
@@ -137,25 +164,31 @@ describe("Sidebar", () => {
 	});
 
 	it("shows repositories for the current organization", async () => {
+		vi.mocked(getCurrentUserFn).mockResolvedValue({
+			user: USER,
+			authMode: "full",
+		});
 		await renderSidebar("/organizations/default");
 
 		expect(
 			screen.getByRole("button", { name: "Repositories" }),
 		).toBeInTheDocument();
-		expect(
-			screen.queryByRole("button", { name: "Organizations" }),
-		).not.toBeInTheDocument();
 		await screen.findAllByRole("button", { name: /repo-/i });
-		expect(listRepositoriesFn).toHaveBeenCalledWith({
-			data: { organizationName: "default" },
+		expect(listUserRepositoriesFn).toHaveBeenCalledWith({
+			data: { userName: "alice" },
 		});
+		expect(listRepositoriesFn).toHaveBeenCalled();
 		expect(listTaskBoardsFn).toHaveBeenCalledWith({
 			data: { organizationName: "default" },
 		});
-		expect(listOrganizationsFn).not.toHaveBeenCalled();
+		expect(listOrganizationsFn).toHaveBeenCalled();
 	});
 
 	it("keeps repository context on nested routes", async () => {
+		vi.mocked(getCurrentUserFn).mockResolvedValue({
+			user: USER,
+			authMode: "full",
+		});
 		await renderSidebar("/organizations/default/repositories/repo-1/pulls/1");
 
 		expect(
@@ -166,6 +199,10 @@ describe("Sidebar", () => {
 	});
 
 	it("navigates from the repositories heading to the organization page", async () => {
+		vi.mocked(getCurrentUserFn).mockResolvedValue({
+			user: USER,
+			authMode: "full",
+		});
 		const user = userEvent.setup();
 		await renderSidebar("/organizations/default/repositories/repo-1/pulls/1");
 
@@ -178,6 +215,13 @@ describe("Sidebar", () => {
 	});
 
 	describe("recent repositories list", () => {
+		beforeEach(() => {
+			vi.mocked(getCurrentUserFn).mockResolvedValue({
+				user: USER,
+				authMode: "full",
+			});
+		});
+
 		it("shows 5 most recent repositories by default", async () => {
 			await renderSidebar("/organizations/default");
 
@@ -217,7 +261,7 @@ describe("Sidebar", () => {
 			vi.mocked(listRepositoriesFn).mockResolvedValue([]);
 			await renderSidebar("/organizations/default");
 
-			await waitFor(() => expect(listRepositoriesFn).toHaveBeenCalledOnce());
+			await waitFor(() => expect(listRepositoriesFn).toHaveBeenCalled());
 			expect(
 				screen.queryByRole("button", { name: /repo-/i }),
 			).not.toBeInTheDocument();
@@ -226,6 +270,10 @@ describe("Sidebar", () => {
 
 	describe("recent task boards list", () => {
 		beforeEach(() => {
+			vi.mocked(getCurrentUserFn).mockResolvedValue({
+				user: USER,
+				authMode: "full",
+			});
 			vi.mocked(listRepositoriesFn).mockResolvedValue([]);
 			vi.mocked(listTaskBoardsFn).mockResolvedValue(BOARDS);
 		});

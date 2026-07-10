@@ -1,6 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { createGitTokenSchema, loginSchema, registerSchema } from "../schemas";
+import {
+	createGitTokenSchema,
+	loginSchema,
+	registerSchema,
+	usernameSchema,
+} from "../schemas";
 
 export const assertSameOriginFn = createServerFn({ method: "GET" }).handler(
 	async () => {
@@ -25,6 +30,15 @@ export const requireCurrentUserFn = createServerFn({ method: "GET" }).handler(
 		return authProvider.requireCurrentUser();
 	},
 );
+
+export const getUserByUsernameFn = createServerFn({ method: "GET" })
+	.validator((data: unknown) =>
+		usernameSchema.parse((data as { username?: unknown }).username),
+	)
+	.handler(async ({ data }) => {
+		const { authProvider } = await import("./auth.server");
+		return authProvider.getUserByUsername(data);
+	});
 
 export const registerFn = createServerFn({ method: "POST" })
 	.validator((data: unknown) => registerSchema.parse(data))

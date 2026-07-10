@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { type ExecaError, execa } from "execa";
 import { getConfig } from "#/platform/config";
@@ -33,6 +33,7 @@ import {
 	renameBranch,
 	revParse,
 } from "./cli-git-helpers";
+import { listRepositories } from "./cli-git-list";
 import {
 	DEFAULT_LOG_LIMIT,
 	DEFAULT_REF,
@@ -48,7 +49,7 @@ import {
 } from "./cli-git-transport";
 import {
 	normalizePath,
-	resolvePath,
+	resolveRepositoryPath,
 	validateName,
 	validateSha,
 } from "./cli-git-validators";
@@ -68,8 +69,8 @@ export class CliGitProvider implements GitProvider {
 		locator: RepositoryTarget,
 		description?: string,
 	): Promise<RepositoryInfo> {
-		const { organizationName, repositoryName: name } =
-			this.normalizeTarget(locator);
+		const normalized = this.normalizeTarget(locator);
+		const { repositoryName: name } = normalized;
 		validateName(name);
 		const repoPath = this.resolveTargetPath(locator);
 
@@ -93,7 +94,14 @@ export class CliGitProvider implements GitProvider {
 			await writeFile(path.join(repoPath, "description"), description, "utf-8");
 		}
 
-		return readRepositoryInfo(organizationName, name, repoPath);
+		const info = await readRepositoryInfo(
+			this.repositoryInfoNamespace(normalized),
+			name,
+			repoPath,
+		);
+		return "userName" in normalized
+			? { ...info, organizationName: undefined, userName: normalized.userName }
+			: info;
 	}
 
 	async delete(locator: RepositoryTarget): Promise<void> {
@@ -109,42 +117,25 @@ export class CliGitProvider implements GitProvider {
 	}
 
 	async list(organizationName?: string): Promise<RepositoryInfo[]> {
-		try {
-			const organizationPath = organizationName
-				? path.join(this.storagePath, organizationName)
-				: this.storagePath;
-			await mkdir(organizationPath, { recursive: true });
-			const entries = await readdir(organizationPath, { withFileTypes: true });
-			const org = organizationName ?? "default";
-			const repos = (
-				await Promise.all(
-					entries
-						.filter((entry) => entry.isDirectory())
-						.map(async (entry) => {
-							const repoPath = path.join(organizationPath, entry.name);
-							if (!existsSync(path.join(repoPath, "HEAD"))) {
-								return null;
-							}
-							return readRepositoryInfo(org, entry.name, repoPath);
-						}),
-				)
-			).filter((r): r is RepositoryInfo => r !== null);
-			repos.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-			return repos;
-		} catch {
-			return [];
-		}
+		return listRepositories(this.storagePath, organizationName);
 	}
 
 	async get(locator: RepositoryTarget): Promise<RepositoryInfo | undefined> {
-		const { organizationName, repositoryName: name } =
-			this.normalizeTarget(locator);
+		const normalized = this.normalizeTarget(locator);
+		const { repositoryName: name } = normalized;
 		validateName(name);
 		const repoPath = this.resolveTargetPath(locator);
 		if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 			return undefined;
 		}
-		return readRepositoryInfo(organizationName, name, repoPath);
+		const info = await readRepositoryInfo(
+			this.repositoryInfoNamespace(normalized),
+			name,
+			repoPath,
+		);
+		return "userName" in normalized
+			? { ...info, organizationName: undefined, userName: normalized.userName }
+			: info;
 	}
 
 	async exists(locator: RepositoryTarget): Promise<boolean> {
@@ -584,11 +575,11 @@ export class CliGitProvider implements GitProvider {
 		if (typeof target === "string") {
 			return path.resolve(this.storagePath, target);
 		}
-		return resolvePath(
-			this.storagePath,
-			target.organizationName,
-			target.repositoryName,
-		);
+		return resolveRepositoryPath(this.storagePath, target);
+	}
+
+	private repositoryInfoNamespace(locator: RepositoryLocator): string {
+		return "userName" in locator ? "users" : locator.organizationName;
 	}
 }
 export const gitProvider: GitProvider = new CliGitProvider();

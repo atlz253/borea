@@ -116,7 +116,7 @@ function OrganizationMembers({
 			role === "owner" &&
 			!window.confirm(
 				m.organizations_organizationPage_transfer_confirm({
-					name: member.name,
+					name: member.username,
 				}),
 			)
 		) {
@@ -154,7 +154,7 @@ function OrganizationMembers({
 		if (
 			!window.confirm(
 				m.organizations_organizationPage_remove_confirm({
-					name: member.name,
+					name: member.username,
 				}),
 			)
 		) {
@@ -192,7 +192,7 @@ function OrganizationMembers({
 					return (
 						<Group key={member.id} justify="space-between" wrap="nowrap">
 							<div>
-								<Text fw={500}>{member.name}</Text>
+								<Text fw={500}>{member.username}</Text>
 								<Text size="sm" c="dimmed">
 									{member.email}
 								</Text>

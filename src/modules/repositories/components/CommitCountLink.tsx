@@ -10,6 +10,7 @@ const LINK_STYLE = {
 
 interface CommitCountLinkProps {
 	organizationName?: string;
+	userName?: string;
 	repoName: string;
 	count: number;
 	branchName: string;
@@ -17,6 +18,7 @@ interface CommitCountLinkProps {
 
 export default function CommitCountLink({
 	organizationName = "default",
+	userName,
 	repoName,
 	count,
 	branchName,
@@ -29,12 +31,20 @@ export default function CommitCountLink({
 
 	return (
 		<Link
-			to="/organizations/$organization/repositories/$repository/tree/$branch/commits"
-			params={{
-				organization: organizationName,
-				repository: repoName,
-				branch: encodedBranch,
-			}}
+			to={
+				(userName
+					? "/users/$username/repositories/$repository/tree/$branch/commits"
+					: "/organizations/$organization/repositories/$repository/tree/$branch/commits") as never
+			}
+			params={
+				(userName
+					? { username: userName, repository: repoName, branch: encodedBranch }
+					: {
+							organization: organizationName,
+							repository: repoName,
+							branch: encodedBranch,
+						}) as never
+			}
 			style={LINK_STYLE}
 		>
 			<Group gap={4}>

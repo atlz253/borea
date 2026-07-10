@@ -7,16 +7,16 @@ keeps Git operations credential-free for local development.
 
 ## Cloning a Repository
 
-1. Open the repository page in Borea (e.g., `http://localhost:3000/organizations/default/repositories/my-project`).
+1. Open the repository page in Borea (for example, `http://localhost:3000/users/alice/repositories/my-project` or `http://localhost:3000/organizations/default/repositories/my-project`).
 2. Copy the URL from the **"Git pull URL"** field using the copy button on the right.
 3. In full mode, create a token at `/settings/git-tokens`.
 4. In your terminal, run:
    ```bash
-   git clone https://<email>@<host>/api/git/<organization>/<repository>.git
+   git clone https://<email>@<host>/api/git/users/<username>/<repository>.git
    ```
    Enter the token when Git asks for a password. For local development:
    ```bash
-   git clone http://alice%40example.com@localhost:3000/api/git/default/my-project.git
+   git clone http://alice%40example.com@localhost:3000/api/git/users/alice/my-project.git
    ```
 5. You now have a local copy of the repository in the `my-project` folder.
 
@@ -30,7 +30,7 @@ keeps Git operations credential-free for local development.
    ```
 2. If you haven't already set a remote, add one using the URL from the repository page:
    ```bash
-   git remote add origin http://localhost:3000/api/git/default/my-project.git
+   git remote add origin http://localhost:3000/api/git/users/alice/my-project.git
    ```
 3. Push your changes and provide the token when prompted:
    ```bash
@@ -42,7 +42,7 @@ keeps Git operations credential-free for local development.
 
 - Git must be installed on your computer ([download](https://git-scm.com/downloads)).
 - The Borea server must be running and accessible (default: `http://localhost:3000`).
-- The organization and repository must already exist in Borea.
+- The user or organization namespace and repository must already exist in Borea.
 
 ## Authentication
 

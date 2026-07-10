@@ -36,11 +36,15 @@ Creates a user and starts a seven-day cookie session.
 
 ```json
 {
-  "name": "Alice",
+  "username": "alice",
   "email": "alice@example.com",
   "password": "password123"
 }
 ```
+
+User responses contain `id`, `username`, `email`, and `createdAt`. There is no
+separate display-name field; `username` is the display identity and URL
+namespace.
 
 #### `POST /api/v1/auth/login`
 
@@ -158,6 +162,35 @@ repositories. Ordinary members need a repository grant.
   }
 ]
 ```
+
+#### `GET /api/v1/users/{username}/repositories`
+
+Returns personal repositories owned by the requested user. A user can only list
+their own personal repositories.
+
+#### `POST /api/v1/users/{username}/repositories`
+
+Creates a personal repository for the authenticated user:
+
+```json
+{
+  "name": "example",
+  "description": "Personal repository"
+}
+```
+
+Returns `201` with repository data. Creating a repository for another username
+returns `403`.
+
+#### `GET /api/v1/users/{username}/repositories/{repository}`
+
+Returns one personal repository or `404` when it does not exist or belongs to a
+different user.
+
+#### `DELETE /api/v1/users/{username}/repositories/{repository}`
+
+Deletes a personal repository owned by the authenticated user and returns
+`204 No Content`.
 
 #### `GET /api/v1/organizations/{organization}/repositories/{repository}`
 
@@ -422,7 +455,9 @@ Merge conflicts and attempts to merge a closed or already merged pull request re
 
 ## Git Smart-HTTP
 
-Git operations use `/api/git/<organization>/<repository>.git/`.
+Git operations use `/api/git/<organization>/<repository>.git/` for
+organization repositories and `/api/git/users/<username>/<repository>.git/` for
+personal repositories.
 Full mode requires HTTP Basic authentication with a Git personal access token
 as the password. The username must be non-empty but is not used for identity
 lookup. REST cookie sessions and account passwords are not accepted.
@@ -451,6 +486,12 @@ Clone and push examples:
 git clone https://alice%40example.com@example.test/api/git/default/example.git
 git remote add origin https://alice%40example.com@example.test/api/git/default/example.git
 git push -u origin main
+```
+
+Personal repository example:
+
+```bash
+git clone https://alice%40example.com@example.test/api/git/users/alice/example.git
 ```
 
 Git prompts for the PAT as the password. Use HTTPS and a Git credential helper;

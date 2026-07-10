@@ -6,7 +6,7 @@ function validateRedirect(value: unknown): string {
 		value.startsWith("/") &&
 		!value.startsWith("//")
 		? value
-		: "/organizations";
+		: "/repositories";
 }
 
 export const Route = createFileRoute("/auth")({
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/auth")({
 	beforeLoad: async () => {
 		const auth = await getCurrentUserFn();
 		if (auth.authMode === "noauth") {
-			throw redirect({ to: "/organizations" });
+			throw redirect({ to: "/repositories" });
 		}
 	},
 	component: () => <AuthPage redirectTo={Route.useSearch().redirect} />,

@@ -37,7 +37,7 @@ describe("auth and permission integration", () => {
 		await c.user.create({
 			data: {
 				id: "user-1",
-				name: "User 1",
+				username: "user-1",
 				email: "user1@test.com",
 				createdAt: now,
 				credential: "",
@@ -47,14 +47,14 @@ describe("auth and permission integration", () => {
 		const fullModeUsers = {
 			async getUserByEmail(email: string) {
 				return email === "user1@test.com"
-					? { id: "user-1", name: "User 1", email, createdAt: now }
+					? { id: "user-1", username: "user-1", email, createdAt: now }
 					: undefined;
 			},
 			async getUserById(id: string) {
 				return id === "user-1"
 					? {
 							id: "user-1",
-							name: "User 1",
+							username: "user-1",
 							email: "user1@test.com",
 							createdAt: now,
 						}
@@ -87,7 +87,7 @@ describe("auth and permission integration", () => {
 		await c.user.create({
 			data: {
 				id: "owner-1",
-				name: "Owner",
+				username: "owner",
 				email: "owner@test.com",
 				createdAt: now,
 				credential: "",
@@ -96,7 +96,7 @@ describe("auth and permission integration", () => {
 		await c.user.create({
 			data: {
 				id: "outsider",
-				name: "Outsider",
+				username: "outsider",
 				email: "outsider@test.com",
 				createdAt: now,
 				credential: "",
@@ -106,23 +106,23 @@ describe("auth and permission integration", () => {
 		const users = {
 			async getUserByEmail(email: string) {
 				return email === "owner@test.com"
-					? { id: "owner-1", name: "Owner", email, createdAt: now }
+					? { id: "owner-1", username: "owner", email, createdAt: now }
 					: email === "outsider@test.com"
-						? { id: "outsider", name: "Outsider", email, createdAt: now }
+						? { id: "outsider", username: "outsider", email, createdAt: now }
 						: undefined;
 			},
 			async getUserById(id: string) {
 				return id === "owner-1"
 					? {
 							id: "owner-1",
-							name: "Owner",
+							username: "owner",
 							email: "owner@test.com",
 							createdAt: now,
 						}
 					: id === "outsider"
 						? {
 								id: "outsider",
-								name: "Outsider",
+								username: "outsider",
 								email: "outsider@test.com",
 								createdAt: now,
 							}

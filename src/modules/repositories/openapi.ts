@@ -1,5 +1,6 @@
 import type { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { z } from "zod";
+import { usernameSchema } from "#/modules/auth";
 import {
 	organizationNameSchema,
 	repositoryMemberResponseSchema,
@@ -7,6 +8,8 @@ import {
 } from "#/modules/organizations";
 import { apiErrorSchema } from "#/platform/http";
 import { repoNameSchema, repositoryResponseSchema } from "./schemas";
+
+const MAX_REPOSITORY_DESCRIPTION_LENGTH = 500;
 
 const jsonContent = (schema: z.ZodType) => ({
 	"application/json": { schema },
@@ -30,6 +33,16 @@ export function registerRepositoryOpenApi(registry: OpenAPIRegistry): void {
 		repository: repoNameSchema,
 	});
 	const memberParams = params.extend({ userId: z.uuid() });
+	const userParams = z.object({
+		username: usernameSchema,
+	});
+	const userRepositoryParams = userParams.extend({
+		repository: repoNameSchema,
+	});
+	const createRepositoryBody = z.object({
+		name: repoNameSchema,
+		description: z.string().max(MAX_REPOSITORY_DESCRIPTION_LENGTH).optional(),
+	});
 
 	registry.registerPath({
 		method: "get",
@@ -70,6 +83,86 @@ export function registerRepositoryOpenApi(registry: OpenAPIRegistry): void {
 			},
 			500: {
 				description: "Internal server error",
+				content: jsonContent(error),
+			},
+		},
+	});
+
+	registry.registerPath({
+		method: "get",
+		path: "/api/v1/users/{username}/repositories",
+		tags: ["Repositories"],
+		summary: "List personal repositories",
+		request: { params: userParams },
+		responses: {
+			200: {
+				description: "Personal repository list",
+				content: jsonContent(repositoryList),
+			},
+			404: {
+				description: "User not found",
+				content: jsonContent(error),
+			},
+		},
+	});
+
+	registry.registerPath({
+		method: "post",
+		path: "/api/v1/users/{username}/repositories",
+		tags: ["Repositories"],
+		summary: "Create personal repository",
+		request: {
+			params: userParams,
+			body: { content: jsonContent(createRepositoryBody) },
+		},
+		responses: {
+			201: {
+				description: "Repository created",
+				content: jsonContent(repository),
+			},
+			400: {
+				description: "Invalid repository name",
+				content: jsonContent(error),
+			},
+			403: {
+				description: "Cannot create repository for another user",
+				content: jsonContent(error),
+			},
+			409: {
+				description: "Repository already exists",
+				content: jsonContent(error),
+			},
+		},
+	});
+
+	registry.registerPath({
+		method: "get",
+		path: "/api/v1/users/{username}/repositories/{repository}",
+		tags: ["Repositories"],
+		summary: "Get personal repository",
+		request: { params: userRepositoryParams },
+		responses: {
+			200: {
+				description: "Repository data",
+				content: jsonContent(repository),
+			},
+			404: {
+				description: "Repository not found",
+				content: jsonContent(error),
+			},
+		},
+	});
+
+	registry.registerPath({
+		method: "delete",
+		path: "/api/v1/users/{username}/repositories/{repository}",
+		tags: ["Repositories"],
+		summary: "Delete personal repository",
+		request: { params: userRepositoryParams },
+		responses: {
+			204: { description: "Repository deleted" },
+			404: {
+				description: "Repository not found",
 				content: jsonContent(error),
 			},
 		},

@@ -21,14 +21,25 @@ export default function RepositoryList({
 	return (
 		<Stack gap="xs">
 			{repositories.map((repo) => (
-				<Group key={`${repo.organizationName}:${repo.name}`} gap="sm">
+				<Group
+					key={`${repo.organizationName ?? repo.userName}:${repo.name}`}
+					gap="sm"
+				>
 					<GitBranch size={16} />
 					<Link
-						to="/organizations/$organization/repositories/$repository"
-						params={{
-							organization: repo.organizationName,
-							repository: repo.name,
-						}}
+						to={
+							(repo.userName
+								? "/users/$username/repositories/$repository"
+								: "/organizations/$organization/repositories/$repository") as never
+						}
+						params={
+							(repo.userName
+								? { username: repo.userName, repository: repo.name }
+								: {
+										organization: repo.organizationName,
+										repository: repo.name,
+									}) as never
+						}
 						style={LINK_STYLE}
 					>
 						{repo.name}

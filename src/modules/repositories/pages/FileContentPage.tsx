@@ -23,6 +23,7 @@ import { getRepositoryFileFn } from "../server/repository.functions";
 
 interface FileContentPageProps {
 	organizationName?: string;
+	userName?: string;
 	name: string;
 	path: string;
 	file: FileContent;
@@ -56,6 +57,7 @@ function formatSize(bytes: number): string {
 
 export default function FileContentPage({
 	organizationName = "default",
+	userName,
 	name,
 	path,
 	file,
@@ -78,6 +80,7 @@ export default function FileContentPage({
 			const result = await getRepositoryFileFn({
 				data: {
 					organizationName,
+					userName,
 					name,
 					path,
 					ref: selectedBranch,
@@ -99,12 +102,20 @@ export default function FileContentPage({
 	const breadcrumbItems = [
 		<Link
 			key="root"
-			to="/organizations/$organization/repositories/$repository/tree/$branch"
-			params={{
-				organization: organizationName,
-				repository: name,
-				branch: encodedBranch,
-			}}
+			to={
+				(userName
+					? "/users/$username/repositories/$repository/tree/$branch"
+					: "/organizations/$organization/repositories/$repository/tree/$branch") as never
+			}
+			params={
+				(userName
+					? { username: userName, repository: name, branch: encodedBranch }
+					: {
+							organization: organizationName,
+							repository: name,
+							branch: encodedBranch,
+						}) as never
+			}
 			style={LINK_STYLE}
 		>
 			{name}
@@ -114,13 +125,26 @@ export default function FileContentPage({
 			return (
 				<Link
 					key={directoryPath}
-					to="/organizations/$organization/repositories/$repository/tree/$branch/$"
-					params={{
-						organization: organizationName,
-						repository: name,
-						branch: encodedBranch,
-						_splat: directoryPath,
-					}}
+					to={
+						(userName
+							? "/users/$username/repositories/$repository/tree/$branch/$"
+							: "/organizations/$organization/repositories/$repository/tree/$branch/$") as never
+					}
+					params={
+						(userName
+							? {
+									username: userName,
+									repository: name,
+									branch: encodedBranch,
+									_splat: directoryPath,
+								}
+							: {
+									organization: organizationName,
+									repository: name,
+									branch: encodedBranch,
+									_splat: directoryPath,
+								}) as never
+					}
 					style={LINK_STYLE}
 				>
 					{segment}
@@ -140,10 +164,15 @@ export default function FileContentPage({
 
 			<Stack mb="lg">
 				<Group justify="space-between" align="center">
-					<GitCloneInfo organizationName={organizationName} name={name} />
+					<GitCloneInfo
+						organizationName={organizationName}
+						userName={userName}
+						name={name}
+					/>
 					<Group gap="xs">
 						<BranchSwitcher
 							organizationName={organizationName}
+							userName={userName}
 							repoName={name}
 							branches={branches}
 							selectedBranch={selectedBranch}
@@ -152,6 +181,7 @@ export default function FileContentPage({
 						{commitCount > 0 && (
 							<CommitCountLink
 								organizationName={organizationName}
+								userName={userName}
 								repoName={name}
 								count={commitCount}
 								branchName={selectedBranch}

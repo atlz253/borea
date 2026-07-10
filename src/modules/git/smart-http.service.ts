@@ -2,12 +2,15 @@ import type { GitService } from "./git-provider";
 
 const GIT_DOT_SUFFIX_LEN = 4;
 const MIN_NAMESPACED_PATH_PARTS = 3;
+const ORG_ENDPOINT_PART_INDEX = 2;
+const USER_ENDPOINT_PART_INDEX = 3;
 const PKT_LINE_LEN_PREFIX = 4;
 const HEX_RADIX = 16;
 const PKT_LINE_HEADER_WIDTH = 4;
 
 export interface SmartHttpPath {
-	organizationName: string;
+	organizationName?: string;
+	userName?: string;
 	repoName: string;
 	endpoint: "info/refs" | "git-upload-pack" | "git-receive-pack" | "unknown";
 	service: GitService;
@@ -27,9 +30,13 @@ export function parseSmartHttpPath(
 		};
 	}
 
-	const organizationName = parts[0];
-	const rawName = parts[1];
-	const endpoint = parts.slice(2).join("/");
+	const isUserPath = parts[0] === "users";
+	const organizationName = isUserPath ? undefined : parts[0];
+	const userName = isUserPath ? parts[1] : undefined;
+	const rawName = isUserPath ? parts[2] : parts[1];
+	const endpoint = parts
+		.slice(isUserPath ? USER_ENDPOINT_PART_INDEX : ORG_ENDPOINT_PART_INDEX)
+		.join("/");
 
 	const repoName = rawName.endsWith(".git")
 		? rawName.slice(0, -GIT_DOT_SUFFIX_LEN)
@@ -40,6 +47,7 @@ export function parseSmartHttpPath(
 		if (svc === "git-receive-pack") {
 			return {
 				organizationName,
+				userName,
 				repoName,
 				endpoint: "info/refs",
 				service: "git-receive-pack",
@@ -47,6 +55,7 @@ export function parseSmartHttpPath(
 		}
 		return {
 			organizationName,
+			userName,
 			repoName,
 			endpoint: "info/refs",
 			service: "git-upload-pack",
@@ -56,6 +65,7 @@ export function parseSmartHttpPath(
 	if (endpoint === "git-upload-pack") {
 		return {
 			organizationName,
+			userName,
 			repoName,
 			endpoint: "git-upload-pack",
 			service: "git-upload-pack",
@@ -65,6 +75,7 @@ export function parseSmartHttpPath(
 	if (endpoint === "git-receive-pack") {
 		return {
 			organizationName,
+			userName,
 			repoName,
 			endpoint: "git-receive-pack",
 			service: "git-receive-pack",
@@ -73,6 +84,7 @@ export function parseSmartHttpPath(
 
 	return {
 		organizationName,
+		userName,
 		repoName,
 		endpoint: "unknown",
 		service: "git-upload-pack",

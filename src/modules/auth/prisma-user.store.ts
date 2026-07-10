@@ -20,14 +20,14 @@ function parseCredential(credential: string): PasswordCredential {
 
 function toStoredUser(row: {
 	id: string;
-	name: string;
+	username: string;
 	email: string;
 	createdAt: string;
 	credential: string;
 }): StoredUser {
 	return {
 		id: row.id,
-		name: row.name,
+		username: row.username,
 		email: row.email,
 		createdAt: row.createdAt,
 		credential: parseCredential(row.credential),
@@ -46,7 +46,7 @@ export class PrismaUserStore implements UserStore {
 			await client.user.create({
 				data: {
 					id,
-					name: input.name,
+					username: input.username,
 					email: input.email,
 					createdAt,
 					credential: credentialValue,
@@ -59,11 +59,13 @@ export class PrismaUserStore implements UserStore {
 				"code" in error &&
 				error.code === "P2002"
 			) {
-				throw new ConflictError("A user with this email already exists");
+				throw new ConflictError(
+					"A user with this email or username already exists",
+				);
 			}
 			throw error;
 		}
-		return { id, name: input.name, email: input.email, createdAt };
+		return { id, username: input.username, email: input.email, createdAt };
 	}
 
 	async getByEmail(email: string): Promise<StoredUser | undefined> {
@@ -77,6 +79,14 @@ export class PrismaUserStore implements UserStore {
 	async getById(id: string): Promise<StoredUser | undefined> {
 		const row = await this.db.getClient().user.findUnique({
 			where: { id },
+		});
+		if (!row) return undefined;
+		return toStoredUser(row);
+	}
+
+	async getByUsername(username: string): Promise<StoredUser | undefined> {
+		const row = await this.db.getClient().user.findUnique({
+			where: { username },
 		});
 		if (!row) return undefined;
 		return toStoredUser(row);

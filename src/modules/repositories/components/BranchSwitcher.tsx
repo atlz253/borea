@@ -15,6 +15,7 @@ import * as m from "#/paraglide/messages";
 
 interface BranchSwitcherProps {
 	organizationName?: string;
+	userName?: string;
 	repoName: string;
 	branches: BranchInfo[];
 	selectedBranch: string;
@@ -23,8 +24,57 @@ interface BranchSwitcherProps {
 	toCommits?: boolean;
 }
 
+function branchRoute(
+	userName: string | undefined,
+	toCommits: boolean | undefined,
+	currentBlobPath: string | undefined,
+	currentTreePath: string | undefined,
+) {
+	if (toCommits) {
+		return userName
+			? "/users/$username/repositories/$repository/tree/$branch/commits"
+			: "/organizations/$organization/repositories/$repository/tree/$branch/commits";
+	}
+	if (currentBlobPath) {
+		return userName
+			? "/users/$username/repositories/$repository/blob/$branch/$"
+			: "/organizations/$organization/repositories/$repository/blob/$branch/$";
+	}
+	if (currentTreePath) {
+		return userName
+			? "/users/$username/repositories/$repository/tree/$branch/$"
+			: "/organizations/$organization/repositories/$repository/tree/$branch/$";
+	}
+	return userName
+		? "/users/$username/repositories/$repository/tree/$branch"
+		: "/organizations/$organization/repositories/$repository/tree/$branch";
+}
+
+function branchParams({
+	organizationName,
+	userName,
+	repoName,
+	branch,
+	currentBlobPath,
+	currentTreePath,
+}: {
+	organizationName: string;
+	userName?: string;
+	repoName: string;
+	branch: string;
+	currentBlobPath?: string;
+	currentTreePath?: string;
+}) {
+	const path = currentBlobPath ?? currentTreePath;
+	const scoped = userName
+		? { username: userName, repository: repoName, branch }
+		: { organization: organizationName, repository: repoName, branch };
+	return path ? { ...scoped, _splat: path } : scoped;
+}
+
 export default function BranchSwitcher({
 	organizationName = "default",
+	userName,
 	repoName,
 	branches,
 	selectedBranch,
@@ -45,47 +95,24 @@ export default function BranchSwitcher({
 		return null;
 	}
 
-	const handleSelect = (branch: string) => {
+	const navigateToBranch = (branch: string) => {
 		const encodedBranch = encodeURIComponent(branch);
-		if (toCommits) {
-			void navigate({
-				to: "/organizations/$organization/repositories/$repository/tree/$branch/commits",
-				params: {
-					organization: organizationName,
-					repository: repoName,
-					branch: encodedBranch,
-				},
-			});
-		} else if (currentBlobPath) {
-			void navigate({
-				to: "/organizations/$organization/repositories/$repository/blob/$branch/$",
-				params: {
-					organization: organizationName,
-					repository: repoName,
-					branch: encodedBranch,
-					_splat: currentBlobPath,
-				},
-			});
-		} else if (currentTreePath) {
-			void navigate({
-				to: "/organizations/$organization/repositories/$repository/tree/$branch/$",
-				params: {
-					organization: organizationName,
-					repository: repoName,
-					branch: encodedBranch,
-					_splat: currentTreePath,
-				},
-			});
-		} else {
-			void navigate({
-				to: "/organizations/$organization/repositories/$repository/tree/$branch",
-				params: {
-					organization: organizationName,
-					repository: repoName,
-					branch: encodedBranch,
-				},
-			});
-		}
+		void navigate({
+			to: branchRoute(
+				userName,
+				toCommits,
+				currentBlobPath,
+				currentTreePath,
+			) as never,
+			params: branchParams({
+				organizationName,
+				userName,
+				repoName,
+				branch: encodedBranch,
+				currentBlobPath,
+				currentTreePath,
+			}) as never,
+		});
 	};
 
 	const handleCreate = async () => {
@@ -95,6 +122,7 @@ export default function BranchSwitcher({
 			await createBranchFn({
 				data: {
 					organizationName,
+					userName,
 					name: repoName,
 					branch: newBranchName,
 					from: selectedBranch,
@@ -102,15 +130,7 @@ export default function BranchSwitcher({
 			});
 			setOpened(false);
 			setNewBranchName("");
-			const encoded = encodeURIComponent(newBranchName);
-			void navigate({
-				to: "/organizations/$organization/repositories/$repository/tree/$branch",
-				params: {
-					organization: organizationName,
-					repository: repoName,
-					branch: encoded,
-				},
-			});
+			navigateToBranch(newBranchName);
 		} catch (err) {
 			setError(
 				err instanceof Error
@@ -129,6 +149,7 @@ export default function BranchSwitcher({
 			await renameBranchFn({
 				data: {
 					organizationName,
+					userName,
 					name: repoName,
 					oldName: selectedBranch,
 					newName: renameNewName,
@@ -136,46 +157,7 @@ export default function BranchSwitcher({
 			});
 			setRenameOpened(false);
 			setRenameNewName("");
-			const encoded = encodeURIComponent(renameNewName);
-			if (toCommits) {
-				void navigate({
-					to: "/organizations/$organization/repositories/$repository/tree/$branch/commits",
-					params: {
-						organization: organizationName,
-						repository: repoName,
-						branch: encoded,
-					},
-				});
-			} else if (currentBlobPath) {
-				void navigate({
-					to: "/organizations/$organization/repositories/$repository/blob/$branch/$",
-					params: {
-						organization: organizationName,
-						repository: repoName,
-						branch: encoded,
-						_splat: currentBlobPath,
-					},
-				});
-			} else if (currentTreePath) {
-				void navigate({
-					to: "/organizations/$organization/repositories/$repository/tree/$branch/$",
-					params: {
-						organization: organizationName,
-						repository: repoName,
-						branch: encoded,
-						_splat: currentTreePath,
-					},
-				});
-			} else {
-				void navigate({
-					to: "/organizations/$organization/repositories/$repository/tree/$branch",
-					params: {
-						organization: organizationName,
-						repository: repoName,
-						branch: encoded,
-					},
-				});
-			}
+			navigateToBranch(renameNewName);
 		} catch (err) {
 			setError(
 				err instanceof Error
@@ -209,7 +191,7 @@ export default function BranchSwitcher({
 							leftSection={
 								branch.name === selectedBranch ? <Check size={14} /> : undefined
 							}
-							onClick={() => handleSelect(branch.name)}
+							onClick={() => navigateToBranch(branch.name)}
 						>
 							<Text size="sm">{branch.name}</Text>
 						</Menu.Item>

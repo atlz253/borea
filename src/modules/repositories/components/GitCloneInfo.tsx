@@ -5,22 +5,27 @@ import * as m from "#/paraglide/messages";
 
 interface GitCloneInfoProps {
 	organizationName?: string;
+	userName?: string;
 	name: string;
 }
 
 export default function GitCloneInfo({
 	organizationName = "default",
+	userName,
 	name,
 }: GitCloneInfoProps) {
 	const [cloneUrl, setCloneUrl] = useState(
-		`/api/git/${organizationName}/${name}.git`,
+		userName
+			? `/api/git/users/${userName}/${name}.git`
+			: `/api/git/${organizationName}/${name}.git`,
 	);
 
 	useEffect(() => {
-		setCloneUrl(
-			`${window.location.origin}/api/git/${organizationName}/${name}.git`,
-		);
-	}, [organizationName, name]);
+		const path = userName
+			? `/api/git/users/${userName}/${name}.git`
+			: `/api/git/${organizationName}/${name}.git`;
+		setCloneUrl(`${window.location.origin}${path}`);
+	}, [organizationName, userName, name]);
 
 	return (
 		<TextInput

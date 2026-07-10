@@ -12,7 +12,6 @@ describe("repository branch validators", () => {
 			const result = listBranchesSchema.parse({ name: "my-repo" });
 			expect(result).toEqual({
 				name: "my-repo",
-				organizationName: "default",
 			});
 		});
 

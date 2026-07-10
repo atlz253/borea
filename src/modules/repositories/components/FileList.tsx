@@ -6,6 +6,7 @@ import type { TreeEntry } from "../schemas";
 
 interface FileListProps {
 	organizationName?: string;
+	userName?: string;
 	entries: TreeEntry[];
 	repoName: string;
 	currentPath: string;
@@ -47,8 +48,46 @@ function sortEntries(entries: TreeEntry[]): TreeEntry[] {
 	});
 }
 
+function linkProps({
+	organizationName,
+	userName,
+	repoName,
+	branch,
+	path,
+	kind,
+}: {
+	organizationName: string;
+	userName?: string;
+	repoName: string;
+	branch: string;
+	path?: string;
+	kind: "blob" | "tree";
+}) {
+	const hasPath = Boolean(path);
+	const route =
+		kind === "blob"
+			? userName
+				? "/users/$username/repositories/$repository/blob/$branch/$"
+				: "/organizations/$organization/repositories/$repository/blob/$branch/$"
+			: userName
+				? hasPath
+					? "/users/$username/repositories/$repository/tree/$branch/$"
+					: "/users/$username/repositories/$repository/tree/$branch"
+				: hasPath
+					? "/organizations/$organization/repositories/$repository/tree/$branch/$"
+					: "/organizations/$organization/repositories/$repository/tree/$branch";
+	const scoped = userName
+		? { username: userName, repository: repoName, branch }
+		: { organization: organizationName, repository: repoName, branch };
+	return {
+		to: route as never,
+		params: (path ? { ...scoped, _splat: path } : scoped) as never,
+	};
+}
+
 function parentDirLink(
 	organizationName: string,
+	userName: string | undefined,
 	repoName: string,
 	currentPath: string,
 	branch: string,
@@ -59,16 +98,15 @@ function parentDirLink(
 	const encodedBranch = encodeURIComponent(branch);
 
 	if (slashIndex === -1) {
+		const props = linkProps({
+			organizationName,
+			userName,
+			repoName,
+			branch: encodedBranch,
+			kind: "tree",
+		});
 		return (
-			<Link
-				to="/organizations/$organization/repositories/$repository/tree/$branch"
-				params={{
-					organization: organizationName,
-					repository: repoName,
-					branch: encodedBranch,
-				}}
-				style={LINK_STYLE}
-			>
+			<Link {...props} style={LINK_STYLE}>
 				<Group gap="xs">
 					<Folder size={16} />
 					..
@@ -77,17 +115,16 @@ function parentDirLink(
 		);
 	}
 
+	const props = linkProps({
+		organizationName,
+		userName,
+		repoName,
+		branch: encodedBranch,
+		path: currentPath.slice(0, slashIndex),
+		kind: "tree",
+	});
 	return (
-		<Link
-			to="/organizations/$organization/repositories/$repository/tree/$branch/$"
-			params={{
-				organization: organizationName,
-				repository: repoName,
-				branch: encodedBranch,
-				_splat: currentPath.slice(0, slashIndex),
-			}}
-			style={LINK_STYLE}
-		>
+		<Link {...props} style={LINK_STYLE}>
 			<Group gap="xs">
 				<Folder size={16} />
 				..
@@ -98,6 +135,7 @@ function parentDirLink(
 
 export default function FileList({
 	organizationName = "default",
+	userName,
 	entries,
 	repoName,
 	currentPath,
@@ -110,6 +148,7 @@ export default function FileList({
 
 	const parentLink = parentDirLink(
 		organizationName,
+		userName,
 		repoName,
 		currentPath,
 		branch,
@@ -128,34 +167,25 @@ export default function FileList({
 	for (const entry of sorted) {
 		const isTree = entry.type === "tree";
 		const icon = isTree ? <Folder size={16} /> : <File size={16} />;
+		const entryPath = childPath(currentPath, entry.name);
+		const props = linkProps({
+			organizationName,
+			userName,
+			repoName,
+			branch: encodedBranch,
+			path: entryPath,
+			kind: isTree ? "tree" : "blob",
+		});
 
 		const nameCell = isTree ? (
-			<Link
-				to="/organizations/$organization/repositories/$repository/tree/$branch/$"
-				params={{
-					organization: organizationName,
-					repository: repoName,
-					branch: encodedBranch,
-					_splat: childPath(currentPath, entry.name),
-				}}
-				style={LINK_STYLE}
-			>
+			<Link {...props} style={LINK_STYLE}>
 				<Group gap="xs">
 					{icon}
 					{entry.name}
 				</Group>
 			</Link>
 		) : (
-			<Link
-				to="/organizations/$organization/repositories/$repository/blob/$branch/$"
-				params={{
-					organization: organizationName,
-					repository: repoName,
-					branch: encodedBranch,
-					_splat: childPath(currentPath, entry.name),
-				}}
-				style={LINK_STYLE}
-			>
+			<Link {...props} style={LINK_STYLE}>
 				<Group gap="xs">
 					{icon}
 					<Text>{entry.name}</Text>

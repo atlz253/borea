@@ -55,7 +55,7 @@ export default function Header({
 			<Group gap="sm">
 				<Stack gap={0} align="flex-end" visibleFrom="sm">
 					<Text size="sm" fw={600}>
-						{user.name}
+						{user.username}
 					</Text>
 					<Text size="xs" c="dimmed">
 						{user.email}

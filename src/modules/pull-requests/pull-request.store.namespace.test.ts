@@ -16,7 +16,7 @@ describe("PrismaPullRequestStore organization namespaces", () => {
 		await c.user.create({
 			data: {
 				id: "00000000-0000-4000-8000-000000000001",
-				name: "a",
+				username: "a",
 				email: "a@a",
 				createdAt: now,
 				credential: "{}",
@@ -25,7 +25,7 @@ describe("PrismaPullRequestStore organization namespaces", () => {
 		await c.user.create({
 			data: {
 				id: "00000000-0000-4000-8000-000000000002",
-				name: "b",
+				username: "b",
 				email: "b@b",
 				createdAt: now,
 				credential: "{}",

@@ -18,6 +18,7 @@ async function globalSetup() {
 			"db",
 			"push",
 			"--accept-data-loss",
+			"--force-reset",
 			"--url",
 			url,
 		],
@@ -30,7 +31,7 @@ async function globalSetup() {
 	const now = new Date().toISOString();
 
 	await client.execute({
-		sql: `INSERT OR IGNORE INTO User (id, name, email, createdAt, credential) VALUES (?, ?, ?, ?, ?)`,
+		sql: `INSERT OR IGNORE INTO User (id, username, email, createdAt, credential) VALUES (?, ?, ?, ?, ?)`,
 		args: [
 			NOAUTH_USER_ID,
 			"anonymous",

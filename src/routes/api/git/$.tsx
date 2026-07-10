@@ -18,13 +18,23 @@ const UNAUTHORIZED_RESPONSE = {
 
 async function authorize(
 	request: Request,
-	organizationName: string,
+	organizationName: string | undefined,
+	userName: string | undefined,
 	repositoryName: string,
 	service: "git-upload-pack" | "git-receive-pack",
 ): Promise<Response | undefined> {
 	const user = await getGitRequestUser(request);
 	if (!user) {
 		return new Response("Authentication Required", UNAUTHORIZED_RESPONSE);
+	}
+	if (userName) {
+		if (user.username !== userName) {
+			return new Response("Repository Not Found", { status: 404 });
+		}
+		return undefined;
+	}
+	if (!organizationName) {
+		return new Response("Repository Not Found", { status: 404 });
 	}
 	try {
 		await requireRepositoryPermissionForUser(
@@ -57,8 +67,10 @@ export const Route = createFileRoute("/api/git/$")({
 				const url = new URL(request.url);
 				const parsed = parseSmartHttpPath(_splat, url.searchParams);
 				const locator = {
-					organizationName: parsed.organizationName,
 					repositoryName: parsed.repoName,
+					...(parsed.userName
+						? { userName: parsed.userName }
+						: { organizationName: parsed.organizationName ?? "" }),
 				};
 
 				if (
@@ -72,6 +84,7 @@ export const Route = createFileRoute("/api/git/$")({
 				const authorizationError = await authorize(
 					request,
 					parsed.organizationName,
+					parsed.userName,
 					parsed.repoName,
 					parsed.service,
 				);
@@ -105,8 +118,10 @@ export const Route = createFileRoute("/api/git/$")({
 					new URL(request.url).searchParams,
 				);
 				const locator = {
-					organizationName: parsed.organizationName,
 					repositoryName: parsed.repoName,
+					...(parsed.userName
+						? { userName: parsed.userName }
+						: { organizationName: parsed.organizationName ?? "" }),
 				};
 
 				if (
@@ -119,6 +134,7 @@ export const Route = createFileRoute("/api/git/$")({
 				const authorizationError = await authorize(
 					request,
 					parsed.organizationName,
+					parsed.userName,
 					parsed.repoName,
 					parsed.service,
 				);

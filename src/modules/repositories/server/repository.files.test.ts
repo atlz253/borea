@@ -12,7 +12,6 @@ describe("repository file validators", () => {
 			const result = listFilesSchema.parse({ name: "my-repo" });
 			expect(result).toEqual({
 				name: "my-repo",
-				organizationName: "default",
 			});
 		});
 

@@ -99,11 +99,12 @@ describe("repository core validators", () => {
 			});
 		});
 
-		it("defaults organizationName to 'default'", () => {
+		it("accepts creation input without an explicit scope", () => {
 			const result = createRepositorySchema.parse({
 				name: "my-repo",
 			});
-			expect(result.organizationName).toBe("default");
+			expect(result.organizationName).toBeUndefined();
+			expect(result.userName).toBeUndefined();
 		});
 
 		it("defaults description to empty string", () => {
@@ -179,12 +180,13 @@ describe("repository core validators", () => {
 			expect(result.confirmation).toBe("my-repo");
 		});
 
-		it("defaults organizationName to 'default'", () => {
+		it("accepts deletion input without an explicit scope", () => {
 			const result = deleteRepositorySchema.parse({
 				name: "my-repo",
 				confirmation: "my-repo",
 			});
-			expect(result.organizationName).toBe("default");
+			expect(result.organizationName).toBeUndefined();
+			expect(result.userName).toBeUndefined();
 		});
 
 		it("rejects mismatched confirmation", () => {
@@ -239,7 +241,6 @@ describe("repository core validators", () => {
 			const result = repositoryLocatorSchema.parse({ name: "my-repo" });
 			expect(result).toEqual({
 				name: "my-repo",
-				organizationName: "default",
 			});
 		});
 

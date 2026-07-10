@@ -14,6 +14,19 @@ export const userNameSchema = z
 	.min(1, m.auth_schemas_nameRequired())
 	.max(MAX_NAME_LENGTH, m.auth_schemas_nameTooLong());
 
+export const usernameSchema = z
+	.string()
+	.trim()
+	.min(1, m.auth_schemas_usernameRequired())
+	.max(MAX_NAME_LENGTH, m.auth_schemas_usernameTooLong())
+	.regex(/^[a-zA-Z0-9._-]+$/, m.auth_schemas_usernameInvalidChars())
+	.refine((username) => !username.startsWith("."), {
+		message: m.auth_schemas_usernameDotStart(),
+	})
+	.refine((username) => username !== "." && username !== "..", {
+		message: m.auth_schemas_usernameInvalid(),
+	});
+
 export const emailSchema = z
 	.email(m.auth_schemas_emailInvalid())
 	.trim()
@@ -25,7 +38,7 @@ export const passwordSchema = z
 	.max(MAX_PASSWORD_LENGTH, m.auth_schemas_passwordTooLong());
 
 export const registerSchema = z.object({
-	name: userNameSchema,
+	username: usernameSchema,
 	email: emailSchema,
 	password: passwordSchema,
 });
@@ -37,7 +50,7 @@ export const loginSchema = z.object({
 
 export const userSchema = z.object({
 	id: z.uuid(),
-	name: userNameSchema,
+	username: usernameSchema,
 	email: emailSchema,
 	createdAt: z.iso.datetime(),
 });

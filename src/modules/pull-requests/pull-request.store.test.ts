@@ -20,7 +20,7 @@ describe("PrismaPullRequestStore", () => {
 		await c.user.create({
 			data: {
 				id: USER_ID,
-				name: "test",
+				username: "test",
 				email: "test@test.com",
 				createdAt: now,
 				credential: "{}",
@@ -29,7 +29,7 @@ describe("PrismaPullRequestStore", () => {
 		await c.user.create({
 			data: {
 				id: REVIEWER_ID,
-				name: "reviewer",
+				username: "reviewer",
 				email: "r@r.com",
 				createdAt: now,
 				credential: "{}",

@@ -8,7 +8,7 @@ import type {
 	RepositoryLocator,
 } from "../git-provider";
 import { parseNameStatus, parseUnifiedDiff } from "./cli-git-parsers";
-import { resolvePath, validateName } from "./cli-git-validators";
+import { resolveRepositoryPath, validateName } from "./cli-git-validators";
 
 export async function renameBranch(
 	gitBin: string,
@@ -205,9 +205,7 @@ export async function computeDiff(
 ): Promise<DiffFile[]> {
 	const name = locator.repositoryName;
 	validateName(name);
-	const repoPath = legacy
-		? path.resolve(storagePath, name)
-		: resolvePath(storagePath, locator.organizationName, name);
+	const repoPath = resolveRepositoryPath(storagePath, locator, legacy);
 
 	if (!existsSync(repoPath) || !existsSync(path.join(repoPath, "HEAD"))) {
 		throw new Error(`Repository "${name}" not found`);

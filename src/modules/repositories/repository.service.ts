@@ -21,22 +21,39 @@ function repositoryName(target: RepositoryTarget): string {
 	return typeof target === "string" ? target : target.repositoryName;
 }
 
+function targetFromInput(input: CreateRepositoryInput): RepositoryLocator {
+	if (input.userName) {
+		return { userName: input.userName, repositoryName: input.name };
+	}
+	return {
+		organizationName: input.organizationName ?? "default",
+		repositoryName: input.name,
+	};
+}
+
+function scopeFromLocator(locator: RepositoryLocator | string): {
+	organizationName?: string;
+	userName?: string;
+} {
+	if (typeof locator === "string") {
+		return { organizationName: "default" };
+	}
+	if ("userName" in locator) {
+		return { userName: locator.userName };
+	}
+	return { organizationName: locator.organizationName };
+}
+
 export async function createRepository(
 	gitProvider: GitProvider,
 	input: CreateRepositoryInput | { name: string; description?: string },
 ): Promise<Repository> {
-	const organizationName =
-		"organizationName" in input ? input.organizationName : "default";
-	const repository = await gitProvider.init(
-		"organizationName" in input
-			? {
-					organizationName,
-					repositoryName: input.name,
-				}
-			: input.name,
-		input.description,
-	);
-	return { ...repository, organizationName };
+	const locator =
+		"organizationName" in input || "userName" in input
+			? targetFromInput(input as CreateRepositoryInput)
+			: input.name;
+	const repository = await gitProvider.init(locator, input.description);
+	return { ...repository, ...scopeFromLocator(locator) };
 }
 
 export async function deleteRepository(
@@ -62,6 +79,18 @@ export async function listRepositories(
 	}));
 }
 
+export async function listUserRepositories(
+	gitProvider: GitProvider,
+	userName: string,
+): Promise<Repository[]> {
+	const repositories = await gitProvider.list(`users/${userName}`);
+	return repositories.map((repository) => ({
+		...repository,
+		organizationName: undefined,
+		userName,
+	}));
+}
+
 export async function getRepository(
 	gitProvider: GitProvider,
 	locator: RepositoryTarget,
@@ -74,9 +103,7 @@ export async function getRepository(
 	}
 	return {
 		...repository,
-		organizationName:
-			repository.organizationName ??
-			(typeof locator === "string" ? "default" : locator.organizationName),
+		...scopeFromLocator(locator),
 	};
 }
 

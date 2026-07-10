@@ -17,6 +17,7 @@ import BranchSwitcher from "../components/BranchSwitcher";
 
 interface CommitDiffPageProps {
 	organizationName?: string;
+	userName?: string;
 	name: string;
 	branch: string;
 	result: GetCommitDiffResult;
@@ -35,6 +36,7 @@ function formatDate(date: Date): string {
 
 export default function CommitDiffPage({
 	organizationName = "default",
+	userName,
 	name,
 	branch,
 	result,
@@ -51,12 +53,20 @@ export default function CommitDiffPage({
 		<Container size="lg" py="xl">
 			<Group mb="md">
 				<Link
-					to="/organizations/$organization/repositories/$repository/tree/$branch/commits"
-					params={{
-						organization: organizationName,
-						repository: name,
-						branch: encodedBranch,
-					}}
+					to={
+						(userName
+							? "/users/$username/repositories/$repository/tree/$branch/commits"
+							: "/organizations/$organization/repositories/$repository/tree/$branch/commits") as never
+					}
+					params={
+						(userName
+							? { username: userName, repository: name, branch: encodedBranch }
+							: {
+									organization: organizationName,
+									repository: name,
+									branch: encodedBranch,
+								}) as never
+					}
 					style={{
 						color: "var(--mantine-color-anchor-color)",
 						textDecoration: "none",
@@ -79,6 +89,7 @@ export default function CommitDiffPage({
 					</Title>
 					<BranchSwitcher
 						organizationName={organizationName}
+						userName={userName}
 						repoName={name}
 						branches={branches}
 						selectedBranch={branch}

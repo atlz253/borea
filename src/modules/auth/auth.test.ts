@@ -64,7 +64,7 @@ describe("NoAuthProvider", () => {
 		const auth = new NoAuthProvider("testuser");
 		const user = await auth.getCurrentUser();
 		expect(user).toBeDefined();
-		expect(user?.name).toBe("testuser");
+		expect(user?.username).toBe("testuser");
 		const sameUser = await auth.requireCurrentUser();
 		expect(sameUser?.id).toBe(user?.id);
 	});
@@ -86,7 +86,7 @@ describe("NoAuthProvider", () => {
 	it("returns user on register and login", async () => {
 		const auth = new NoAuthProvider("testuser");
 		await expect(
-			auth.register({ name: "x", email: "x@x", password: "password" }),
+			auth.register({ username: "x", email: "x@x", password: "password" }),
 		).resolves.toBeDefined();
 		await expect(
 			auth.login({ email: "x@x", password: "password" }),

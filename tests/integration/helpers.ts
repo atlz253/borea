@@ -54,7 +54,7 @@ export async function seedNoAuthUser(db: DatabaseProvider): Promise<void> {
 		await c.user.create({
 			data: {
 				id: NOAUTH_USER_ID,
-				name: "anonymous",
+				username: "anonymous",
 				email: "noauth@localhost",
 				createdAt: new Date(0).toISOString(),
 				credential: "",

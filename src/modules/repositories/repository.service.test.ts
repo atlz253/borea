@@ -91,6 +91,28 @@ describe("createRepository", () => {
 		expect(result).toEqual(expected);
 	});
 
+	it("delegates personal repositories to a user locator", async () => {
+		const mockGit = createMockGit();
+		const expected = {
+			userName: "alice",
+			name: "test",
+			createdAt: new Date(),
+		};
+		vi.mocked(mockGit.init).mockResolvedValue(expected);
+
+		const result = await createRepository(mockGit, {
+			userName: "alice",
+			name: "test",
+			description: "desc",
+		});
+
+		expect(mockGit.init).toHaveBeenCalledWith(
+			{ userName: "alice", repositoryName: "test" },
+			"desc",
+		);
+		expect(result).toEqual(expected);
+	});
+
 	it("forwards error when gitProvider.init fails", async () => {
 		const mockGit = createMockGit();
 		vi.mocked(mockGit.init).mockRejectedValue(new Error("git init failed"));
@@ -128,6 +150,24 @@ describe("getRepository", () => {
 
 		await expect(getRepository(mockGit, "test")).resolves.toEqual(repository);
 		expect(mockGit.get).toHaveBeenCalledWith("test");
+	});
+
+	it("returns personal repository data from a user locator", async () => {
+		const mockGit = createMockGit();
+		const repository = {
+			userName: "alice",
+			name: "test",
+			createdAt: new Date(),
+		};
+		vi.mocked(mockGit.get).mockResolvedValue(repository);
+
+		await expect(
+			getRepository(mockGit, { userName: "alice", repositoryName: "test" }),
+		).resolves.toEqual(repository);
+		expect(mockGit.get).toHaveBeenCalledWith({
+			userName: "alice",
+			repositoryName: "test",
+		});
 	});
 
 	it("throws a typed not-found error for an unknown repository", async () => {

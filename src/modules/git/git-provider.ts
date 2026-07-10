@@ -1,14 +1,20 @@
 export interface RepositoryInfo {
 	organizationName?: string;
+	userName?: string;
 	name: string;
 	description?: string;
 	createdAt: Date;
 }
 
-export interface RepositoryLocator {
-	organizationName: string;
-	repositoryName: string;
-}
+export type RepositoryLocator =
+	| {
+			organizationName: string;
+			repositoryName: string;
+	  }
+	| {
+			userName: string;
+			repositoryName: string;
+	  };
 
 export type TreeEntryType = "blob" | "tree";
 
