@@ -9,11 +9,16 @@ test("deletes a repository after exact name confirmation", async ({
 	await page.goto("/organizations/default", { waitUntil: "load" });
 	await waitForHydration(page);
 	await page.getByRole("button", { name: "New repository" }).click();
-	await page.getByLabel("Repository name").fill(name);
-	await page.getByRole("button", { name: "Create repository" }).click();
+	const nameInput = page.getByLabel("Repository name");
+	await nameInput.fill(name);
+	await Promise.all([
+		page.waitForURL(`/organizations/default/repositories/${name}`, {
+			timeout: 15000,
+		}),
+		page.getByRole("button", { name: "Create repository" }).click(),
+	]);
 	await page.waitForLoadState("load");
 
-	await page.getByRole("link", { name, exact: true }).first().click();
 	await expect(page).toHaveURL(`/organizations/default/repositories/${name}`);
 	await waitForHydration(page);
 	await page.getByRole("tab", { name: "Settings" }).click();

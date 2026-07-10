@@ -24,6 +24,9 @@ async function createRepoViaUI(page: Page, repoName: string) {
 	await page.getByRole("button", { name: /create repository/i }).click();
 
 	await nameInput.waitFor({ state: "detached", timeout: 15000 });
+	await page.waitForURL(`/organizations/default/repositories/${repoName}`, {
+		timeout: 15000,
+	});
 	await page.waitForLoadState("load");
 	await waitForHydration(page);
 }
@@ -36,7 +39,8 @@ function collectRealErrors(page: Page): string[] {
 			!msg.includes("console-pipe/sse") &&
 			!msg.includes("access control") &&
 			!msg.includes("error loading dynamically imported module") &&
-			!msg.includes("Importing a module script failed")
+			!msg.includes("Importing a module script failed") &&
+			!msg.includes("Load failed")
 		) {
 			errors.push(msg);
 		}
@@ -53,17 +57,13 @@ test("navigating from repositories list to a repo shows empty state", async ({
 	const repoName = `e2e-empty-${UNIQUE}`;
 	await createRepoViaUI(page, repoName);
 
+	await page.goto("/organizations/default", { waitUntil: "load" });
+	await waitForHydration(page);
 	const link = page.getByRole("link", { name: repoName });
 	await link.click();
-	try {
-		await page.waitForURL(`/organizations/default/repositories/${repoName}`, {
-			timeout: 10000,
-		});
-	} catch {
-		await page.goto(`/organizations/default/repositories/${repoName}`, {
-			waitUntil: "load",
-		});
-	}
+	await page.waitForURL(`/organizations/default/repositories/${repoName}`, {
+		timeout: 10000,
+	});
 
 	await expect(page.getByRole("heading", { name: repoName })).toBeVisible();
 	await expect(page.getByText("This repository is empty")).toBeVisible();

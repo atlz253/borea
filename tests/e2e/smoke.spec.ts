@@ -1,14 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { waitForHydration } from "./helpers";
 
-test("home page redirects to the default organization", async ({ page }) => {
+test("home page redirects to repositories", async ({ page }) => {
 	await page.goto("/");
-	await expect(page).toHaveURL("/organizations/default");
+	await expect(page).toHaveURL("/repositories");
 });
 
 test("NoAuth mode bypasses the authentication page", async ({ page }) => {
 	await page.goto("/auth");
-	await expect(page).toHaveURL("/organizations/default");
+	await expect(page).toHaveURL("/repositories");
 });
 
 test("repositories page renders its heading", async ({ page }) => {
@@ -20,7 +20,7 @@ test("sidebar navigation links to repositories page", async ({ page }) => {
 	await page.goto("/");
 	await waitForHydration(page);
 	await page.getByRole("button", { name: "Repositories" }).click();
-	await expect(page).toHaveURL("/organizations/default");
+	await expect(page).toHaveURL("/repositories");
 });
 
 test("header renders logo and theme toggle", async ({ page }) => {

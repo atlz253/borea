@@ -103,9 +103,9 @@ async function seedPullRequestBranches(
 test("enforces organization and repository role hierarchy", async ({
 	browser,
 	page,
-}) => {
+}, testInfo) => {
 	test.setTimeout(120_000);
-	const suffix = Date.now().toString(36);
+	const suffix = `${Date.now().toString(36)}-${testInfo.workerIndex}-${Math.random().toString(36).slice(2, 8)}`;
 	const owner = {
 		username: `owner-${suffix}`,
 		email: `owner-${suffix}@example.com`,
@@ -129,7 +129,12 @@ test("enforces organization and repository role hierarchy", async ({
 	await page.getByRole("button", { name: "New repository" }).click();
 	await page.getByLabel("Repository name").fill(repositoryName);
 	await page.getByRole("button", { name: "Create repository" }).click();
-	await expect(page.getByRole("link", { name: repositoryName })).toBeVisible();
+	await expect(page).toHaveURL(
+		`/organizations/${organizationName}/repositories/${repositoryName}`,
+	);
+	await expect(
+		page.getByRole("heading", { name: repositoryName }),
+	).toBeVisible();
 	const seededRepository = await seedPullRequestBranches(
 		organizationName,
 		repositoryName,

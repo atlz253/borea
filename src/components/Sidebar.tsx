@@ -74,13 +74,14 @@ export default function Sidebar() {
 					</span>
 				}
 			/>
-			{repositoriesOpened && userName && (
+			{repositoriesOpened && (organizationName || userName) && (
 				<Box pl="1.75rem">
 					<SidebarRecentRepositories
-						key={userName ?? "repositories"}
+						key={organizationName ? `org:${organizationName}` : userName}
 						opened={repositoriesOpened}
-						userName={userName}
-						includeOrganizations
+						organizationName={organizationName}
+						userName={organizationName ? undefined : userName}
+						includeOrganizations={!organizationName}
 					/>
 				</Box>
 			)}

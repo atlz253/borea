@@ -34,7 +34,7 @@ export default defineConfig({
 		},
 	],
 	webServer: {
-		command: "npm run dev",
+		command: "npx prisma generate && npx vite dev --port 3000 --strictPort",
 		url: "http://localhost:3000",
 		reuseExistingServer: false,
 		timeout: 120_000,

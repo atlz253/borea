@@ -92,12 +92,12 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 	baseURL,
 	browser,
 	page,
-}) => {
+}, testInfo) => {
 	if (!baseURL) {
 		throw new Error("baseURL must be configured for auth E2E tests");
 	}
 	test.setTimeout(120_000);
-	const suffix = Date.now().toString(36);
+	const suffix = `${Date.now().toString(36)}-${testInfo.workerIndex}-${Math.random().toString(36).slice(2, 8)}`;
 	const organizationName = `git-auth-${suffix}`;
 	const repositoryName = `private-${suffix}`;
 	const owner = {
@@ -120,7 +120,12 @@ test("authorizes Git smart-HTTP with PAT and repository permissions", async ({
 	await page.getByRole("button", { name: "New repository" }).click();
 	await page.getByLabel("Repository name").fill(repositoryName);
 	await page.getByRole("button", { name: "Create repository" }).click();
-	await expect(page.getByRole("link", { name: repositoryName })).toBeVisible();
+	await expect(page).toHaveURL(
+		`/organizations/${organizationName}/repositories/${repositoryName}`,
+	);
+	await expect(
+		page.getByRole("heading", { name: repositoryName }),
+	).toBeVisible();
 
 	const seeded = await seedRepository(organizationName, repositoryName, suffix);
 	const reader = await createAccount(browser, "Reader", suffix);

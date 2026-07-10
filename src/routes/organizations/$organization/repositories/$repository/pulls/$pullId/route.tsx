@@ -3,7 +3,6 @@ import {
 	createFileRoute,
 	Link,
 	Outlet,
-	useNavigate,
 	useRouterState,
 } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
@@ -22,7 +21,6 @@ const LINK_STYLE = {
 
 function PullRequestDetailLayout() {
 	const { organization, repository, pullId } = Route.useParams();
-	const navigate = useNavigate();
 	const location = useRouterState({ select: (s) => s.location });
 
 	const pathname = location.pathname;
@@ -47,23 +45,25 @@ function PullRequestDetailLayout() {
 				<Tabs.List>
 					<Tabs.Tab
 						value="conversation"
-						onClick={() =>
-							navigate({
-								to: "/organizations/$organization/repositories/$repository/pulls/$pullId",
-								params: { organization, repository, pullId },
-							})
-						}
+						renderRoot={(props) => (
+							<Link
+								{...props}
+								to="/organizations/$organization/repositories/$repository/pulls/$pullId"
+								params={{ organization, repository, pullId }}
+							/>
+						)}
 					>
 						{m.routes_repository_tabs_conversation()}
 					</Tabs.Tab>
 					<Tabs.Tab
 						value="files"
-						onClick={() =>
-							navigate({
-								to: "/organizations/$organization/repositories/$repository/pulls/$pullId/files",
-								params: { organization, repository, pullId },
-							})
-						}
+						renderRoot={(props) => (
+							<Link
+								{...props}
+								to="/organizations/$organization/repositories/$repository/pulls/$pullId/files"
+								params={{ organization, repository, pullId }}
+							/>
+						)}
 					>
 						{m.routes_repository_tabs_filesChanged()}
 					</Tabs.Tab>

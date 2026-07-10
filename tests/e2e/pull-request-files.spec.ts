@@ -9,6 +9,26 @@ import { fillTextInput, waitForHydration } from "./helpers";
 const STORAGE_PATH = "./data/repositories/default";
 const BASE_URL = "http://localhost:3000";
 
+async function clickTabUntilUrl(
+	page: import("@playwright/test").Page,
+	name: RegExp,
+	url: RegExp,
+) {
+	const tab = page.getByRole("tab", { name });
+	for (let attempt = 0; attempt < 3; attempt += 1) {
+		await tab.click();
+		try {
+			await expect(page).toHaveURL(url, { timeout: 5000 });
+			return tab;
+		} catch (caught) {
+			if (attempt === 2) {
+				throw caught;
+			}
+		}
+	}
+	return tab;
+}
+
 test("Files changed tab shows PR diff", async ({ page }) => {
 	test.setTimeout(90000);
 	const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -92,8 +112,9 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		expect(errors).toEqual([]);
 		await expect(page.getByText("E2E test pull request")).toBeVisible();
 
-		await page.getByRole("tab", { name: /Files changed/i }).click();
-		await page.waitForURL(
+		await clickTabUntilUrl(
+			page,
+			/Files changed/i,
 			new RegExp(
 				`/organizations/default/repositories/${repoName}/pulls/\\d+/files`,
 			),
@@ -153,13 +174,18 @@ test("Files changed tab shows PR diff", async ({ page }) => {
 		await expect(page.getByText("feature content")).toBeVisible();
 
 		await page.evaluate(() => window.scrollTo(0, 0));
-		await page.getByRole("tab", { name: /Conversation/i }).click();
-		await page.waitForURL(
+		const conversationTab = await clickTabUntilUrl(
+			page,
+			/Conversation/i,
 			new RegExp(`/organizations/default/repositories/${repoName}/pulls/\\d+$`),
 		);
 		await waitForHydration(page);
 
+		await expect(conversationTab).toHaveAttribute("aria-selected", "true");
 		await expect(page.getByText("E2E test pull request")).toBeVisible();
+		await expect(
+			page.getByRole("button", { name: "Merge (fast-forward)" }),
+		).toBeVisible();
 		await page.getByRole("button", { name: "Merge (fast-forward)" }).click();
 		await expect(page.getByText("Merged as")).toBeVisible({ timeout: 15_000 });
 

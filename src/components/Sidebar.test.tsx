@@ -174,10 +174,10 @@ describe("Sidebar", () => {
 			screen.getByRole("button", { name: "Repositories" }),
 		).toBeInTheDocument();
 		await screen.findAllByRole("button", { name: /repo-/i });
-		expect(listUserRepositoriesFn).toHaveBeenCalledWith({
-			data: { userName: "alice" },
+		expect(listUserRepositoriesFn).not.toHaveBeenCalled();
+		expect(listRepositoriesFn).toHaveBeenCalledWith({
+			data: { organizationName: "default" },
 		});
-		expect(listRepositoriesFn).toHaveBeenCalled();
 		expect(listTaskBoardsFn).toHaveBeenCalledWith({
 			data: { organizationName: "default" },
 		});

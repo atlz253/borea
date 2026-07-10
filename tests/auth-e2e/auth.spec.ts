@@ -22,8 +22,8 @@ async function register(
 test("authenticates users and shares organizations through membership", async ({
 	browser,
 	page,
-}) => {
-	const suffix = Date.now().toString(36);
+}, testInfo) => {
+	const suffix = `${Date.now().toString(36)}-${testInfo.workerIndex}-${Math.random().toString(36).slice(2, 8)}`;
 	const alice = {
 		username: `alice-${suffix}`,
 		email: `alice-${suffix}@example.com`,

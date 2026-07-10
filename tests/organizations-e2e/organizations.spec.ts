@@ -30,7 +30,8 @@ async function createRepository(
 	await page.getByRole("button", { name: "New repository" }).click();
 	await page.getByLabel("Repository name").fill(name);
 	await page.getByRole("button", { name: "Create repository" }).click();
-	await expect(page.getByRole("link", { name, exact: true })).toBeVisible();
+	await expect(page).toHaveURL(new RegExp(`/repositories/${name}$`));
+	await expect(page.getByRole("heading", { name })).toBeVisible();
 }
 
 test("creates organizations and isolates repositories by namespace", async ({
@@ -129,7 +130,9 @@ test("sidebar shows task boards for the current organization", async ({
 	await page.goto(`/organizations/${organization}`);
 	await waitForHydration(page);
 	const sidebar = page.getByRole("navigation").first();
-	await expect(sidebar.getByRole("button", { name: "Tasks" })).toBeVisible();
+	await expect(
+		sidebar.getByRole("button", { name: "Tasks", exact: true }),
+	).toBeVisible();
 	await expect(sidebar.getByRole("button", { name: boardName })).toBeVisible();
 
 	await sidebar.getByRole("button", { name: boardName }).click();
@@ -155,15 +158,18 @@ test("sidebar expands and collapses a long organization list", async ({
 	await page.goto("/organizations");
 	await waitForHydration(page);
 	const sidebar = page.getByRole("navigation").first();
-	await expect(sidebar.getByText("Show more")).toBeVisible();
-	await sidebar.getByText("Show more").click();
+	await expect(sidebar.getByText("Show more").last()).toBeVisible();
+	await sidebar.getByText("Show more").last().click();
 
 	for (const name of names) {
 		await expect(sidebar.getByRole("button", { name })).toBeVisible();
 	}
 	await expect(sidebar.getByText("Show less")).toBeVisible();
 
-	await sidebar.getByText("Show less").click();
-	await expect(sidebar.getByText("Show more")).toBeVisible();
-	await expect(sidebar.getByRole("button")).toHaveCount(6);
+	await sidebar.getByText("Show less").last().click();
+	await expect(sidebar.getByText("Show more").last()).toBeVisible();
+	for (const name of names.slice(1)) {
+		await expect(sidebar.getByRole("button", { name })).toBeVisible();
+	}
+	await expect(sidebar.getByRole("button", { name: names[0] })).toHaveCount(0);
 });
