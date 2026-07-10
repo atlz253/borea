@@ -41,6 +41,8 @@ src/
     errors/               Shared error types
   routes/                 File-based routing (TanStack Router)
     api/git/$.tsx         Git smart-HTTP endpoints (clone, push)
+    api/v1/...            Versioned REST API routes
+    users/$username/...   User profile and user-owned repository UI pages
     organizations/...     Organization and namespaced repository UI pages
   router.tsx              Router factory + type registration
   theme.ts                Mantine theme (neutral dev-tool palette)
@@ -78,7 +80,7 @@ All external dependencies are accessed through unified interfaces with swappable
 
 ### Thin Routes
 
-Route files in `src/routes/` are minimal: they define `createFileRoute`, load data via server functions, and render a page component from `src/modules/<domain>/pages/`. Domain logic stays in modules.
+Route files in `src/routes/` are minimal: they define `createFileRoute`, load data via server functions, and render a page component from `src/modules/<domain>/pages/`. Repeated URL segments are represented with nested directories, and layout/parent routes use `route.tsx`. Domain logic stays in modules.
 
 ### Git Smart-HTTP
 

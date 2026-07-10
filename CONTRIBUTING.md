@@ -85,13 +85,10 @@ borea/
 │   ├── routes/                     # File-based routes (TanStack Router)
 │   │   ├── __root.tsx              # Root layout / document shell
 │   │   ├── index.tsx               # Home page (redirects to /repositories)
-│   │   ├── repositories.tsx        # Repositories layout
-│   │   ├── repositories.index.tsx  # Repositories list
-│   │   ├── repositories.$name.tsx  # Repository page layout
-│   │   ├── repositories.$name.index.tsx  # Repository page
-│   │   ├── repositories.$name.tree.$.tsx  # File tree browser
-│   │   ├── repositories.$name.commits.tsx  # Commit history
-│   │   ├── repositories.$name.tree.$branch.commits.$sha.tsx  # Commit diff viewer
+│   │   ├── repositories.tsx        # Repositories redirect/list entry route
+│   │   ├── settings/route.tsx      # Settings layout route
+│   │   ├── users/$username/        # User profile and user-owned repository routes
+│   │   ├── organizations/          # Organization and namespaced repository UI routes
 │   │   └── api/
 │   │       ├── git/$.tsx           # Git smart-HTTP endpoints
 │   │       └── v1/                 # Versioned REST API routes
@@ -113,7 +110,7 @@ borea/
 - **No comments** in source code unless explicitly requested by the reviewer.
 - **Imports:** use path aliases `#/*` or `@/*` (map to `./src/*`). Run "organize imports" on save.
 - **Module boundaries:** cross-module imports must go through the barrel (`index.ts`). Deep imports into internal module subpaths are forbidden (enforced by Biome `style/noRestrictedImports`). See `docs/ADR/0003-project-structure.md`.
-- **Routes are thin:** route files in `src/routes/` contain only `createFileRoute`, a loader, and rendering of a page component from `src/modules/<domain>/pages/`. Domain logic belongs in modules.
+- **Routes are thin:** route files in `src/routes/` contain only `createFileRoute`, a loader, and rendering of a page component from `src/modules/<domain>/pages/`. Use nested directories for repeated URL segments and `route.tsx` for layout/parent routes. Domain logic belongs in modules.
 - **Mantine imports:** import components from `@mantine/core`, hooks from `@mantine/hooks`, code highlighting from `@mantine/code-highlight`.
 - **Tests:** follow TDD principles (see `docs/archive/MVP.md` §10). Co-locate unit tests next to source files (`*.test.ts`).
 

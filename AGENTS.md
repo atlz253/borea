@@ -75,7 +75,7 @@ npm run db:studio   # Launch Prisma Studio GUI
   - `noEmptyInterface` — empty interfaces are forbidden
 - **Mantine imports:** import Mantine components from `@mantine/core`, hooks from `@mantine/hooks`, code highlighting from `@mantine/code-highlight`, notifications from `@mantine/notifications`. Import Mantine CSS via side-effect: `import '@mantine/core/styles.css'` in root layout.
 - **No comments** unless explicitly requested by the user.
-- **Routing:** file-based — add a new route by creating a file in `src/routes/`; the route tree is auto-generated into `src/routeTree.gen.ts` (never edit by hand).
+- **Routing:** file-based — add a new route by creating a file in `src/routes/`; use nested directories for repeated path segments and `route.tsx` for layout/parent routes. The route tree is auto-generated into `src/routeTree.gen.ts` (never edit by hand).
 - **Routes are thin:** route files in `src/routes/` should only contain `createFileRoute`, a loader, and rendering of a page component imported from `src/modules/<domain>/pages/`. Domain logic belongs in modules, not routes.
 - **React:** function components, hooks-based; follow the patterns in `src/routes/` and `src/components/`.
 
@@ -105,12 +105,13 @@ npm run db:studio   # Launch Prisma Studio GUI
 | `src/modules/` | Domain modules (git, auth, organizations, repositories, pull-requests) |
 | `src/modules/auth/` | AuthProvider implementations, user store, sessions, schemas, UI and API |
 | `src/modules/pull-requests/` | PR module: `schemas.ts`, `pull-request.store.ts`, `pull-request.service.ts`, `server/pull-request.functions.ts`, `components/`, `pages/` |
-| `src/routes/repositories.$name.tree.$branch.commits.$sha.tsx` | Route for commit diff viewing |
+| `src/routes/users/$username/repositories/$repository/tree/$branch/commits/$sha.tsx` | User repository commit diff route |
+| `src/routes/organizations/$organization/repositories/$repository/tree/$branch/commits/$sha.tsx` | Organization repository commit diff route |
 | `src/modules/repositories/pages/CommitDiffPage.tsx` | Commit diff detail page |
 | `src/components/SplitDiffView.tsx` | Side-by-side diff viewer component (shared) |
-| `src/routes/repositories.$name.pulls.$pullId.tsx` | PR detail layout (Conversation / Files changed tabs) |
-| `src/routes/repositories.$name.pulls.$pullId.index.tsx` | PR Conversation tab (detail + merge controls) |
-| `src/routes/repositories.$name.pulls.$pullId.files.tsx` | PR Files changed tab (diff view) |
+| `src/routes/organizations/$organization/repositories/$repository/pulls/$pullId/route.tsx` | PR detail layout (Conversation / Files changed tabs) |
+| `src/routes/organizations/$organization/repositories/$repository/pulls/$pullId/index.tsx` | PR Conversation tab (detail + merge controls) |
+| `src/routes/organizations/$organization/repositories/$repository/pulls/$pullId/files.tsx` | PR Files changed tab (diff view) |
 | `src/platform/` | Cross-domain infrastructure (db, storage, config, logger, errors) |
 | `prisma/schema.prisma` | Prisma ORM data model — all metadata entities |
 | `src/generated/prisma/` | ⚠ Generated Prisma Client — do not edit |
